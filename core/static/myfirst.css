@@ -1,0 +1,18 @@
+.signals-columns {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  
+  .signals-column-container {
+    width: 50%;
+    box-sizing: border-box;
+    padding: 0 10px;
+  }
+  
+  .signals-column {
+    border: 1px solid black;
+    padding: 10px;
+    margin-bottom: 20px;
+  }
+  
