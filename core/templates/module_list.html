@@ -3,33 +3,44 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h2>Add Module</h2>
-<form method="post" action="{% url 'module_list' %}">
+
+<div id="create-module" style="display:none;">
+  <h2>Create Module</h2>
+  <form id="create-module-form">
     {% csrf_token %}
-    <label for="module_name">Module Name:</label>
-    <input type="text" name="module_name" required>
-    <button type="submit" name="add_module">Add</button>
-</form>
+    <div class="form-group">
+      <label for="name">Name:</label>
+      <input type="text" class="form-control" id="name" name="name" required>
+    </div>
+    <div class="form-group">
+      <label for="description">Description:</label>
+      <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+</div>
 
-<h1>Module List</h1>
-<div class="col-md-6">
-
-<table class="table table-striped">
+<!-- Table for displaying existing modules -->
+<div id="show-modules">
+  <h2>Modules</h2>
+  <table class="table">
     <thead>
       <tr>
-        <th>Module ID</th>
-        <th>Module Name</th>
-        <th>Delete</th>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody>
-        {% for module in modules %}
+      {% for module in modules %}
         <tr>
-        <td>{{ module.id}}</td>
-        <td class="editable" data-id="{{ module.id }}" data-name="name">{{ module.name}}</a></td>
-        <td><button type="submit" name="delete_module" value="{{ module.id }}">Delete</button>
-        </td>
-      </tr>
+          <td>{{ module.name }}</td>
+          <td>{{ module.description }}</td>
+          <td>
+            <a href="#" class="edit-module" data-id="{{ module.id }}">Edit</a>
+            <a href="#" class="delete-module" data-id="{{ module.id }}">Delete</a>
+          </td>
+        </tr>
       {% endfor %}
     </tbody>
   </table>

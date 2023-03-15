@@ -2,7 +2,7 @@
 from django.urls import path, include
 from . import views
 from rest_framework import routers
-from .views import SignalListView
+from .views import SignalListView, ModuleListView
 from django.contrib.auth.views import LoginView
 
 
@@ -23,7 +23,10 @@ urlpatterns = [
     path('toexcel/', views.export_to_excel, name= "to-excel"),
 
     #To manage modules & signals
-    path('modules/', views.module_list, name='module_list'),
+    #path('update_module/', views.update_module, name='update_module'),
+    path('module_list/', ModuleListView.as_view(), name='module_list'),
+    path('module_list/edit/', views.update_module, name = 'module_edit'),
+    path('module_list/<int:id>/delete/', views.module_destroy, name='module_delete'),
 ]
 
 

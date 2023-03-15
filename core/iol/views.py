@@ -10,14 +10,14 @@ from rest_framework.views import APIView
 from django.views.generic import TemplateView
 import xlsxwriter
 from rest_framework.response import Response
-from .serializers import SignalSerializer
+from .serializers import SignalSerializer, ModuleSerializer
 from .forms import ProjectForm
 from .models import Project, Module, Signals, IOList
 from django.core import serializers
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required,permission_required
 from django.contrib.auth import login, logout, authenticate
-from .forms import RegisterForm
+from .forms import RegisterForm, ModuleForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 
@@ -134,7 +134,7 @@ class SignalListView(LoginRequiredMixin, TemplateView):
         serializer = SignalSerializer(signals, many=True)
         context['signals'] = serializer.data
         return context
-
+  
 
 @login_required(login_url="/login")
 @csrf_exempt
@@ -248,3 +248,79 @@ def module_list(request):
             Module.objects.filter(id=module_id).delete()
             return redirect('module_list')
     return render(request, 'module_list.html', {'modules': modules})
+
+def modules(request):
+    if request.method =="POST":
+        form = ModuleForm(request.POST)
+        if form.is_valid():
+            try:
+                form.save()
+                return redirect('/show')
+            except:
+                pass
+    else:
+        form = ModuleForm()
+    return render(request, 'cluster_list.html', {'form' : form})
+
+"""
+def show_module(request):
+    modules = Module.objects.all()
+    return render(request, 'cluster_list.html', {'modules' :modules})
+
+def edit_module(request, id):
+    module = Module.objects.get(id = id)
+    return render(request, 'cluster_list.html', {'module' :module})
+
+
+def update_module(request, id):
+    module = Module.objects.get(id=id)
+    form = ModuleForm(request.POST, instance= module)
+    if form.is_valid():
+        form.save()
+        return redirect('/show_module')
+    
+    return render(request, 'edit_module.html', {'module' :module})
+
+
+def destroy(request, id):
+    module = Module.objects.get(id=id)
+    module.delete()
+    return redirect('/show_module')
+    
+"""
+def module_destroy(request, id):
+    module = Module.objects.get(id=id)
+    signals = Signals.objects.filter(module = id)
+    for signal in signals:
+        signal.module.remove(module)
+
+    # print(signals)
+    module.delete()
+    return redirect('/module_list')
+
+class ModuleListView(LoginRequiredMixin, TemplateView):
+    template_name = 'update_module.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        modules = Module.objects.all()
+        serializer = ModuleSerializer(modules, many = True)
+        context["modules"] = serializer.data
+        return context
+
+
+@login_required(login_url="/login")
+@csrf_exempt
+def update_module(request):
+    sig_id= request.POST.get('id','')
+    name= request.POST.get('name','')
+    value= request.POST.get('value','')
+    print(f'id- {sig_id}, name - {name}, value - {value}')
+    module = Module.objects.get(id=sig_id)
+    if name=="module":
+        module.module = value
+
+    module.save()
+    module = Module.objects.get(id=sig_id)
+    print(module)
+    return JsonResponse({"success":"Updated"})

@@ -20,3 +20,7 @@ class RegisterForm(UserCreationForm):
         fields = ['first_name', 'last_name','username','email', 'password1', 'password2']
 
 
+class ModuleForm(forms.ModelForm):
+    class Meta:
+        model = Module
+        fields = "__all__"
