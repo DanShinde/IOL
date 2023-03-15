@@ -1,6 +1,7 @@
 from io import BytesIO
 import json
 import subprocess
+import git
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 import pandas as pd
@@ -20,23 +21,28 @@ from .forms import RegisterForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 
+# def git_update(request):
+#     try:
+#         # Change directory to the root of your app
+#         subprocess.call(['cd', '/home/iol/IOL'])
+
+#         # Pull the latest changes from your Git repository
+#         subprocess.call(['git', 'pull'])
+
+#         # Restart the WSGI process to load the updated code
+#         subprocess.call(['touch', '/var/www/iol_pythonanywhere_com_wsgi.py'])
+#     except Exception:
+#         return HttpResponse('App update Failed')
+
+#     # Return a response to confirm that the update process is complete
+#     return HttpResponse('App updated successfully.')
+
 def git_update(request):
-    try:
-        # Change directory to the root of your app
-        subprocess.call(['cd', '/home/iol/IOL'])
-
-        # Pull the latest changes from your Git repository
-        subprocess.call(['git', 'pull'])
-
-        # Restart the WSGI process to load the updated code
-        subprocess.call(['touch', '/var/www/iol_pythonanywhere_com_wsgi.py'])
-    except Exception:
-        return HttpResponse('App update Failed')
-
-    # Return a response to confirm that the update process is complete
-    return HttpResponse('App updated successfully.')
-
-
+    repo = git.Repo('/home/iol/IOL')
+    origin = repo.remotes.origin
+    repo.create_head('main', origin.refs.main).set_tracking_branch(origin.refs.main).checkout()
+    origin.pull()
+    return HttpResponse(status=200)
 
 @login_required(login_url="/login")
 def create_project(request):
