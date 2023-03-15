@@ -9,7 +9,7 @@ from django.contrib.auth.views import LoginView
 urlpatterns = [
     #Login 
     path('login/', LoginView.as_view(template_name='login.html'), name='login'),
-
+    path('git_update', views.git_update, name = 'git-update'),
     ###
     path('add_signals/', views.add_signals, name= 'add_signals'),
     path('projects/create/', views.create_project, name='create_project'),
