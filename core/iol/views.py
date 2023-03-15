@@ -24,12 +24,29 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 @csrf_exempt
 def git_update(request):
+    if request.method != "POST":
+        return HttpResponse("Couldn't update the code on PythonAnywhere")
+    '''
+        pass the path of the diectory where your project will be 
+        stored on PythonAnywhere in the git.Repo() as parameter.
+        Here the name of my directory is "test.pythonanywhere.com"
+        '''
     repo = git.Repo('/home/iol/IOL')
-    print(f"Repo is {repo}")
     origin = repo.remotes.origin
-    repo.create_head('main', origin.refs.main).set_tracking_branch(origin.refs.main).checkout()
     origin.pull()
-    return HttpResponse(status=200)
+    return HttpResponse("Updated code on PythonAnywhere")
+
+
+
+
+# @csrf_exempt
+# def git_update(request):
+#     repo = git.Repo('/home/iol/IOL')
+#     print(f"Repo is {repo}")
+#     origin = repo.remotes.origin
+#     repo.create_head('main', origin.refs.main).set_tracking_branch(origin.refs.main).checkout()
+#     origin.pull()
+#     return HttpResponse(status=200)
 
 @login_required(login_url="/login")
 def create_project(request):
