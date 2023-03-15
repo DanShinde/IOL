@@ -7,4 +7,15 @@
     {{ form.as_p }}
     <button type="submit">Save</button>
   </form>
+  <script>
+    function myFunction() {
+      var detailstab = document.getElementById("list-tab");
+      detailstab.classList.remove("active");
+      var signalstab = document.getElementById("signals-tab");
+      signalstab.classList.remove("active");
+    }
+    window.addEventListener('load', function() {
+      myFunction();
+    });
+  </script>
 {% endblock %}

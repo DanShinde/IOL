@@ -3,9 +3,14 @@ from django.urls import path, include
 from . import views
 from rest_framework import routers
 from .views import SignalListView
+from django.contrib.auth.views import LoginView
 
 
 urlpatterns = [
+    #Login 
+    path('login/', LoginView.as_view(template_name='login.html'), name='login'),
+
+    ###
     path('add_signals/', views.add_signals, name= 'add_signals'),
     path('projects/create/', views.create_project, name='create_project'),
     path('', views.project_list, name='project_list'),

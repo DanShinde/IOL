@@ -10,7 +10,7 @@
 
         {% load static %}
         <script src="{% static 'js/details.js' %}"></script>
-        <form id="module-form" method="post" data-url="{% url 'get_filtered_signals' %}">
+        <form id="module-form" method="post"  data-url="{% url 'get_filtered_signals' %}">
           {% csrf_token %}
           <input class="" id="module_name">
           <label for="module">Select Module:</label>
@@ -47,6 +47,7 @@
               <th>Code</th>
               <th>Tag</th>
               <th>Signal Type</th>
+              <th>Delete</th>
             </tr>
           </thead>
           <tbody>
@@ -73,5 +74,7 @@
     </div>
   </div>
 </div>
+<script>
 
+</script>
 {% endblock %}

@@ -13,7 +13,29 @@ from .forms import ProjectForm
 from .models import Project, Module, Signals, IOList
 from django.core import serializers
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.decorators import login_required,permission_required
+from django.contrib.auth import login, logout, authenticate
+from .forms import RegisterForm
+from django.contrib.auth.mixins import LoginRequiredMixin
 
+
+# def login(request):
+#     if request.method != 'POST':
+#         return render(request, 'login.html')
+#     username = request.POST['username']
+#     password = request.POST['password']
+#     user = authenticate(request, username=username, password=password)
+#     if user is not None:
+#         login(request, user)
+#         return redirect('home')
+#     else:
+#         error_message = 'Invalid login credentials'
+#         return render(request, 'login.html', {'error_message': error_message})
+
+
+
+
+@login_required(login_url="/login")
 def create_project(request):
     if request.method == 'POST':
         form = ProjectForm(request.POST)
@@ -24,11 +46,12 @@ def create_project(request):
         form = ProjectForm()
     return render(request, 'create_project.html', {'form': form})
 
+@login_required(login_url="/login")
 def project_list(request):
     projects = Project.objects.all()
     return render(request, 'project_list.html', {'projects': projects})
 
-
+@login_required(login_url="/login")
 def project_detail(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
     modules = Module.objects.all()
@@ -37,22 +60,24 @@ def project_detail(request, project_id):
     io_list = IOList.objects.filter(project = project)
     return render(request, 'project_detail.html', {'project': project, 'modules': modules, 'signals': signals, 'io_list': io_list})
 
+
 def get_signals_for_module(module):
     signals = Signals.objects.filter(module=module)
     return serializers.serialize('json', signals)
 
-
+@login_required(login_url="/login")
 def get_signals(request, module_id):
     module = get_object_or_404(Module, pk=module_id)
     signals = get_signals_for_module(module)
     return HttpResponse(signals, content_type='application/json')
 
+@login_required(login_url="/login")
 def get_filtered_signals(request):
     selected_module = request.GET.get('module')
     signals = Signals.objects.filter(module=selected_module).values()
     return JsonResponse({'signals': list(signals)})
 
-
+@login_required(login_url="/login")
 def add_signals(request):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'message': 'Invalid request method.'})
@@ -87,11 +112,9 @@ def add_signals(request):
     return JsonResponse({'success': True, 'data': data})
 
 
-
-
-class SignalListView(TemplateView):
+class SignalListView(LoginRequiredMixin, TemplateView):
     template_name = 'editSignals.html'
-
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         signals = Signals.objects.all()
@@ -99,6 +122,8 @@ class SignalListView(TemplateView):
         context['signals'] = serializer.data
         return context
 
+
+@login_required(login_url="/login")
 @csrf_exempt
 def update_signal(request):
     if request.method != 'POST':
@@ -131,6 +156,8 @@ def update_signal(request):
 
     return JsonResponse({'success': True})
 
+#View to update signals list
+@login_required(login_url="/login")
 @csrf_exempt
 def update(request):
     sig_id= request.POST.get('id','')
@@ -165,10 +192,10 @@ def update(request):
     return JsonResponse({"success":"Updated"})
 
 
-
+@login_required(login_url="/login")
 def export_to_excel(request):
     project_id = request.session.get('project')
-    project = get_object_or_404(Project, id=1)
+    project = get_object_or_404(Project, id=project_id)
     iolist = IOList.objects.filter(project_id=project_id).order_by('signal_type')
     output = BytesIO()
     # Feed a buffer to workbook
