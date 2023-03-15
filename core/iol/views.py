@@ -1,5 +1,6 @@
 from io import BytesIO
 import json
+import subprocess
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 import pandas as pd
@@ -19,19 +20,21 @@ from .forms import RegisterForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 
-# def login(request):
-#     if request.method != 'POST':
-#         return render(request, 'login.html')
-#     username = request.POST['username']
-#     password = request.POST['password']
-#     user = authenticate(request, username=username, password=password)
-#     if user is not None:
-#         login(request, user)
-#         return redirect('home')
-#     else:
-#         error_message = 'Invalid login credentials'
-#         return render(request, 'login.html', {'error_message': error_message})
+def git_update(request):
+    try:
+        # Change directory to the root of your app
+        subprocess.call(['cd', '/home/iol/IOL'])
 
+        # Pull the latest changes from your Git repository
+        subprocess.call(['git', 'pull'])
+
+        # Restart the WSGI process to load the updated code
+        subprocess.call(['touch', '/var/www/iol_pythonanywhere_com_wsgi.py'])
+    except Exception:
+        return HttpResponse('App update Failed')
+
+    # Return a response to confirm that the update process is complete
+    return HttpResponse('App updated successfully.')
 
 
 
