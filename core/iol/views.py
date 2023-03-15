@@ -39,6 +39,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 def git_update(request):
     repo = git.Repo('/home/iol/IOL')
+    print(f"Repo is {repo}")
     origin = repo.remotes.origin
     repo.create_head('main', origin.refs.main).set_tracking_branch(origin.refs.main).checkout()
     origin.pull()
