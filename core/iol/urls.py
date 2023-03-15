@@ -20,7 +20,10 @@ urlpatterns = [
     path('update_signal/', views.update_signal, name='update_signal'),
     path('signals/', SignalListView.as_view(), name='signals-list'),
     path('signals/update/', views.update, name = 'update'),
-    path('toexcel/', views.export_to_excel, name= "to-excel")
+    path('toexcel/', views.export_to_excel, name= "to-excel"),
+
+    #To manage modules & signals
+    path('modules/', views.module_list, name='module_list'),
 ]
 
 

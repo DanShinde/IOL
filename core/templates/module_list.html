@@ -1,0 +1,37 @@
+<!-- module_form.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Add Module</h2>
+<form method="post" action="{% url 'module_list' %}">
+    {% csrf_token %}
+    <label for="module_name">Module Name:</label>
+    <input type="text" name="module_name" required>
+    <button type="submit" name="add_module">Add</button>
+</form>
+
+<h1>Module List</h1>
+<div class="col-md-6">
+
+<table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Module ID</th>
+        <th>Module Name</th>
+        <th>Delete</th>
+      </tr>
+    </thead>
+    <tbody>
+        {% for module in modules %}
+        <tr>
+        <td>{{ module.id}}</td>
+        <td class="editable" data-id="{{ module.id }}" data-name="name">{{ module.name}}</a></td>
+        <td><button type="submit" name="delete_module" value="{{ module.id }}">Delete</button>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

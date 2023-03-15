@@ -26,8 +26,8 @@ class IOList(models.Model):
     channel = models.IntegerField( blank=True, null=True)
     io_address = models.CharField(max_length=10, blank=True, null=True)
     modules = models.ManyToManyField('Module', verbose_name='modules')
-
-
+    
+    
 class Module(models.Model):
     module = models.CharField(max_length=50)
 
@@ -44,9 +44,6 @@ class Signals(models.Model):
     initial_state = models.BooleanField(default=True)
     location = models.CharField(max_length=2, choices=(('FD', 'FD'), ('CP', 'CP')))
     module = models.ManyToManyField(Module, verbose_name='modules')
-
-    
-
 
 
 

@@ -21,21 +21,6 @@ from .forms import RegisterForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 
-# def git_update(request):
-#     try:
-#         # Change directory to the root of your app
-#         subprocess.call(['cd', '/home/iol/IOL'])
-
-#         # Pull the latest changes from your Git repository
-#         subprocess.call(['git', 'pull'])
-
-#         # Restart the WSGI process to load the updated code
-#         subprocess.call(['touch', '/var/www/iol_pythonanywhere_com_wsgi.py'])
-#     except Exception:
-#         return HttpResponse('App update Failed')
-
-#     # Return a response to confirm that the update process is complete
-#     return HttpResponse('App updated successfully.')
 
 @csrf_exempt
 def git_update(request):
@@ -234,3 +219,15 @@ def export_to_excel(request):
     response = HttpResponse(output.read(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     return response
 
+def module_list(request):
+    modules = Module.objects.all()
+    if request.method == 'POST':
+        if 'add_module' in request.POST:
+            module_name = request.POST['module_name']
+            module = Module.objects.create(module=module_name)
+            return redirect('module_list')
+        elif 'delete_module' in request.POST:
+            module_id = request.POST['module_id']
+            Module.objects.filter(id=module_id).delete()
+            return redirect('module_list')
+    return render(request, 'module_list.html', {'modules': modules})

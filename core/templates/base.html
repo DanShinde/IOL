@@ -22,6 +22,9 @@
             <li class="nav-item" role="presentation">
               <button class="nav-link active rounded-5 mybtns" id="signals-tab" data-bs-toggle="tab" type="button" role="tab" aria-selected="false" onclick= "location.href='{% url 'signals-list' %}'">View Signal</button>
             </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active rounded-5 mybtns" id="addmodule-tab" data-bs-toggle="tab" type="button" role="tab" aria-selected="false" onclick= "location.href='{% url 'module_list' %}'">Add or Edit Module</button>
+            </li>
           </ul>
         {% block content %}
         {% endblock %}

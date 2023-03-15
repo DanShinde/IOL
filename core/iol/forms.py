@@ -1,7 +1,10 @@
 from django import forms
-from .models import Project
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404, render
+from .models import Project, Module, Signals
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.forms.models import inlineformset_factory, BaseInlineFormSet
 
 
 class ProjectForm(forms.ModelForm):
@@ -15,3 +18,5 @@ class RegisterForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['first_name', 'last_name','username','email', 'password1', 'password2']
+
+
