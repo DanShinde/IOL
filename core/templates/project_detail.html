@@ -1,36 +1,77 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="div">
-<h1>{{ project.name }}</h1>
-<p>{{ project.description }}</p>
+<div class = "container-fluid">
+  <div class = "row row-height">
+    <div class="col-md-6 left">
+      <div class="div">
+        <h1 id= "projectName">{{ project.name }}</h1>
+        <p>{{ project.description }}</p>
 
-{% load static %}
-<script src="{% static 'js/details.js' %}"></script>
-<form id="module-form" method="post" data-url="{% url 'get_filtered_signals' %}">
-  {% csrf_token %}
-  <input class="" id= "module_name">
-  <label for="module">Select Module:</label>
-  <select name="module" id="module">
-    {% for module in modules %}
-    <option value="{{ module.id }}">{{ module.module }}</option>
-    {% endfor %}
-  </select>
-  <button class="btn btn-primary mt-3" type="submit">Show Signals</button>
-  <button id="add-signals-btn" class="btn btn-primary mt-3">Add</button>
-</form>
+        {% load static %}
+        <script src="{% static 'js/details.js' %}"></script>
+        <form id="module-form" method="post" data-url="{% url 'get_filtered_signals' %}">
+          {% csrf_token %}
+          <input class="" id="module_name">
+          <label for="module">Select Module:</label>
+          <select name="module" id="module">
+            {% for module in modules %}
+            <option value="{{ module.id }}">{{ module.module }}</option>
+            {% endfor %}
+          </select>
+          </br>
+          <button class="btn btn-primary mt-3" type="submit">Show Signals</button>
+          <button class="btn btn-primary mt-3" id="add-signals-btn">Add</button>
+          <button class="btn btn-primary mt-4"id="export-iolist-btn">Export IO List</button>
+        </form>
 
-<div class="row">
-    <div class="col-6 offset-1" id="di-signals-container">
-      <h2>DI Signals</h2>
-      <!-- The DI signals will be dynamically added here -->
+        <div class="row">
+          <div class="col-6 offset-1" id="di-signals-container">
+            <h2>DI Signals</h2>
+            <!-- The DI signals will be dynamically added here -->
+          </div>
+          <div class="col-5" id="do-signals-container">
+            <h2>DO Signals</h2>
+            <!-- The DO signals will be dynamically added here -->
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="col-5" id="do-signals-container">
-      <h2>DO Signals</h2>
-      <!-- The DO signals will be dynamically added here -->
+    <div class="col-md-6 right">
+      <div class="div">
+        <table class="table" id='io-list-table'>
+          <thead>
+            <tr>
+              <th>Sr.No</th>
+              <th>Module Name</th>
+              <th>Code</th>
+              <th>Tag</th>
+              <th>Signal Type</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for iolist in io_list %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ iolist.name }}</td>
+              <td>{{ iolist.code }}</td>
+              <td>{{ iolist.tag }}</td>
+              <td>{{ iolist.signal_type }}</td>
+              <td>
+                {% comment %} <a href="{% url 'edit_iolist' iolist.id %}" class="btn btn-sm btn-primary">Edit</a>
+                <a href="{% url 'delete_iolist' iolist.id %}" class="btn btn-sm btn-danger">Delete</a> {% endcomment %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5">No iolists found.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
-  
 </div>
 
 {% endblock %}

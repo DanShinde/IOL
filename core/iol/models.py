@@ -45,8 +45,6 @@ class Signals(models.Model):
     location = models.CharField(max_length=2, choices=(('FD', 'FD'), ('CP', 'CP')))
     module = models.ManyToManyField(Module, verbose_name='modules')
 
-    def __str__(self):
-        return self.equipment_code+"_"+self.code
     
 
 

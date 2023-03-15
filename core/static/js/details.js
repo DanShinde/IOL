@@ -1,6 +1,7 @@
 window.onload = function() {
     var modForm = document.getElementById('module-form');
     var addBtn = document.getElementById('add-signals-btn');
+    var exportBtn = document.getElementById('export-iolist-btn');
 
     function getCookie(name) {
         var cookieValue = null;
@@ -26,11 +27,11 @@ window.onload = function() {
         xhr.onload = function() {
             if (xhr.status === 200) {
                 var signals = JSON.parse(xhr.responseText)['signals'];
+                console.log(signals)
                 var diSignalsContainer = document.getElementById('di-signals-container');
                 var doSignalsContainer = document.getElementById('do-signals-container');
                 diSignalsContainer.innerHTML = 'DI';
                 doSignalsContainer.innerHTML = 'DO';
-                console.log(signals);
                 if (signals.length > 0) {
                     for (var i = 0; i < signals.length; i++) {
                         var signal = signals[i];
@@ -39,6 +40,11 @@ window.onload = function() {
                         checkbox.type = 'checkbox';
                         checkbox.name = 'signals';
                         checkbox.value = signal['id'];
+                        if (signal['initial_state'] === true){
+                            checkbox.checked = true;
+                        }                        
+                        // console.log(signal['code'])
+                        // console.log(signal['initial_state'])
                         signalItem.appendChild(checkbox);
                         var label = document.createElement('label');
                         label.htmlFor = 'signal-' + signal['id'];
@@ -77,11 +83,46 @@ window.onload = function() {
           headers: {"X-CSRFToken": getCookie("csrftoken")},
           success: function(response) {
             console.log("Selected signals sent to server.");
-            // handle success response
-          },
+            var ioListTable = document.getElementById('io-list-table');
+        ioListTable.innerHTML = '';
+        var ioListData = JSON.parse(response.data);
+        for (var i = 0; i < ioListData.length; i++) {
+          var ioListRow = ioListTable.insertRow();
+          var ioListFields = ioListData[i].fields;
+          ioListRow.insertCell().innerHTML = i+1;
+          ioListRow.insertCell().innerHTML = ioListFields['name'];
+          ioListRow.insertCell().innerHTML = ioListFields['code'];
+          ioListRow.insertCell().innerHTML = ioListFields['tag'];
+          ioListRow.insertCell().innerHTML = ioListFields['signal_type'];
+        }
+      },
           error: function(xhr, status, error) {
             // handle error response
           }
         });
       });
-    };
+
+
+      exportBtn.addEventListener('click', function(event) {
+        xhttp = new XMLHttpRequest();
+        var project= document.getElementById("projectName");
+
+        projectName = project.textContent; 
+        xhttp.onreadystatechange = function() {
+            var a, today;
+            if (xhttp.readyState === 4 && xhttp.status === 200) {
+                a = document.createElement('a');
+                a.href = window.URL.createObjectURL(xhttp.response);
+                today = new Date();
+                a.download = projectName +"_IO_List_R0"+ ".xls";
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                return a.click();
+            }
+        };
+        xhttp.open("GET", "/toexcel", true);
+        xhttp.setRequestHeader("Content-Type", "application/json");
+        xhttp.responseType = 'blob';
+        xhttp.send();
+    });
+};

@@ -6,3 +6,4 @@ from .models import *
 admin.site.register(Signals)
 admin.site.register(IOList)
 admin.site.register(Project)
+admin.site.register(Module)
