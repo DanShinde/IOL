@@ -37,6 +37,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 #     # Return a response to confirm that the update process is complete
 #     return HttpResponse('App updated successfully.')
 
+@csrf_exempt
 def git_update(request):
     repo = git.Repo('/home/iol/IOL')
     print(f"Repo is {repo}")
