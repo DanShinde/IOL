@@ -38,6 +38,8 @@ class IOList(models.Model):
     channel = models.IntegerField( blank=True, null=True)
     io_address = models.CharField(max_length=10, blank=True, null=True)
     module = models.CharField(max_length=50, default="Testing")
+    def __str__(self):
+        return self.tag
 
 
 class Signals(models.Model):
