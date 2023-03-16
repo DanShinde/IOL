@@ -107,7 +107,7 @@ def add_signals(request):
             pre = "Qx_"
         else:
             pre = "Encoder_"
-        module = signalData.module.values_list('id').first()
+        module = signalData.module #get_object_or_404(Module, pk=signalData.module)
         entry = IOList(
             project=project,
             name=module_name,
@@ -115,10 +115,12 @@ def add_signals(request):
             code=signalData.code,
             tag=pre + module_name + "_" + signalData.code,
             signal_type=signalData.signal_type,
+            device_type = signalData.device_type,
             actual_description=f"{signalData.component_description}, {signalData.function_purpose}",
+            module = signalData.module 
         )
         entry.save()
-        entry.modules.set(module)
+        # entry.module.set(module)
     io_list = IOList.objects.filter(project = project)
     data = serializers.serialize('json', io_list)
 
@@ -215,7 +217,7 @@ def export_to_excel(request):
     workbook = xlsxwriter.Workbook(output)
     worksheet = workbook.add_worksheet(project.name)
     bold = workbook.add_format({'bold': True})
-    columns = ["Project", "ModuleName",  "Code", "Tag", "Signal Type", "Actual Description"]
+    columns = ["Project", "ModuleName",  "Code", "Tag", "Signal Type","Device Type", "Actual Description"]
     # Fill first row with columns
     row = 0
     for i,elem in enumerate(columns):
@@ -229,6 +231,7 @@ def export_to_excel(request):
         worksheet.write(row, 3, IO.tag)
         worksheet.write(row, 4, IO.signal_type)
         worksheet.write(row, 5, IO.actual_description)
+        worksheet.write(row, 6, IO.device_type)
         row += 1
 
     workbook.close()

@@ -9,6 +9,17 @@ class Project(models.Model):
     def __str__(self):
         return self.name
 
+class CountryManager(models.Manager):
+    """Enable fixtures using self.sigla instead of `id`"""
+
+    def get_by_natural_key(self, module):
+        return self.get(module=module)
+
+class Module(models.Model):
+    module = models.CharField(max_length=50)
+    def __str__(self):
+        return self.module
+
 class IOList(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     name = models.CharField(max_length=30)
@@ -16,6 +27,7 @@ class IOList(models.Model):
     code = models.CharField(max_length=40)
     tag = models.CharField(max_length=100, editable=False)
     signal_type = models.CharField(max_length=10)
+    device_type = models.TextField(max_length=100, blank=True)
     actual_description = models.TextField(max_length=100)
     panel_number = models.CharField(max_length=10, blank=True, null=True)
     node = models.CharField(max_length=10, blank=True, null=True)
@@ -25,11 +37,7 @@ class IOList(models.Model):
     terminal_number = models.IntegerField(blank=True, null=True)
     channel = models.IntegerField( blank=True, null=True)
     io_address = models.CharField(max_length=10, blank=True, null=True)
-    modules = models.ManyToManyField('Module', verbose_name='modules')
-    
-    
-class Module(models.Model):
-    module = models.CharField(max_length=50)
+    module = models.ForeignKey(Module, on_delete=models.DO_NOTHING, related_name = "modules1", default=1)
 
 
 class Signals(models.Model):
@@ -43,7 +51,8 @@ class Signals(models.Model):
     segment = models.CharField(max_length=50, blank=True)
     initial_state = models.BooleanField(default=True)
     location = models.CharField(max_length=2, choices=(('FD', 'FD'), ('CP', 'CP')))
-    module = models.ManyToManyField(Module, verbose_name='modules')
+    module = models.ForeignKey(Module, on_delete=models.CASCADE,default= 1, related_name = "modules")
+
 
 
 
