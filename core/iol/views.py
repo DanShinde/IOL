@@ -7,7 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 import pandas as pd
 from rest_framework import generics
 from rest_framework.views import APIView
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, CreateView
 import xlsxwriter
 from rest_framework.response import Response
 from .serializers import SignalSerializer, ModuleSerializer
@@ -17,6 +17,7 @@ from django.core import serializers
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required,permission_required
 from django.contrib.auth import login, logout, authenticate
+from django.urls import reverse_lazy
 from .forms import RegisterForm, ModuleForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 
@@ -36,17 +37,12 @@ def git_update(request):
     origin.pull()
     return HttpResponse("Updated code on PythonAnywhere")
 
+class SignUpView(CreateView):
+    form_class = RegisterForm
+    success_url = reverse_lazy("login")
+    template_name = "signup.html"
 
 
-
-# @csrf_exempt
-# def git_update(request):
-#     repo = git.Repo('/home/iol/IOL')
-#     print(f"Repo is {repo}")
-#     origin = repo.remotes.origin
-#     repo.create_head('main', origin.refs.main).set_tracking_branch(origin.refs.main).checkout()
-#     origin.pull()
-#     return HttpResponse(status=200)
 
 @login_required(login_url="/login")
 def create_project(request):
@@ -107,7 +103,7 @@ def add_signals(request):
             pre = "Qx_"
         else:
             pre = "Encoder_"
-        module = signalData.module #get_object_or_404(Module, pk=signalData.module)
+        module = get_object_or_404(Module, pk=signalData.module)
         entry = IOList(
             project=project,
             name=module_name,
@@ -117,10 +113,9 @@ def add_signals(request):
             signal_type=signalData.signal_type,
             device_type = signalData.device_type,
             actual_description=f"{signalData.component_description}, {signalData.function_purpose}",
-            module = signalData.module 
+            module =  get_object_or_404(Module, pk=signalData.module)
         )
         entry.save()
-        # entry.module.set(module)
     io_list = IOList.objects.filter(project = project)
     data = serializers.serialize('json', io_list)
 
@@ -293,11 +288,6 @@ def destroy(request, id):
 """
 def module_destroy(request, id):
     module = Module.objects.get(id=id)
-    signals = Signals.objects.filter(module = id)
-    for signal in signals:
-        signal.module.remove(module)
-
-    # print(signals)
     module.delete()
     return redirect('/module_list')
 
@@ -320,8 +310,7 @@ def update_module(request):
     value= request.POST.get('value','')
     print(f'id- {sig_id}, name - {name}, value - {value}')
     module = Module.objects.get(id=sig_id)
-    if name=="module":
-        module.module = value
+    module.module = value
 
     module.save()
     module = Module.objects.get(id=sig_id)

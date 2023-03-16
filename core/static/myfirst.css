@@ -42,11 +42,13 @@
     overflow-y: scroll;
   }
 
+
   .mybtns{
-    background-color: aqua;
+    background-color: rgb(41, 87, 87);
     font-weight: bold;
     font-size: medium;
   }
+
   .mybtns:hover{
       background-color: rgb(211, 192, 48);
   }
@@ -55,4 +57,21 @@
     background-color: #3e8e41;
     box-shadow: 0 5px #666;
     transform: translateY(4px);
+  }
+
+
+  .navbtns{
+    background-color: aquamarine;
+    font-weight: bold;
+    font-size: medium;
+  }
+
+  .navbtns:hover{
+    background-color: rgb(39, 86, 95);
+  }
+
+  .navbtns:active {
+  background-color: #3e8e41;
+  box-shadow: 0 5px #666;
+  transform: translateY(4px);
   }

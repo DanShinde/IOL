@@ -76,5 +76,16 @@
 </div>
 <script>
 
+  function myFunction() {
+    var signalstab = document.getElementById("signals-tab");
+    signalstab.classList.remove("active");
+    var createtab = document.getElementById("create-tab");
+    createtab.classList.remove("active");
+    var createtab = document.getElementById("list-tab");
+    createtab.classList.remove("active");
+  }
+  window.addEventListener('load', function() {
+    myFunction();
+  });
 </script>
 {% endblock %}

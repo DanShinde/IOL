@@ -37,7 +37,7 @@ class IOList(models.Model):
     terminal_number = models.IntegerField(blank=True, null=True)
     channel = models.IntegerField( blank=True, null=True)
     io_address = models.CharField(max_length=10, blank=True, null=True)
-    module = models.ForeignKey(Module, on_delete=models.DO_NOTHING, related_name = "modules1", default=1)
+    module = models.CharField(max_length=50, default="Testing")
 
 
 class Signals(models.Model):

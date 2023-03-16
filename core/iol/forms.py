@@ -13,14 +13,23 @@ class ProjectForm(forms.ModelForm):
         fields = ['name', 'description']
 
 class RegisterForm(UserCreationForm):
+    first_name = forms.CharField(required=True)
+    last_name = forms.CharField(required=True)
     email = forms.EmailField(required=True)
 
     class Meta:
         model = User
         fields = ['first_name', 'last_name','username','email', 'password1', 'password2']
 
+    def __init__(self, *args, **kwargs):
+        super(RegisterForm, self).__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.required = True
+
 
 class ModuleForm(forms.ModelForm):
     class Meta:
         model = Module
         fields = "__all__"
+
+

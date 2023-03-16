@@ -43,7 +43,9 @@
   }
 
   .mybtns{
-    background-color: aqua;
+    background-color:  rgb(41, 87, 87);
+    font-weight: bold;
+    font-size: medium;
   }
   .mybtns:hover{
       background-color: rgb(211, 192, 48);
