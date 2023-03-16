@@ -1,6 +1,7 @@
 from io import BytesIO
 import json
 import subprocess
+from django.forms import inlineformset_factory
 import git
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -11,7 +12,7 @@ from django.views.generic import TemplateView, CreateView
 import xlsxwriter
 from rest_framework.response import Response
 from .serializers import SignalSerializer, ModuleSerializer
-from .forms import ProjectForm
+from .forms import ProjectForm, SignalsForm, SignalsFormSet
 from .models import Project, Module, Signals, IOList
 from django.core import serializers
 from django.views.decorators.csrf import csrf_exempt
@@ -103,7 +104,7 @@ def add_signals(request):
             pre = "Qx_"
         else:
             pre = "Encoder_"
-        module = get_object_or_404(Module, pk=signalData.module)
+
         entry = IOList(
             project=project,
             name=module_name,
@@ -113,7 +114,7 @@ def add_signals(request):
             signal_type=signalData.signal_type,
             device_type = signalData.device_type,
             actual_description=f"{signalData.component_description}, {signalData.function_purpose}",
-            module =  get_object_or_404(Module, pk=signalData.module)
+            module =  signalData.module
         )
         entry.save()
     io_list = IOList.objects.filter(project = project)
@@ -225,8 +226,8 @@ def export_to_excel(request):
         worksheet.write(row, 2, IO.code)
         worksheet.write(row, 3, IO.tag)
         worksheet.write(row, 4, IO.signal_type)
-        worksheet.write(row, 5, IO.actual_description)
         worksheet.write(row, 6, IO.device_type)
+        worksheet.write(row, 5, IO.actual_description)
         row += 1
 
     workbook.close()
@@ -254,8 +255,8 @@ def modules(request):
             try:
                 form.save()
                 return redirect('/show')
-            except:
-                pass
+            except Exception:
+                print("Invalid Form")
     else:
         form = ModuleForm()
     return render(request, 'cluster_list.html', {'form' : form})
@@ -316,3 +317,15 @@ def update_module(request):
     module = Module.objects.get(id=sig_id)
     print(module)
     return JsonResponse({"success":"Updated"})
+
+
+
+def edit_module(request, id):
+    module = get_object_or_404(Module, pk=id)
+    signals = Signals.objects.filter(module=module)
+    return render(request, 'edit_module.html', {'module': module, 'signals': signals})
+
+def signal_delete(request, id):
+    signal = Signals.objects.get(id=id)
+    signal.delete()
+    return redirect('/module_edit')

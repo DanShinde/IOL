@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Edit Module</h1>
+    <form method="post">
+        {% csrf_token %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Equipment Code</th>
+                    <th>Code</th>
+                    <th>Component Description</th>
+                    <th>Function Purpose</th>
+                    <th>Device Type</th>
+                    <th>Signal Type</th>
+                    <th>Remarks</th>
+                    <th>Segment</th>
+                    <th>Initial State</th>
+                    <th>Location</th>
+                    <th>Update</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for signal in signals %}
+                    <tr>
+                        <td>{{ signal.equipment_code }}</td>
+                        <td>{{ signal.code }}</td>
+                        <td>{{ signal.component_description }}</td>
+                        <td>{{ signal.function_purpose }}</td>
+                        <td>{{ signal.device_type }}</td>
+                        <td>{{ signal.signal_type }}</td>
+                        <td>{{ signal.remarks }}</td>
+                        <td>{{ signal.segment }}</td>
+                        <td>{{ signal.initial_state }}</td>
+                        <td>{{ signal.location }}</td>
+                        <td>
+                            <button type="submit" formaction="{% url 'module_edit' signal.module signal.id %}" class="btn btn-primary">Update</button>
+                        </td>
+                        <td>
+                            <button type="submit" formaction="{% url 'signal_delete' signal.module signal.id %}" class="btn btn-danger">Delete</button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+    </form>
+
+
+{% endblock %}

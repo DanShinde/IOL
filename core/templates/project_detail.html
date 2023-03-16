@@ -10,23 +10,23 @@
 
         {% load static %}
         <script src="{% static 'js/details.js' %}"></script>
-        <form id="module-form" method="post"  data-url="{% url 'get_filtered_signals' %}">
+        {% comment %} <form id="module-form" method="post"  data-url="{% url 'get_filtered_signals' %}"> {% endcomment %}
           {% csrf_token %}
-          <input class="" id="module_name">
+          <input class=""  id="module_name">
           <label for="module">Select Module:</label>
-          <select name="module" id="module">
+          <select name="module" id="module" >
             {% for module in modules %}
             <option value="{{ module.id }}">{{ module.module }}</option>
             {% endfor %}
           </select>
           </br>
-          <button class="btn btn-primary mt-3 mybtns" type="submit">Show Signals</button>
+          <div class="divbtn">
           <button class="btn btn-primary mt-3 mybtns" id="add-signals-btn">Add</button>
           <button class="btn btn-primary mt-3 mybtns" id="export-iolist-btn">Export IO List</button>
-        </form>
-
+        {% comment %} </form> {% endcomment %}
+          </div>
         <div class="row">
-          <div class="col-6 offset-1" id="di-signals-container">
+          <div class="col-5 offset-1" id="di-signals-container">
             <h2>DI Signals</h2>
             <!-- The DI signals will be dynamically added here -->
           </div>
@@ -87,5 +87,57 @@
   window.addEventListener('load', function() {
     myFunction();
   });
+</script>
+<script>
+  window.onload = function() {
+    // your function code here
+
+  document.getElementById('module').addEventListener('change', function() {
+    event.preventDefault();
+    var module_id = document.getElementById('module').value;
+    var url = "{% url 'get_filtered_signals' %}?module=" + module_id;
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url);
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        var signals = JSON.parse(xhr.responseText)['signals'];
+        console.log(signals);
+        var diSignalsContainer = document.getElementById('di-signals-container');
+        var doSignalsContainer = document.getElementById('do-signals-container');
+        diSignalsContainer.innerHTML = 'DI';
+        doSignalsContainer.innerHTML = 'DO';
+        if (signals.length > 0) {
+            for (var i = 0; i < signals.length; i++) {
+                var signal = signals[i];
+                var signalItem = document.createElement('div');
+                var checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.name = 'signals';
+                checkbox.value = signal['id'];
+                if (signal['initial_state'] === true){
+                    checkbox.checked = true;
+                }                        
+                // console.log(signal['code'])
+                // console.log(signal['initial_state'])
+                signalItem.appendChild(checkbox);
+                var label = document.createElement('label');
+                label.htmlFor = 'signal-' + signal['id'];
+                label.appendChild(document.createTextNode(signal['code']));
+                signalItem.appendChild(label);
+                if (signal['signal_type'] === 'DI') {
+                    diSignalsContainer.appendChild(signalItem);
+                } else if (signal['signal_type'] === 'DO') {
+                    doSignalsContainer.appendChild(signalItem);
+                }
+            }
+        } else {
+            diSignalsContainer.innerHTML = 'No signals found.';
+            doSignalsContainer.innerHTML = 'No signals found.';
+        }
+      }
+    };
+    xhr.send();
+  });
+}
 </script>
 {% endblock %}

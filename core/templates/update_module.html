@@ -1,7 +1,19 @@
 {% extends "base.html" %}
-
+{% block styles %}
+{<style>
+  Cluster{
+    background-color: rgb(211, 192, 48);
+    font-weight: bold;
+    font-size: medium;
+  }
+  Cluster:hover{
+    background-color: rgb(39, 86, 95);
+  }
+</style>}
+{% endblock %}
 {% block content %}
 <div id="create-module" style="display:none;">
+
     <h2>Create Module</h2>
     <form id="create-module-form">
       {% csrf_token %}
@@ -16,6 +28,7 @@
       <button type="submit" class="btn btn-primary">Submit</button>
     </form>
   </div>
+  <div>
   <table class="table table-striped">
     <thead>
       <tr>
@@ -28,18 +41,20 @@
           {% for module in modules %}
           <tr>
             <td>{{ module.id }}</td>
-            <td class="editable" data-id="{{ module.id }}" data-name="module">{{ module.module }}</a></td>
+            <td class="Cluster"  onclick= "location.href='{% url 'module_edit' id=module.id %}'" >{{ module.module }}</a>
+            </td>
             <td>
-                <button class="button danger"  onclick= "location.href='{% url 'module_delete' id=module.id %}'" 
+                <button class="button danger"  
                 data-confirm="Are you sure you want to delete this module?">Delete Module</button>
-           
+                {% comment %} onclick= "location.href='{% url 'module_delete' id=module.id %}'"  {% endcomment %}
             </td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
+    </div>
 <script>
-    $(document).ready(function(){
+    {% comment %} $(document).ready(function(){
         $(document).on("dblclick",".editable", function(){
         var value=$(this).text();
         var input = "<input type='text' class='input-data form-control' value='" + value + "'>";
@@ -86,9 +101,10 @@
         });
     }
 
-});
+}); {% endcomment %}
 </script>
   <script>
+
     function myFunction() {
       var detailstab = document.getElementById("detail-tab");
       detailstab.classList.remove("active");

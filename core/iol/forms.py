@@ -6,7 +6,6 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.forms.models import inlineformset_factory, BaseInlineFormSet
 
-
 class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
@@ -27,9 +26,15 @@ class RegisterForm(UserCreationForm):
             field.required = True
 
 
+
+class SignalsForm(forms.ModelForm):
+    class Meta:
+        model = Signals
+        exclude = []
+
+SignalsFormSet = inlineformset_factory(Module, Signals, form=SignalsForm, extra=1)
+
 class ModuleForm(forms.ModelForm):
     class Meta:
         model = Module
-        fields = "__all__"
-
-
+        fields = '__all__'

@@ -26,8 +26,10 @@ urlpatterns = [
     #To manage modules & signals
     #path('update_module/', views.update_module, name='update_module'),
     path('module_list/', ModuleListView.as_view(), name='module_list'),
-    path('module_list/edit/', views.update_module, name = 'module_edit'),
+    #path('module_list/edit/', views.update_module, name = 'module_edit'),
     path('module_list/<int:id>/delete/', views.module_destroy, name='module_delete'),
+    path('module_edit/<int:id>/', views.edit_module, name = 'module_edit'),
+    path('module_edit/<int:id>/delete/', views.signal_delete, name='signal_delete'),
 ]
 
 
