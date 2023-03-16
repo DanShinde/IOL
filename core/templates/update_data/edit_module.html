@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base/base.html" %}
 
 {% block content %}
     <h1>Edit Module</h1>
@@ -35,10 +35,10 @@
                         <td>{{ signal.initial_state }}</td>
                         <td>{{ signal.location }}</td>
                         <td>
-                            <button type="submit" formaction="{% url 'module_edit' signal.module signal.id %}" class="btn btn-primary">Update</button>
+                            <button type="submit" formaction="{% url 'module_edit' signal.id %}" class="btn btn-primary">Update</button>
                         </td>
                         <td>
-                            <button type="submit" formaction="{% url 'signal_delete' signal.module signal.id %}" class="btn btn-danger">Delete</button>
+                            <button type="submit" formaction="{% url 'signal_delete' signal.id %}" class="btn btn-danger">Delete</button>
                         </td>
                     </tr>
                 {% endfor %}

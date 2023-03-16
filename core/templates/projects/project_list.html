@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base/base.html' %}
 
 {% block content %}
   <h1 class="mb-4">Projects</h1>
@@ -24,15 +24,5 @@
       </tbody>
     </table>
   </div>
-  <script>
-    function myFunction() {
-      var signalstab = document.getElementById("signals-tab");
-      signalstab.classList.remove("active");
-      var createtab = document.getElementById("create-tab");
-      createtab.classList.remove("active");
-    }
-    window.addEventListener('load', function() {
-      myFunction();
-    });
-  </script>
+
 {% endblock %}

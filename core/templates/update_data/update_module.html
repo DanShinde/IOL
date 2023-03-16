@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base/base.html" %}
 {% block styles %}
 {<style>
   Cluster{
@@ -34,6 +34,7 @@
       <tr>
             <th>ID</th>
             <th>Cluster Name</th>
+            <th>Edit</th>
             <th>Delete</th>
           </tr>
         </thead>
@@ -41,12 +42,16 @@
           {% for module in modules %}
           <tr>
             <td>{{ module.id }}</td>
-            <td class="Cluster"  onclick= "location.href='{% url 'module_edit' id=module.id %}'" >{{ module.module }}</a>
+            <td class="Cluster"   >{{ module.module }}</a>
             </td>
             <td>
-                <button class="button danger"  
-                data-confirm="Are you sure you want to delete this module?">Delete Module</button>
-                {% comment %} onclick= "location.href='{% url 'module_delete' id=module.id %}'"  {% endcomment %}
+              <button class="button btn-warning" 
+              onclick= "location.href='{% url 'module_edit' id=module.id %}'"> Edit Module</button>
+          </td>
+            <td>
+                <button class="button btn-danger"  
+                data-confirm="Are you sure you want to delete this module?" 
+                onclick= "location.href='{% url 'module_delete' id=module.id %}'">Delete Module</button>
             </td>
           </tr>
           {% endfor %}

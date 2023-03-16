@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'crispy_forms',
     'crispy_bootstrap5',
+    'accounts',
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
@@ -137,3 +138,6 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGIN_REDIRECT_URL = '/project_list'
+LOGOUT_REDIRECT_URL = '/accounts/login'
