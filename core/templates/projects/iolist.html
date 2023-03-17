@@ -17,6 +17,9 @@
             <th>Code</th>
             <th>Tag</th>
             <th>Signal Type</th>
+            <th>Device Type</th>
+            <th>Location</th>
+            <th>Panel Number</th>
             <th>Delete</th>
           </tr>
         </thead>
@@ -28,6 +31,9 @@
             <td>{{ iolist.code }}</td>
             <td>{{ iolist.tag }}</td>
             <td>{{ iolist.signal_type }}</td>
+            <td>{{ iolist.device_type }}</td>
+            <td>{{ iolist.location }}</td>
+            <td>{{ iolist.panel_number }}</td>
             <td>
               <a href="{% url 'iolist-delete' iolist.id 'delete' %}" class="btn btn-sm btn-danger">Delete</a> 
             </td>
