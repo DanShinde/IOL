@@ -97,7 +97,27 @@
     height: 50px;
     background: rgba(0, 0, 0, 0.6);
   }
-  
-.table{
+
+.iotable{
   width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  border: 1px solid black;
+}
+
+.iotable:nth-child(even) {
+  background-color: #ebe0e0;
+}
+
+iotable:nth-child(even) {
+  background-color: #f4f4f4;
+}
+
+td {
+  border: 1px dotted #999;
+}
+
+th, td {
+  padding: 15px;
+  text-align: left;
 }

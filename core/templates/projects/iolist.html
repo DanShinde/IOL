@@ -5,50 +5,50 @@
 <div class = "container-flex">
         <h1 id= "projectName">{{ project.name }}</h1>
         <p>{{ project.description }}</p>
-
-
-<div class="col-md-7">
-    <div class="diviol">
-      <table class="table" id='io-list-table'>
-        <thead>
-          <tr>
-            <th>Sr.No</th>
-            <th>Module Name</th>
-            <th>Code</th>
-            <th>Tag</th>
-            <th>Signal Type</th>
-            <th>Device Type</th>
-            <th>Location</th>
-            <th>Panel Number</th>
-            <th>Delete</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for iolist in io_list %}
-          <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ iolist.name }}</td>
-            <td>{{ iolist.code }}</td>
-            <td>{{ iolist.tag }}</td>
-            <td>{{ iolist.signal_type }}</td>
-            <td>{{ iolist.device_type }}</td>
-            <td>{{ iolist.location }}</td>
-            <td>{{ iolist.panel_number }}</td>
-            <td>
-              <a href="{% url 'iolist-delete' iolist.id 'delete' %}" class="btn btn-sm btn-danger">Delete</a> 
-            </td>
-          </tr>
-          {% empty %}
-          <tr>
-            <td colspan="5">No iolists found.</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </div>
 </div>
 
+<div class="col-md-7">
+    <div class="diviol thead-dark">
+
+    </div>
+  </div>
+
+  <table class="iotable" id='io-list-table'>
+    <thead>
+      <tr>
+        <th>Sr.No</th>
+        <th>Module Name</th>
+        <th>Code</th>
+        <th>Tag</th>
+        <th>Signal Type</th>
+        <th>Device Type</th>
+        <th>Location</th>
+        <th>Panel Number</th>
+        <th>Delete</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for iolist in io_list %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ iolist.name }}</td>
+        <td>{{ iolist.code }}</td>
+        <td>{{ iolist.tag }}</td>
+        <td>{{ iolist.signal_type }}</td>
+        <td>{{ iolist.device_type }}</td>
+        <td>{{ iolist.location }}</td>
+        <td>{{ iolist.panel_number }}</td>
+        <td>
+          <a href="{% url 'iolist-delete' iolist.id 'delete' %}" class="btn btn-sm btn-danger">Delete</a> 
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5">No iolists found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 
 
 
