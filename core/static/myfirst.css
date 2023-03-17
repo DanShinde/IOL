@@ -17,6 +17,9 @@
   }
   .div{
     overflow-y: scroll;
+    height: 90%;
+  }
+  .diviol{
     height: 100%;
   }
   .btn{
@@ -94,3 +97,4 @@
     height: 50px;
     background: rgba(0, 0, 0, 0.6);
   }
+

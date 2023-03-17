@@ -27,14 +27,34 @@ class RegisterForm(UserCreationForm):
 
 
 
+# class SignalsForm(forms.ModelForm):
+#     class Meta:
+#         model = Signals
+#         exclude = []
+
+# SignalsFormSet = inlineformset_factory(Module, Signals, form=SignalsForm, extra=1)
+
+# class ModuleForm(forms.ModelForm):
+#     class Meta:
+#         model = Module
+#         fields = '__all__'
+
+
+
 class SignalsForm(forms.ModelForm):
     class Meta:
         model = Signals
-        exclude = []
-
-SignalsFormSet = inlineformset_factory(Module, Signals, form=SignalsForm, extra=1)
-
-class ModuleForm(forms.ModelForm):
-    class Meta:
-        model = Module
         fields = '__all__'
+        widgets = {
+            'equipment_code': forms.TextInput(attrs={'class': 'form-control'}),
+            'code': forms.TextInput(attrs={'class': 'form-control'}),
+            'component_description': forms.Textarea(attrs={'class': 'form-control'}),
+            'function_purpose': forms.Textarea(attrs={'class': 'form-control'}),
+            'device_type': forms.TextInput(attrs={'class': 'form-control'}),
+            'signal_type': forms.Select(attrs={'class': 'form-control'}),
+            'remarks': forms.Textarea(attrs={'class': 'form-control'}),
+            'segment': forms.TextInput(attrs={'class': 'form-control'}),
+            'initial_state': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'location': forms.Select(attrs={'class': 'form-control'}),
+            'module': forms.Select(attrs={'class': 'form-control'}),
+        }

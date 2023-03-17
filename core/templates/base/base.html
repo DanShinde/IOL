@@ -6,6 +6,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'myfirst.css' %}">
+    <script src="{% static 'js/nav.js' %}"></script>
     {% block styles %}
     {% endblock %}
 </head>
@@ -24,9 +25,12 @@
             <li class="nav-item" role="presentation">
               <button class="nav-link active rounded-5 navbtns" id="addmodule-tab" data-bs-toggle="tab" type="button" role="tab" aria-selected="false" onclick= "location.href='{% url 'module_list' %}'">Add or Edit Module</button>
             </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active rounded-5 navbtns" id="addmodule-tab" data-bs-toggle="tab" type="button" role="tab" aria-selected="false" onclick= "location.href='{% url 'iolist' %}'">Review IO List</button>
+            </li>
             {% if request.user.is_authenticated %}
             <li class="nav-item" role="presentation">
-              <p class= "nav-link active rounded-5 navbtns">Welcome, {{ request.user.first_name }}!</p>
+              <h2 class= "nav-link active rounded-5 navbtns">Welcome, {{ request.user.first_name }}!</h2>
               </li>
             <li class="nav-item" role="presentation">
               <button class="nav-link active rounded-5 navbtns" id="addmodule-tab" data-bs-toggle="tab" type="button" role="tab" aria-selected="false" onclick="window.location.href='/accounts/logout';">Logout</button>
@@ -41,36 +45,8 @@
 
         {% block content %}
         {% endblock %}
-<script>
-  function setActiveNavButton() {
-    // Get all the buttons with class "nav-link" inside the element with id "nav-pills"
-    var buttons = document.querySelectorAll(".nav-link");
-    // Get the path of the current URL
-    var path = window.location.pathname;
-    
-    // Loop through all the buttons
-    for (var i = 0; i < buttons.length; i++) {
-      // Get the href attribute of the button
-      var href = buttons[i].getAttribute("onclick");
-      {% comment %} console.log(window.location.href); {% endcomment %}
-      // Check if the href attribute matches the current path
-    if (href.includes(path)) {
-        // If it is, add the "active" class to the button
-        buttons[i].classList.add("active");
-      } else {
-        // If it's not, remove the "active" class from the button
-        buttons[i].classList.remove("active");
-      }
-    }
-  }
-  
 
 
-  window.onload = function() {
-    setActiveNavButton();
-  };
-  
-</script>
     </main>
 </body>
 </html>

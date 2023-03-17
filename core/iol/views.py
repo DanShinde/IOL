@@ -2,21 +2,28 @@ from io import BytesIO
 import json
 import subprocess
 from django.forms import inlineformset_factory
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
+from django.views import View
 import pandas as pd
+from .utils import set_pagination
+from django.contrib import messages
+from django.db.models import Q
 from django.views.generic import TemplateView
 import xlsxwriter
+from django.template.loader import render_to_string
+from django.template import loader
 from rest_framework.response import Response
 from .serializers import SignalSerializer, ModuleSerializer
-from .forms import ProjectForm, SignalsForm, SignalsFormSet
+from .forms import ProjectForm, SignalsForm
 from .models import Project, Module, Signals, IOList
 from django.core import serializers
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required,permission_required
 from django.contrib.auth import login, logout, authenticate
-
-from .forms import ModuleForm
+from django.http import QueryDict
+# from .forms import ModuleForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 
@@ -160,30 +167,173 @@ def module_destroy(request, id):
     return redirect('/module_list')
 
 
-
-# @login_required(login_url="/accounts/login")
-# @csrf_exempt
-# def update_module(request):
-#     sig_id= request.POST.get('id','')
-#     name= request.POST.get('name','')
-#     value= request.POST.get('value','')
-#     print(f'id- {sig_id}, name - {name}, value - {value}')
-#     module = Module.objects.get(id=sig_id)
-#     module.module = value
-
-#     module.save()
-#     module = Module.objects.get(id=sig_id)
-#     print(module)
-#     return JsonResponse({"success":"Updated"})
-
-
-
 def edit_module(request, id):
     module = get_object_or_404(Module, pk=id)
     signals = Signals.objects.filter(module=module)
-    return render(request, 'edit_module.html', {'signals': signals})
+    return render(request, 'update_data/edit_module.html', {'signals': signals})
 
 def signal_delete(request, id):
     signal = Signals.objects.get(id=id)
     signal.delete()
     return redirect('/module_edit')
+
+
+class SignalsView(View):
+    context = {'segment': 'signals'}
+
+
+    def get(self, request, pk=None, action=None):
+        if HttpRequest.is_ajax(request):
+            if pk and action == 'edit':
+                edit_row = self.edit_row(pk)
+                return JsonResponse({'edit_row': edit_row})
+            elif pk and not action:
+                edit_row = self.get_row_item(pk)
+                return JsonResponse({'edit_row': edit_row})
+
+        if pk and action == 'edit':
+            context, template = self.edit(request, pk)
+        else:
+            context, template = self.list(request)
+
+        if not context:
+            html_template = loader.get_template('page-500.html')
+            return HttpResponse(html_template.render(self.context, request))
+
+        return render(request, template, context)
+    # def get(self, request, pk=None, action=None):
+    #     if request.is_ajax():
+    #         if pk and action == 'edit':
+    #             edit_row = self.edit_row(pk)
+    #             return JsonResponse({'edit_row': edit_row})
+    #         elif pk and not action:
+    #             edit_row = self.get_row_item(pk)
+    #             return JsonResponse({'edit_row': edit_row})
+
+    #     if pk and action == 'edit':
+    #         context, template = self.edit(request, pk)
+    #     else:
+    #         context, template = self.list(request)
+
+    #     if not context:
+    #         html_template = loader.get_template('page-500.html')
+    #         return HttpResponse(html_template.render(self.context, request))
+
+    #     return render(request, template, context)
+
+    def post(self, request, pk=None, action=None):
+        self.update_instance(request, pk)
+        return redirect('signals')
+
+    def put(self, request, pk, action=None):
+        is_done, message = self.update_instance(request, pk, True)
+        edit_row = self.get_row_item(pk)
+        return JsonResponse({'valid': 'success' if is_done else 'warning', 'message': message, 'edit_row': edit_row})
+
+    def delete(self, request, pk, action=None):
+        signal = self.get_object(pk)
+        signal.delete()
+
+        redirect_url = None
+        if action == 'single':
+            messages.success(request, 'Item deleted successfully')
+            redirect_url = reverse('signals')
+
+        response = {'valid': 'success', 'message': 'Item deleted successfully', 'redirect_url': redirect_url}
+        return JsonResponse(response)
+
+    """ Get pages """
+
+    def list(self, request):
+        filter_params = None
+
+        search = request.GET.get('search')
+        if search:
+            filter_params = None
+            for key in search.split():
+                if key.strip():
+                    if not filter_params:
+                        filter_params = Q(code__icontains=key.strip())
+                    else:
+                        filter_params |= Q(code__icontains=key.strip())
+
+        signals = Signals.objects.filter(filter_params) if filter_params else Signals.objects.all()
+
+        self.context['signals'], self.context['info'] = set_pagination(request, signals)
+        if not self.context['signals']:
+            return False, self.context['info']
+
+        return self.context, 'app/signals/list.html'
+
+    def edit(self, request, pk):
+        signal = self.get_object(pk)
+
+        self.context['signal'] = signal
+        self.context['form'] = SignalsForm(instance=signal)
+
+        return self.context, 'update_data/edit.html'
+
+    """ Get Ajax pages """
+
+    def edit_row(self, pk):
+        signal = self.get_object(pk)
+        form = SignalsForm(instance=signal)
+        context = {'instance': signal, 'form': form}
+        return render_to_string('app/signals/edit_row.html', context)
+
+    """ Common methods """
+
+    def get_object(self, pk):
+        signal = get_object_or_404(Signals, id=pk)
+        return signal
+    
+    def update_instance(self, request, pk, is_urlencode=False):
+        signal = self.get_object(pk)
+        form_data = QueryDict(request.body) if is_urlencode else request.POST
+        form = SignalsForm(form_data, instance=signal)
+        if form.is_valid():
+            form.save()
+            if not is_urlencode:
+                messages.success(request, 'Transaction saved successfully')
+
+            return True, 'Transaction saved successfully'
+
+        if not is_urlencode:
+            messages.warning(request, 'Error Occurred. Please try again.')
+        return False, 'Error Occurred. Please try again.'
+
+
+
+class IolistView(View):
+    context = {'segment': 'iolist'}
+
+    def get(self, request, pk=None, action=None):
+        project_id = request.session.get('project')
+        iolists =IOList.objects.filter(project_id=project_id)
+        self.context['io_list'] = iolists
+        return render(request, 'projects/iolist.html', self.context)
+
+    def delete(self, request, *args, **kwargs):
+        if kwargs.get('action') == 'delete':
+            iolist = get_object_or_404(IOList, id=kwargs.get('pk'))
+            iolist.delete()
+            messages.success(request, 'Item deleted successfully')
+            redirect_url = reverse('iolist')
+            
+            response = {'valid': 'success', 'message': 'Item deleted successfully', 'redirect_url': redirect_url}
+            
+            # return JsonResponse(response)
+        return redirect('iolist')
+
+    def dispatch(self, request, *args, **kwargs):
+        if kwargs.get('action') is None:
+            return self.get(request, *args, **kwargs)
+        elif kwargs.get('action') == 'delete':
+            return self.delete(request, *args, **kwargs)
+        else:
+            return super().dispatch(request, *args, **kwargs)
+
+
+
+
+

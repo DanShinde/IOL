@@ -58,67 +58,6 @@
         </tbody>
       </table>
     </div>
-<script>
-    {% comment %} $(document).ready(function(){
-        $(document).on("dblclick",".editable", function(){
-        var value=$(this).text();
-        var input = "<input type='text' class='input-data form-control' value='" + value + "'>";
-        $(this).html(input);
-        $(this).removeClass('editable');
-    });
 
-    $(document).on("blur",".input-data", function(){
-        var value=$(this).val();
-        var td=$(this).parent("td");
-        $(this).remove();
-        td.html(value);
-        td.addClass("editable");
-        var name=td.data("module");
-        sendToServer(td.data("id"), value, name);
-    });
-
-    $(document).on("keypress",".input-data", function(e){
-        var key = e.which;
-        if (key==13){
-            var value=$(this).val();
-            var td=$(this).parent("td");
-            $(this).remove();
-            td.html(value);
-            td.addClass("editable");
-            var name=td.data("module");
-            sendToServer(td.data("id"), value, name);
-        };
-    });
-    function sendToServer(id, value, name){
-        console.log(id);
-        console.log(value);
-        console.log(name)
-        $.ajax({
-            url:"edit/",
-            type:"POST",
-            data:{id:id, module:name,value:value},
-        })
-        .done(function(response){
-            console.log(response)
-        })
-        .fail(function(){
-            console.log("Error Occured, Could not update the signal")
-        });
-    }
-
-}); {% endcomment %}
-</script>
-  <script>
-
-    function myFunction() {
-      var detailstab = document.getElementById("detail-tab");
-      detailstab.classList.remove("active");
-      var createtab = document.getElementById("create-tab");
-      createtab.classList.remove("active");
-    }
-    window.addEventListener('load', function() {
-      myFunction();
-    });
-  </script>
   {% endblock %}
 

@@ -75,31 +75,17 @@
     </div>
   </div>
 </div>
-<script>
 
-  function myFunction() {
-    var signalstab = document.getElementById("signals-tab");
-    signalstab.classList.remove("active");
-    var createtab = document.getElementById("create-tab");
-    createtab.classList.remove("active");
-    var createtab = document.getElementById("list-tab");
-    createtab.classList.remove("active");
-  }
-  window.addEventListener('load', function() {
-    myFunction();
-    console.log(jQuery);
-  });
-</script>
 <script>
   window.onload = function() {
-    // your function code here
-
-  document.getElementById('module').addEventListener('change', function() {
+  console.log("Loading");
+  document.getElementById('module').addEventListener('change', function(event) {
     event.preventDefault();
     var module_id = document.getElementById('module').value;
     var url = "{% url 'get_filtered_signals' %}?module=" + module_id;
     var xhr = new XMLHttpRequest();
     xhr.open('GET', url);
+    console.log(module_id);
     xhr.onload = function() {
       if (xhr.status === 200) {
         var signals = JSON.parse(xhr.responseText)['signals'];
@@ -109,37 +95,36 @@
         diSignalsContainer.innerHTML = 'DI';
         doSignalsContainer.innerHTML = 'DO';
         if (signals.length > 0) {
-            for (var i = 0; i < signals.length; i++) {
-                var signal = signals[i];
-                var signalItem = document.createElement('div');
-                var checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.name = 'signals';
-                checkbox.value = signal['id'];
-                if (signal['initial_state'] === true){
-                    checkbox.checked = true;
-                }                        
-                // console.log(signal['code'])
-                // console.log(signal['initial_state'])
-                signalItem.appendChild(checkbox);
-                var label = document.createElement('label');
-                label.htmlFor = 'signal-' + signal['id'];
-                label.appendChild(document.createTextNode(signal['code']));
-                signalItem.appendChild(label);
-                if (signal['signal_type'] === 'DI') {
-                    diSignalsContainer.appendChild(signalItem);
-                } else if (signal['signal_type'] === 'DO') {
-                    doSignalsContainer.appendChild(signalItem);
-                }
+          for (var i = 0; i < signals.length; i++) {
+            var signal = signals[i];
+            var signalItem = document.createElement('div');
+            var checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.name = 'signals';
+            checkbox.value = signal['id'];
+            if (signal['initial_state'] === true){
+              checkbox.checked = true;
+            }                        
+            signalItem.appendChild(checkbox);
+            var label = document.createElement('label');
+            label.htmlFor = 'signal-' + signal['id'];
+            label.appendChild(document.createTextNode(signal['code']));
+            signalItem.appendChild(label);
+            if (signal['signal_type'] === 'DI') {
+              diSignalsContainer.appendChild(signalItem);
+            } else if (signal['signal_type'] === 'DO') {
+              doSignalsContainer.appendChild(signalItem);
             }
+          }
         } else {
-            diSignalsContainer.innerHTML = 'No signals found.';
-            doSignalsContainer.innerHTML = 'No signals found.';
+          diSignalsContainer.innerHTML = 'No signals found.';
+          doSignalsContainer.innerHTML = 'No signals found.';
         }
       }
     };
     xhr.send();
   });
+
 
   function getCookie(name) {
     var cookieValue = null;
