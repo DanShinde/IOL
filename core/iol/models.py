@@ -56,7 +56,10 @@ class Signals(models.Model):
     location = models.CharField(max_length=2, choices=(('FD', 'FD'), ('CP', 'CP')))
     module = models.ForeignKey(Module, on_delete=models.CASCADE,default= 1, related_name = "modules")
     def __str__(self):
-        return f'{self.equipment_code}_{self.code}'
+        if self.equipment_code != '':
+            return f'{self.equipment_code}_{self.code}'
+        else:
+            return self.code
 
 
 

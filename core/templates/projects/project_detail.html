@@ -5,7 +5,7 @@
 <div class = "container-fluid">
   <div class = "row row-height">
     <div class="col-md-6 left">
-      <div class="div">
+
         <h1 id= "projectName">{{ project.name }}</h1>
         <p>{{ project.description }}</p>
 
@@ -24,6 +24,7 @@
           <div class="divbtn">
           <button class="btn btn-primary mt-3 mybtns" id="add-signals-btn">Add</button>
           <button class="btn btn-primary mt-3 mybtns" id="export-iolist-btn">Export IO List</button>
+          <span></span>
         {% comment %} </form> {% endcomment %}
           </div>
         <div class="row">
@@ -37,7 +38,6 @@
           </div>
         </div>
       </div>
-    </div>
     <div class="col-md-6 right">
       <div class="div">
         <table class="table" id='io-list-table'>

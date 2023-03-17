@@ -37,6 +37,11 @@
     background-color: bisque;
     height: 100%;
     overflow-y: scroll;
+    text-align: center;
+  }
+
+  .col-5{
+    padding-left: 100px;
   }
   
   .right{
@@ -50,6 +55,8 @@
     background-color: rgb(41, 87, 87);
     font-weight: bold;
     font-size: medium;
+    width: 200px;
+    height: inherit;
   }
 
   .mybtns:hover{
@@ -81,6 +88,7 @@
 
   .div{
     text-align: center;
+
   }
 
   #di-signals-container, #do-signals-container {
@@ -102,19 +110,13 @@
   width: 100%;
   margin-left: auto;
   margin-right: auto;
-  border: 1px solid black;
+  border: 1px solid ;
 }
 
-.iotable:nth-child(even) {
-  background-color: #ebe0e0;
-}
 
-iotable:nth-child(even) {
-  background-color: #f4f4f4;
-}
 
 td {
-  border: 1px dotted #999;
+  border: 1px dotted #aba4a4;
 }
 
 th, td {

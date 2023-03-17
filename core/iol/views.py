@@ -54,7 +54,7 @@ def project_detail(request, project_id):
     modules = Module.objects.all()
     signals = None
     request.session['project'] = project_id
-    io_list = IOList.objects.filter(project = project)
+    io_list = IOList.objects.filter(project = project).order_by('-id')
     return render(request, 'projects/project_detail.html', {'project': project, 'modules': modules, 'signals': signals, 'io_list': io_list})
 
 
@@ -110,7 +110,8 @@ def add_signals(request):
             module =  signalData.module
         )
         entry.save()
-    io_list = IOList.objects.filter(project = project).order_by('-id').values()
+    io_list = IOList.objects.filter(project = project).order_by('-id')
+    # print(io_list)
     data = serializers.serialize('json', io_list)
 
     return JsonResponse({'success': True, 'data': data})
