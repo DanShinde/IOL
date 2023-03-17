@@ -1,7 +1,8 @@
 window.onload = function() {
-    
     var exportBtn = document.getElementById('export-iolist-btn');
-
+    var project= document.getElementById("projectName");
+        console.log(project.textContent);
+    
     function getCookie(name) {
         var cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -20,7 +21,7 @@ window.onload = function() {
       exportBtn.addEventListener('click', function(event) {
         xhttp = new XMLHttpRequest();
         var project= document.getElementById("projectName");
-
+        console.log(project.textContent);
         projectName = project.textContent; 
         xhttp.onreadystatechange = function() {
             var a, today;
