@@ -24,8 +24,7 @@ urlpatterns = [
     path('module_edit/<int:id>/', views.edit_module, name = 'module_edit'),
     path('module_edit/<int:id>/delete/', views.signal_delete, name='signal_delete'),
 
-    re_path(r'^signals/(?:(?P<pk>\d+)/)?(?:(?P<action>\w+)/)?', views.SignalsView.as_view(),
-            name='signals'),
+    # re_path(r'^signals/(?:(?P<pk>\d+)/)?(?:(?P<action>\w+)/)?', views.SignalsView.as_view(), name='signals'),
 
     path('iolist/', IolistView.as_view(), name='iolist'),
     path('iolist/<int:pk>/<str:action>/', IolistView.as_view(), name='iolist-delete'),
