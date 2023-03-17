@@ -51,10 +51,12 @@ class Signals(models.Model):
     device_type = models.TextField(max_length=100, blank=True)
     signal_type = models.CharField(max_length=10, default="DI", choices=(('DI', 'DI'), ('DO', 'DO'), ('Encoder', 'Encoder')))
     remarks = models.TextField(max_length=100, blank=True)
-    segment = models.CharField(max_length=50, blank=True)
+    segment = models.CharField(max_length=50, blank=True, choices=(('Carton/Tote Handling'),('Carton/Tote Handling')))
     initial_state = models.BooleanField(default=True)
     location = models.CharField(max_length=2, choices=(('FD', 'FD'), ('CP', 'CP')))
     module = models.ForeignKey(Module, on_delete=models.CASCADE,default= 1, related_name = "modules")
+    def __str__(self):
+        return f'{self.equipment_code}_{self.code}'
 
 
 
