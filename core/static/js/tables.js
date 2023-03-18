@@ -1,58 +1,18 @@
-{% extends 'base/base.html' %}
+// $(document).ready(function () {
+//     console.log('DataTables is here')
+//     $('#example').DataTable();
+// });
 
-{% block content %}
-  <h1 class="mb-4">Projects</h1>
-
-  <div class="table-responsive filterable">
-    <div class="panel-heading">
-      <h3 class="panel-title">
-      <button class="btn btn-default btn-secondary btn-xs btn-filter" id= "FilterON"><span class="glyphicon glyphicon-filter"></span>Click To Apply Filter</button>
-  </h3>
-  </div>
-    <table class="table table-dark table-striped table-bordered">
-      <thead>
-        <tr  class="filters">
-          <th scope="col"><input type="text" class="form-control" placeholder="Sr.No." disabled></th>
-          <th scope="col"><input type="text" class="form-control" placeholder="Project Name" disabled></th>
-          <th scope="col"><input type="text" class="form-control" placeholder="Description" disabled></th>
-          <th scope="col"><input type="text" class="form-control" placeholder="Segment" disabled></th>
-          <th scope="col"><input type="text" class="form-control" placeholder="Created At" disabled></th>
-          <th scope="col"><input type="text" class="form-control" placeholder="Created By" disabled></th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for project in projects %}
-          <tr>
-            <td> {{project.id}} </td>
-            <td ><a class ="btn-info btn-primary"  href="{% url 'project_detail' project_id=project.pk %}">{{ project.name }}</a></td>
-            <td>{{ project.description }}</td>
-            <td>{{ project.segment }}</td>
-            <td>{{ project.created_by }}</td>
-            <td>{{ project.created_at }}</td>
-          </tr>
-        {% empty %}
-          <tr>
-            <td colspan="2">No projects yet.</td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-      <p>No.of Rows : <span id="rowcount"></span></p>
-  </div>
-</div>
-
-<script>
-  
-    $(document).ready(function() {
-    console.log('DataTable Ready')
+// Set the initial value of #rowcount to the number of rows in the table
+$(document).ready(function() {
     $("#rowcount").html($(".filterable tr").length - 1);
   
     // Add a click event listener to the .btn-filter element
-    $("#FilterON").click(function() {
+    $(".filterable .btn-filter").click(function() {
       var table = $(this).parents(".filterable");
       var filters = table.find(".filters input");
       var tbody = table.find(".table tbody");
-      console.log('DataTable On click ' + table.length + filters.length + tbody.length)
+  
       if (filters.prop("disabled")) {
         // If filters are disabled, enable them and focus on the first input field
         filters.prop("disabled", false);
@@ -107,8 +67,7 @@
     var visibleRows = $("tbody tr:visible").length;
     var message = visibleRows === 1 ? "No result found" : visibleRows - 1;
     $("#rowcount").html(message);
-  };
-                  
-           
-</script>
-{% endblock %}
+  }
+  
+
+console.log('DataTables is here')

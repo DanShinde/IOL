@@ -35,7 +35,7 @@
                         <td>{{ signal.initial_state }}</td>
                         <td>{{ signal.location }}</td>
                         <td>
-                            <button type="submit" formaction="{% url 'signals' signal.id 'edit'  %}" class="btn btn-primary">Update</button>
+                            <button type="submit" formaction="{% url 'signals' signal.id 'edit'  %}" class="btn btn-primary" >Update</button>
                         </td>
                         <td>
                             <button type="submit" formaction="{% url 'signal_delete' signal.id %}" class="btn btn-danger">Delete</button>

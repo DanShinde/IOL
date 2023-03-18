@@ -26,8 +26,7 @@ urlpatterns = [
 
     # re_path(r'^signals/(?:(?P<pk>\d+)/)?(?:(?P<action>\w+)/)?', views.SignalsView.as_view(), name='signals'),
 
-    path('iolist/', IolistView.as_view(), name='iolist'),
-    path('iolist/<int:pk>/<str:action>/', IolistView.as_view(), name='iolist-delete'),
+    re_path(r'^iolist/(?:(?P<pk>\d+)/)?(?:(?P<action>\w+)/)?', views.IolistView.as_view(), name='iolist'),
 ]
 
 

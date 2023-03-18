@@ -1,0 +1,23 @@
+/* 
+
+.dataTables_paginate {
+    margin-top: -30px !important;
+}
+
+.dataTables_filter {
+    display: none;
+}
+
+.dataTables_length {
+    float: right;
+    margin-top: 10px !important;
+}
+
+.dt-buttons {
+    margin-between: 10px !important;
+}
+
+thead input {
+    width: 100;
+    text-align: center;
+} */

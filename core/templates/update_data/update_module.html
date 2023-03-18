@@ -34,7 +34,8 @@
       <tr>
             <th>ID</th>
             <th>Cluster Name</th>
-            <th>Segment<th>
+            <th>Segment</th>
+            <th>Created By</th>
             <th>Edit</th>
             <th>Delete</th>
           </tr>
@@ -43,11 +44,10 @@
           {% for module in modules %}
           <tr>
             <td>{{ module.id }}</td>
-            <td class="Cluster"   >{{ module.module }}</a>
-              <td class="Segment"   >{{ module.segment }}</a>
-            </td>
-            <td>
-              <button class="button btn-warning" 
+            <td class="Cluster"   >{{ module.module }}</td>
+            <td class="Segment"   >{{ module.segment }}</td>
+            <td class="Segment"   >{{ module.created_by }}</td>
+            <td><button class="button btn-warning" 
               onclick= "location.href='{% url 'module_edit' id=module.id %}'"> Edit Module</button>
           </td>
             <td>

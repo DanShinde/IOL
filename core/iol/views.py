@@ -16,7 +16,7 @@ from django.template.loader import render_to_string
 from django.template import loader
 from rest_framework.response import Response
 from .serializers import SignalSerializer, ModuleSerializer
-from .forms import ProjectForm, SignalsForm
+from .forms import ProjectForm, SignalsForm, IOListForm
 from .models import Project, Module, Signals, IOList
 from django.core import serializers
 from django.views.decorators.csrf import csrf_exempt
@@ -36,7 +36,9 @@ def create_project(request):
     if request.method == 'POST':
         form = ProjectForm(request.POST)
         if form.is_valid():
-            project = form.save()
+            project = form.save(commit=False)
+            project.created_by = request.user.get_full_name()
+            project.save()
             return redirect('project_list') 
     else:
         form = ProjectForm()
@@ -107,7 +109,7 @@ def add_signals(request):
             signal_type=signalData.signal_type,
             device_type = signalData.device_type,
             actual_description=f"{signalData.component_description}, {signalData.function_purpose}",
-            module =  signalData.module,
+            Cluster =  signalData.module,
             created_by = request.user.get_full_name()
         )
         entry.save()
@@ -123,13 +125,13 @@ def add_signals(request):
 def export_to_excel(request):
     project_id = request.session.get('project')
     project = get_object_or_404(Project, id=project_id)
-    iolist = IOList.objects.filter(project_id=project_id).order_by('signal_type')
+    iolist = IOList.objects.filter(project_id=project_id).order_by('location','signal_type')
     output = BytesIO()
     # Feed a buffer to workbook
     workbook = xlsxwriter.Workbook(output)
     worksheet = workbook.add_worksheet(project.name)
     bold = workbook.add_format({'bold': True})
-    columns = ["Project", "ModuleName",  "Code", "Tag", "Signal Type","Device Type", "Actual Description"]
+    columns = ["Project", "ModuleName",  "Code", "Tag", "Signal Type","Device Type", "Actual Description","Location"]
     # Fill first row with columns
     row = 0
     for i,elem in enumerate(columns):
@@ -137,13 +139,14 @@ def export_to_excel(request):
     row += 1
     # Now fill other rows with columns
     for IO in iolist:
-        worksheet.write(row, 0, project_id)
+        worksheet.write(row, 0, project.name)
         worksheet.write(row, 1, IO.name)
         worksheet.write(row, 2, IO.code)
         worksheet.write(row, 3, IO.tag)
         worksheet.write(row, 4, IO.signal_type)
-        worksheet.write(row, 6, IO.device_type)
-        worksheet.write(row, 5, IO.actual_description)
+        worksheet.write(row, 5, IO.device_type)
+        worksheet.write(row, 6, IO.actual_description)
+        worksheet.write(row, 7, IO.location)
         row += 1
 
     workbook.close()
@@ -326,14 +329,29 @@ class IolistView(View):
         
         # return JsonResponse(response)
         return redirect('iolist')
-    
+
     def edit(self, request, *args, **kwargs):
         iolist = get_object_or_404(IOList, id=kwargs.get('pk'))
-        messages.success(request, 'Item updated successfully')
-        redirect_url = reverse('iolist')
-        response = {'valid': 'success', 'message': 'Item updated successfully', 'redirect_url': redirect_url}
-        # return JsonResponse(response)
-        return redirect('iolist')
+        if request.method == 'POST':
+            form = IOListForm(request.POST, instance=iolist)
+            print("It's Post")
+            if form.is_valid():
+                form.save()
+                print("It's Save")
+                messages.success(request, 'Item updated successfully')
+                redirect_url = reverse('iolist')
+                response = {'valid': 'success', 'message': 'Item updated successfully', 'redirect_url': redirect_url}
+                return redirect('iolist')
+            else:
+                print(form.errors)
+        else:
+            form = IOListForm(instance=iolist)
+        context = {
+            'form': form,
+            'iolist': iolist,
+            'action': 'edit',
+        }
+        return render(request, 'projects/edit_iolist.html', context)
 
     def dispatch(self, request, *args, **kwargs):
         if kwargs.get('action') is None:
@@ -346,6 +364,61 @@ class IolistView(View):
             return super().dispatch(request, *args, **kwargs)
 
 
+
+#Work in progress
+
+# class ModuleView(View):
+#     context = {'segment': 'iolist'}
+
+#     def get(self, request, pk=None, action=None):
+#         project_id = request.session.get('project')
+#         iolists =IOList.objects.filter(project_id=project_id)
+#         self.context['io_list'] = iolists
+#         return render(request, 'update_data/modulelist.html', self.context)
+
+#     def delete(self, request, *args, **kwargs):
+#         # sourcery skip: class-extract-method
+#         iolist = get_object_or_404(IOList, id=kwargs.get('pk'))
+#         iolist.delete()
+#         redirect_url = reverse('iolist')
+        
+#         response = {'valid': 'success', 'message': 'Item deleted successfully', 'redirect_url': redirect_url}
+        
+#         # return JsonResponse(response)
+#         return redirect('iolist')
+
+#     def edit(self, request, *args, **kwargs):
+#         iolist = get_object_or_404(Signals, id=kwargs.get('pk'))
+#         if request.method == 'POST':
+#             form = IOListForm(request.POST, instance=iolist)
+#             print("It's Post")
+#             if form.is_valid():
+#                 form.save()
+#                 print("It's Save")
+#                 messages.success(request, 'Item updated successfully')
+#                 redirect_url = reverse('iolist')
+#                 response = {'valid': 'success', 'message': 'Item updated successfully', 'redirect_url': redirect_url}
+#                 return redirect('iolist')
+#             else:
+#                 print(form.errors)
+#         else:
+#             form = IOListForm(instance=iolist)
+#         context = {
+#             'form': form,
+#             'iolist': iolist,
+#             'action': 'edit',
+#         }
+#         return render(request, 'update_data/edit_module.html', context)
+
+#     def dispatch(self, request, *args, **kwargs):
+#         if kwargs.get('action') is None:
+#             return self.get(request, *args, **kwargs)
+#         elif kwargs.get('action') == 'delete':
+#             return self.delete(request, *args, **kwargs)
+#         elif kwargs.get('action') == 'edit':
+#             return self.edit(request, *args, **kwargs)
+#         else:
+#             return super().dispatch(request, *args, **kwargs)
 
 
 

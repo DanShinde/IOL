@@ -3,6 +3,7 @@ body {
   height: 100%;
   margin: 0;
   max-width: 100%;
+  background-color: #f9f5f5;
 }
 
 
@@ -80,13 +81,22 @@ body {
 
 
   .navbtns{
-    background-color: aquamarine;
+    background-color: rgb(93, 104, 100);
     font-weight: bold;
     font-size: medium;
   }
 
+  
+  .navbar-text{
+    background-color: rgb(93, 104, 100);
+    font-weight: bold;
+    font-size: medium;
+    width: 250px;
+    color: azure;
+  }
+
   .navbtns:hover{
-    background-color: rgb(39, 86, 95);
+    background-color: rgb(89, 121, 127);
   }
 
   .navbtns:active {

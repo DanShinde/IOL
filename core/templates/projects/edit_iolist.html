@@ -1,0 +1,124 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+{% load widget_tweaks %}
+
+
+  <div class="row justify-content-center">
+    <div class="col-md-12">
+      <div class="wrapper">
+        <div class="row no-gutters">
+          <div class="col-lg-8 col-md-7 order-md-last d-flex align-items-stretch">
+            <div class="contact-wrap w-100 p-md-5 p-4">
+
+
+<form method="POST" id="iolistForm" name="iolistForm" class="iolistForm" novalidate="novalidate">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+              <label class="label" for="{{ form.project.id_for_label }}">{{ form.project.label_tag }}</label>
+              {% render_field form.project|add_class:"form-control" %}
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label class="label" for="{{ form.Cluster.id_for_label }}">{{ form.Cluster.label_tag }}</label>
+              {% render_field form.Cluster|add_class:"form-control" %}
+      
+            </div>
+          </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.name.id_for_label }}">{{ form.name.label_tag }}</label>
+          {% render_field form.name|add_class:"form-control" %}
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.equipment_code.id_for_label }}">{{ form.equipment_code.label_tag }}</label>
+          {% render_field form.equipment_code|add_class:"form-control" %}
+  
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.code.id_for_label }}">{{ form.code.label_tag }}</label>
+          {% render_field form.code|add_class:"form-control" %}
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.signal_type.id_for_label }}">{{ form.signal_type.label_tag }}</label>
+          {% render_field form.signal_type|add_class:"form-control" %}
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.device_type.id_for_label }}">{{ form.device_type.label_tag }}</label>
+          {% render_field form.device_type|add_class:"form-control" %}
+  
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.actual_description.id_for_label }}">{{ form.actual_description.label_tag }}</label>
+          {% render_field form.actual_description|add_class:"form-control" %}
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.panel_number.id_for_label }}">{{ form.panel_number.label_tag }}</label>
+          {% render_field form.panel_number|add_class:"form-control" %}
+  
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.node.id_for_label }}">{{ form.node.label_tag }}</label>
+          {% render_field form.node|add_class:"form-control" %}
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.rack.id_for_label }}">{{ form.rack.label_tag }}</label>
+          {% render_field form.rack|add_class:"form-control" %}
+  
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.module_position.id_for_label }}">{{ form.module_position.label_tag }}</label>
+          {% render_field form.module_position|add_class:"form-control" %}
+  
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.location.id_for_label }}">{{ form.location.label_tag }}</label>
+          {% render_field form.location|add_class:"form-control" %}
+  
+        </div>
+      </div>
+
+                 <div class="col-md-12">
+                    <div class="form-group">
+                      <input type="submit" value="Update Signal" class="btn btn-warning">
+
+
+                      <a href="{% url 'iolist' iolist.id 'delete' %}" class="btn float-right btn-danger">Delete</a> 
+                      <div class="submitting"></div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+
+
+          </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+
+ {% endblock %}

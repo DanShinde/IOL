@@ -9,7 +9,8 @@ Segments=(('Carton/Tote Handling','Carton/Tote Handling'),
 class Project(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField(max_length=500, blank=True)
-    created_by = models.CharField(max_length=30,  default = 'Pravin')
+    segment = models.CharField(max_length=50, blank=True, default =Segments[0][0], choices = Segments)
+    created_by = models.CharField(max_length=30)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     # segment = models.CharField(max_length=50, blank=True, default =Segments[0][0], choices = Segments)
@@ -25,10 +26,10 @@ class CountryManager(models.Manager):
 
 class Module(models.Model):
     module = models.CharField(max_length=50)
-    created_by = models.CharField(max_length=30, default = 'Pravin')
+    created_by = models.CharField(max_length=30)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    # segment = models.CharField(max_length=50, blank=True, default =Segments[0][0], choices = Segments)
+    segment = models.CharField(max_length=50, blank=True, default =Segments[0][0], choices = Segments)
     def __str__(self):
         return self.module
 
@@ -50,8 +51,8 @@ class IOList(models.Model):
     channel = models.IntegerField( blank=True, null=True)
     location = models.CharField(max_length=2, choices=(('FD', 'FD'), ('CP', 'CP')), default='CP')
     io_address = models.CharField(max_length=10, blank=True, null=True)
-    module = models.CharField(max_length=50, default="Testing")
-    created_by = models.CharField(max_length=30, default = 'Pravin')
+    Cluster = models.CharField(max_length=50, default="Testing")
+    created_by = models.CharField(max_length=30)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
@@ -70,7 +71,7 @@ class Signals(models.Model):
     initial_state = models.BooleanField(default=True)
     location = models.CharField(max_length=2, choices=(('FD', 'FD'), ('CP', 'CP')))
     module = models.ForeignKey(Module, on_delete=models.CASCADE,default= 1, related_name = "modules")
-    created_by = models.CharField(max_length=30, default= 'Pravin')
+    created_by = models.CharField(max_length=30)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):

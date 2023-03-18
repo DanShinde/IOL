@@ -12,15 +12,28 @@
         {% load static %}
         <script src="{% static 'js/details.js' %}"></script>
         {% comment %} <form id="module-form" method="post"  data-url="{% url 'get_filtered_signals' %}"> {% endcomment %}
-          {% csrf_token %}
-          <input class=""  id="module_name">
-          <label for="module">Select Module:</label>
-          <select name="module" id="module" >
-            {% for module in modules %}
-            <option value="{{ module.id }}">{{ module.module }}</option>
-            {% endfor %}
-          </select>
-          </br>
+          <form method="POST" id="contactForm" name="contactForm" class="contactForm" novalidate="novalidate">
+            {% csrf_token %}
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="label" for="module_name">Module Name</label>
+                  <input type="text" name="name" maxlength="50" class="form-control" required="" id="module_name">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label class="label" for="module">Select Cluster</label>
+                  <select name="module" class="form-control" id="module">
+                    {% for module in modules %}
+                    <option value="{{ module.id }}">{{ module.module }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+            </div>
+          </form>
+
           <div class="divbtn">
           <button class="btn btn-primary mt-3 mybtns" id="add-signals-btn">Add</button>
           <button class="btn btn-primary mt-3 mybtns" id="export-iolist-btn">Export IO List</button>
@@ -28,12 +41,14 @@
         {% comment %} </form> {% endcomment %}
           </div>
         <div class="row">
+          
           <div class="col-5 offset-1" id="di-signals-container">
-            <h2>DI Signals</h2>
+            DI Signals
             <!-- The DI signals will be dynamically added here -->
           </div>
+          
           <div class="col-5" id="do-signals-container">
-            <h2>DO Signals</h2>
+            DO Signals
             <!-- The DO signals will be dynamically added here -->
           </div>
         </div>
@@ -92,8 +107,8 @@
         console.log(signals);
         var diSignalsContainer = document.getElementById('di-signals-container');
         var doSignalsContainer = document.getElementById('do-signals-container');
-        diSignalsContainer.innerHTML = 'DI';
-        doSignalsContainer.innerHTML = 'DO';
+        diSignalsContainer.innerHTML = 'DI Signals';
+        doSignalsContainer.innerHTML = 'DO Signals';
         if (signals.length > 0) {
           for (var i = 0; i < signals.length; i++) {
             var signal = signals[i];
@@ -206,4 +221,5 @@
 
 }
 </script>
+
 {% endblock %}

@@ -1,21 +1,24 @@
 {% extends 'base/base.html' %}
+{% load static%}
 
-
+{% block script %}
+<script src="{% static 'js/tables.js' %}"></script>
+{% endblock %}
 {% block content %}
+
 <div class = "container-flex">
         <h1 id= "projectName">{{ project.name }}</h1>
         <p>{{ project.description }}</p>
 </div>
+  <div class="panel panel-primary filterable">
+<div class="panel-heading">
+    <button class="btn btn-primary mt-3 mybtns float-left" id= "FilterON"><span class="glyphicon glyphicon-filter"></span>Click To Apply Filter</button>
+<button class="btn btn-primary mt-3 mybtns float-right" id="export-iolist-btn">Export IO List</button>
+</div>
 
-<div class="col-md-7">
-    <div class="diviol thead-dark">
-
-    </div>
-  </div>
-
-  <table class="table-dark table-striped iotable" id='io-list-table'>
+  <table class="table-dark table-striped iotable table" id='example'>
     <thead>
-      <tr>
+      {% comment %} <tr>
         <th>Sr.No</th>
         <th>Module Name</th>
         <th>Code</th>
@@ -27,6 +30,20 @@
         <th>Created By</th>
         <th>Edit</th>
         <th>Delete</th>
+      </tr> {% endcomment %}
+
+      <tr class="filters">
+        <th><input type="text" class="form-control" placeholder="#" disabled></th>
+        <th><input type="text" class="form-control" placeholder="Module Name" disabled></th>
+        <th><input type="text" class="form-control" placeholder="Code" disabled></th>
+        <th><input type="text" class="form-control" placeholder="Tag" disabled></th>
+        <th><input type="text" class="form-control" placeholder="Signal Type" disabled></th>
+        <th><input type="text" class="form-control" placeholder="Device Type" disabled></th>
+        <th><input type="text" class="form-control" placeholder="Location" disabled></th>
+        <th><input type="text" class="form-control" placeholder="Panel Number" disabled></th>
+        <th><input type="text" class="form-control" placeholder="Created By" disabled></th>
+        <th>--</th>
+        <th>--</th>
       </tr>
     </thead>
     <tbody>
@@ -42,10 +59,10 @@
         <td>{{ iolist.panel_number }}</td>
         <td>{{ iolist.created_by }}</td>
         <td>
-          <a href="{% url 'iolist-delete' iolist.id 'edit' %}" class="btn btn-sm btn-warning">Delete</a> 
+          <a href="{% url 'iolist' iolist.id 'edit' %}" class="btn btn-sm btn-block btn-warning">Edit</a> 
         </td>
         <td>
-          <a href="{% url 'iolist-delete' iolist.id 'delete' %}" class="btn btn-sm btn-danger">Delete</a> 
+          <a href="{% url 'iolist' iolist.id 'delete' %}" class="btn btn-sm btn-block btn-danger">Delete</a> 
         </td>
       </tr>
       {% empty %}
@@ -55,7 +72,115 @@
       {% endfor %}
     </tbody>
   </table>
+  <p>No.of Rows : <span id="rowcount"></span></p>
+</div>
+
+</div>
+
+<script>
+ 
+
+    {% comment %} $('#example').DataTable({
+      //Datatable configurations
+      paging: true, //Pagination
+      pageLength: 10, //Entries per page
+      lengthChange: true, //Show entries control for per page
+      autoWidth: true, // Control auto width
+      searching: true, // Show search
+      bInfo: true, // Info at footer
+      bSort: true, // Sorting for column
+
+    }); {% endcomment %}
 
 
+    $(document).ready(function() {
+    console.log('DataTable Ready')
+    $("#rowcount").html($(".filterable tr").length - 1);
+  
+    // Add a click event listener to the .btn-filter element
+    $("#FilterON").click(function() {
+      var table = $(this).parents(".filterable");
+      var filters = table.find(".filters input");
+      var tbody = table.find(".table tbody");
+      console.log('DataTable On click ' + table.length + filters.length + tbody.length)
+      if (filters.prop("disabled")) {
+        // If filters are disabled, enable them and focus on the first input field
+        filters.prop("disabled", false);
+        filters.first().focus();
+      } else {
+        // If filters are enabled, clear them and disable them
+        filters.val("").prop("disabled", true);
+        tbody.find(".no-result").remove();
+        tbody.find("tr").show();
+      }
+  
+      // Update the value of #rowcount to reflect the number of rows in the table
+      $("#rowcount").html($(".filterable tr").length - 1);
+    });
+  
+    // Listen for keyup events on the filter input fields
+    $(".filterable .filters input").keyup(function(event) {
+      // Ignore the Tab key
+      if (event.keyCode === 9) return;
+  
+      var input = $(this);
+      var value = input.val().toLowerCase();
+      var table = input.parents(".filterable");
+      var column = table.find(".filters th").index(input.parents("th"));
+      var tbody = table.find(".table tbody");
+      var rows = tbody.find("tr");
+      var matches = rows.filter(function() {
+        return $(this).find("td").eq(column).text().toLowerCase().indexOf(value) !== -1;
+      });
+  
+      // Hide rows that don't match the search term and show rows that do match
+      rows.hide();
+      matches.show();
+  
+      // If there are no matching rows, add a "No result found" message to the table
+      if (matches.length === 0) {
+        tbody.prepend('<tr class="no-result text-center"><td colspan="' + table.find(".filters th").length + '">No result found</td></tr>');
+      } else {
+        tbody.find(".no-result").remove();
+      }
+  
+      // Update the value of #rowcount to reflect the number of visible rows in the table
+      $("#rowcount").html(rows.filter(":visible").length - 1);
+  
+      // Call the checkval() function
+      checkval();
+    });
+  });
+  
+  // Define the checkval() function
+  function checkval() {
+    var visibleRows = $("tbody tr:visible").length;
+    var message = visibleRows === 1 ? "No result found" : visibleRows - 1;
+    $("#rowcount").html(message);
+  };
+                  
+  document.getElementById('export-iolist-btn').addEventListener('click', function(event) {
+    xhttp = new XMLHttpRequest();
+    var project= document.getElementById("projectName");
+    console.log(project.textContent);
+    projectName = project.textContent; 
+    xhttp.onreadystatechange = function() {
+        var a, today;
+        if (xhttp.readyState === 4 && xhttp.status === 200) {
+            a = document.createElement('a');
+            a.href = window.URL.createObjectURL(xhttp.response);
+            today = new Date();
+            a.download = projectName +"_IO_List_R0"+ ".xls";
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            return a.click();
+        }
+    };
+    xhttp.open("GET", "/toexcel", true);
+    xhttp.setRequestHeader("Content-Type", "application/json");
+    xhttp.responseType = 'blob';
+    xhttp.send();
+});               
+</script>
 
 {% endblock %}
