@@ -1,6 +1,6 @@
 # ignore all logs
 *.log
-/static_temp/
+**/static_temp/
 /website/myapp.log
 *.pyc
 /venv

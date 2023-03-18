@@ -51,5 +51,9 @@ class IOListForm(forms.ModelForm):
     class Meta:
         model = IOList
         exclude = ['created_by', 'created_at', 'updated_at', 'io_address','channel']
+        widgets = {
+            'project': forms.Select(attrs={'disabled': 'disabled'}),
+            # 'Cluster': forms.Select(attrs={'disabled': 'disabled'}),
+        }
 
 
