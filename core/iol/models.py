@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 class Project(models.Model):
     name = models.CharField(max_length=50)
     description = models.TextField(max_length=500, blank=True)
-    created_by = models.CharField(max_length=30)
+    created_by = models.CharField(max_length=30,  default = 'Pravin')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     segment = models.CharField(max_length=50, blank=True, default ='Carton/Tote Handling',choices=(('Carton/Tote Handling','Slit Roll','CBS'),('Carton/Tote Handling','Slit Roll', 'CBS')))
@@ -22,7 +22,7 @@ class CountryManager(models.Manager):
 
 class Module(models.Model):
     module = models.CharField(max_length=50)
-    created_by = models.CharField(max_length=30)
+    created_by = models.CharField(max_length=30, default = 'Pravin')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     segment = models.CharField(max_length=50, blank=True, default ='Carton/Tote Handling', choices=(('Carton/Tote Handling','Slit Roll','CBS'),('Carton/Tote Handling','Slit Roll', 'CBS')))
@@ -48,7 +48,7 @@ class IOList(models.Model):
     location = models.CharField(max_length=2, choices=(('FD', 'FD'), ('CP', 'CP')), default='CP')
     io_address = models.CharField(max_length=10, blank=True, null=True)
     module = models.CharField(max_length=50, default="Testing")
-    created_by = models.CharField(max_length=30)
+    created_by = models.CharField(max_length=30, default = 'Pravin')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
