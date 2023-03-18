@@ -2,6 +2,9 @@ from django.db import models
 from django.db.models.base import ModelBase
 from django.contrib.auth.models import User
 
+Segments=(('Carton/Tote Handling','Carton/Tote Handling'),
+          ('Slit Roll','Slit Roll'),
+          ('CBS', 'CBS'))
 
 class Project(models.Model):
     name = models.CharField(max_length=50)
@@ -9,7 +12,7 @@ class Project(models.Model):
     created_by = models.CharField(max_length=30,  default = 'Pravin')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    segment = models.CharField(max_length=50, blank=True, default ='Carton/Tote Handling',choices=(('Carton/Tote Handling','Slit Roll','CBS'),('Carton/Tote Handling','Slit Roll', 'CBS')))
+    # segment = models.CharField(max_length=50, blank=True, default =Segments[0][0], choices = Segments)
 
     def __str__(self):
         return self.name
@@ -25,7 +28,7 @@ class Module(models.Model):
     created_by = models.CharField(max_length=30, default = 'Pravin')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    segment = models.CharField(max_length=50, blank=True, default ='Carton/Tote Handling', choices=(('Carton/Tote Handling','Slit Roll','CBS'),('Carton/Tote Handling','Slit Roll', 'CBS')))
+    # segment = models.CharField(max_length=50, blank=True, default =Segments[0][0], choices = Segments)
     def __str__(self):
         return self.module
 
@@ -63,11 +66,11 @@ class Signals(models.Model):
     device_type = models.TextField(max_length=100, blank=True)
     signal_type = models.CharField(max_length=10, default="DI", choices=(('DI', 'DI'), ('DO', 'DO'), ('Encoder', 'Encoder')))
     remarks = models.TextField(max_length=100, blank=True)
-    segment = models.CharField(max_length=50, blank=True, choices=(('Carton/Tote Handling','Slit Roll','CBS'),('Carton/Tote Handling','Slit Roll', 'CBS')))
+    segment = models.CharField(max_length=50, blank=True,default=Segments[0][0], choices = Segments)
     initial_state = models.BooleanField(default=True)
     location = models.CharField(max_length=2, choices=(('FD', 'FD'), ('CP', 'CP')))
     module = models.ForeignKey(Module, on_delete=models.CASCADE,default= 1, related_name = "modules")
-    created_by = models.CharField(max_length=30)
+    created_by = models.CharField(max_length=30, default= 'Pravin')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     def __str__(self):
