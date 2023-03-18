@@ -370,7 +370,9 @@ class IolistView(View):
 
 
 #Work in progress
-
+# from django.utils.decorators import method_decorator
+# from django.contrib.auth.decorators import login_required, permission_required
+# @method_decorator(login_required)
 # class ModuleView(View):
 #     context = {'segment': 'iolist'}
 
