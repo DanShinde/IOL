@@ -1,7 +1,7 @@
 from django.urls import path, re_path
 from . import views
 from .views import ModuleListView, IolistView
-
+from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
 
@@ -26,7 +26,7 @@ urlpatterns = [
 
     # re_path(r'^signals/(?:(?P<pk>\d+)/)?(?:(?P<action>\w+)/)?', views.SignalsView.as_view(), name='signals'),
 
-    re_path(r'^iolist/(?:(?P<pk>\d+)/)?(?:(?P<action>\w+)/)?', views.IolistView.as_view(), name='iolist'),
+    re_path(r'^iolist/(?:(?P<pk>\d+)/)?(?:(?P<action>\w+)/)?',  login_required(views.IolistView.as_view()), name='iolist'),
 ]
 
 

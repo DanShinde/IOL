@@ -311,13 +311,16 @@ def signal_delete(request, id):
 
 
 class IolistView(View):
+
     context = {'segment': 'iolist'}
+
 
     def get(self, request, pk=None, action=None):
         project_id = request.session.get('project')
         iolists =IOList.objects.filter(project_id=project_id)
         self.context['io_list'] = iolists
         return render(request, 'projects/iolist.html', self.context)
+    
 
     def delete(self, request, *args, **kwargs):
         # sourcery skip: class-extract-method
@@ -329,6 +332,7 @@ class IolistView(View):
         
         # return JsonResponse(response)
         return redirect('iolist')
+    
 
     def edit(self, request, *args, **kwargs):
         iolist = get_object_or_404(IOList, id=kwargs.get('pk'))
