@@ -107,7 +107,8 @@ def add_signals(request):
             signal_type=signalData.signal_type,
             device_type = signalData.device_type,
             actual_description=f"{signalData.component_description}, {signalData.function_purpose}",
-            module =  signalData.module
+            module =  signalData.module,
+            created_by = request.user.get_full_name()
         )
         entry.save()
     io_list = IOList.objects.filter(project = project).order_by('-id')
@@ -316,15 +317,22 @@ class IolistView(View):
         return render(request, 'projects/iolist.html', self.context)
 
     def delete(self, request, *args, **kwargs):
-        if kwargs.get('action') == 'delete':
-            iolist = get_object_or_404(IOList, id=kwargs.get('pk'))
-            iolist.delete()
-            messages.success(request, 'Item deleted successfully')
-            redirect_url = reverse('iolist')
-            
-            response = {'valid': 'success', 'message': 'Item deleted successfully', 'redirect_url': redirect_url}
-            
-            # return JsonResponse(response)
+        # sourcery skip: class-extract-method
+        iolist = get_object_or_404(IOList, id=kwargs.get('pk'))
+        iolist.delete()
+        redirect_url = reverse('iolist')
+        
+        response = {'valid': 'success', 'message': 'Item deleted successfully', 'redirect_url': redirect_url}
+        
+        # return JsonResponse(response)
+        return redirect('iolist')
+    
+    def edit(self, request, *args, **kwargs):
+        iolist = get_object_or_404(IOList, id=kwargs.get('pk'))
+        messages.success(request, 'Item updated successfully')
+        redirect_url = reverse('iolist')
+        response = {'valid': 'success', 'message': 'Item updated successfully', 'redirect_url': redirect_url}
+        # return JsonResponse(response)
         return redirect('iolist')
 
     def dispatch(self, request, *args, **kwargs):
@@ -332,6 +340,8 @@ class IolistView(View):
             return self.get(request, *args, **kwargs)
         elif kwargs.get('action') == 'delete':
             return self.delete(request, *args, **kwargs)
+        elif kwargs.get('action') == 'edit':
+            return self.edit(request, *args, **kwargs)
         else:
             return super().dispatch(request, *args, **kwargs)
 

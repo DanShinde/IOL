@@ -26,18 +26,18 @@
               <button class="nav-link active rounded-5 navbtns" id="addmodule-tab" data-bs-toggle="tab" type="button" role="tab" aria-selected="false" onclick= "location.href='{% url 'module_list' %}'">Add or Edit Module</button>
             </li>
             <li class="nav-item" role="presentation">
-              <button class="nav-link active rounded-5 navbtns" id="addmodule-tab" data-bs-toggle="tab" type="button" role="tab" aria-selected="false" onclick= "location.href='{% url 'iolist' %}'">Review IO List</button>
+              <button class="nav-link active rounded-5 navbtns" id="iolist-tab" data-bs-toggle="tab" type="button" role="tab" aria-selected="false" onclick= "location.href='{% url 'iolist' %}'">Review IO List</button>
             </li>
             {% if request.user.is_authenticated %}
             <li class="nav-item" role="presentation">
-              <h2 class= "nav-link active rounded-5 navbtns">Welcome, {{ request.user.first_name }}!</h2>
+              <h2 class= "nav-link rounded-5 ">Welcome, {{ request.user.first_name }}!</h2>
               </li>
             <li class="nav-item" role="presentation">
-              <button class="nav-link active rounded-5 navbtns" id="addmodule-tab" data-bs-toggle="tab" type="button" role="tab" aria-selected="false" onclick="window.location.href='/accounts/logout';">Logout</button>
+              <button class="nav-link active rounded-5 navbtns" id="logout-tab" data-bs-toggle="tab" type="button" role="tab" aria-selected="false" onclick="window.location.href='/accounts/logout';">Logout</button>
             </li>
             {% else %}
             <li class="nav-item" role="presentation">
-              <button class="nav-link active rounded-5 navbtns" id="addmodule-tab" data-bs-toggle="tab" type="button" role="tab" aria-selected="false" onclick="window.location.href='/accounts/login';">Login</button>
+              <button class="nav-link active rounded-5 navbtns" id="login-tab" data-bs-toggle="tab" type="button" role="tab" aria-selected="false" onclick="window.location.href='/accounts/login';">Login</button>
             </li>
             {% endif %}
 

@@ -1,3 +1,12 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  max-width: 100%;
+}
+
+
+
 .signals-columns {
     display: flex;
     justify-content: space-between;

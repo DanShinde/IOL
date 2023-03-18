@@ -1,4 +1,4 @@
-{% extends 'base/base.html' %}
+{% extends 'base/base2.html' %}
 
 {% block content %}
   <h1 class="mb-4">Projects</h1>
@@ -8,6 +8,9 @@
         <tr>
           <th scope="col">Project Name</th>
           <th scope="col">Description</th>
+          <th scope="col">Segment</th>
+          <th scope="col">Created At</th>
+          <th scope="col">Created By</th>
         </tr>
       </thead>
       <tbody>
@@ -15,6 +18,9 @@
           <tr>
             <td><a href="{% url 'project_detail' project_id=project.pk %}">{{ project.name }}</a></td>
             <td>{{ project.description }}</td>
+            <td>{{ project.segment }}</td>
+            <td>{{ project.created_by }}</td>
+            <td>{{ project.created_at }}</td>
           </tr>
         {% empty %}
           <tr>

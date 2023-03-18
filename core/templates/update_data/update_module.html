@@ -1,6 +1,6 @@
 {% extends "base/base.html" %}
 {% block styles %}
-{<style>
+<style>
   Cluster{
     background-color: rgb(211, 192, 48);
     font-weight: bold;
@@ -9,7 +9,7 @@
   Cluster:hover{
     background-color: rgb(39, 86, 95);
   }
-</style>}
+</style>
 {% endblock %}
 {% block content %}
 <div id="create-module" style="display:none;">
@@ -34,6 +34,7 @@
       <tr>
             <th>ID</th>
             <th>Cluster Name</th>
+            <th>Segment<th>
             <th>Edit</th>
             <th>Delete</th>
           </tr>
@@ -43,6 +44,7 @@
           <tr>
             <td>{{ module.id }}</td>
             <td class="Cluster"   >{{ module.module }}</a>
+              <td class="Segment"   >{{ module.segment }}</a>
             </td>
             <td>
               <button class="button btn-warning" 
