@@ -16,7 +16,7 @@
             <span class="glyphicon glyphicon-filter"></span>Click To Apply Filter
         </button>
         <div class="text-center mx-auto">
-            <h5 class="card-title mt-3">{{ project }}</h5>
+            <h5 class="card-title mt-3" id ="projectName">{{ project }}</h5>
             <p class="card-text">{{ project.description }}</p>
         </div>
         <button class="btn btn-primary mt-3 mybtns ml-auto" id="export-iolist-btn">Export IO List</button>
@@ -172,6 +172,7 @@
     var project= document.getElementById("projectName");
     console.log(project.textContent);
     projectName = project.textContent; 
+    console.log('Test')
     xhttp.onreadystatechange = function() {
         var a, today;
         if (xhttp.readyState === 4 && xhttp.status === 200) {
