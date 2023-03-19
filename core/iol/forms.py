@@ -46,14 +46,12 @@ class SignalsForm(forms.ModelForm):
             'module': forms.Select(attrs={'class': 'form-control'}),
         }
 
-
 class IOListForm(forms.ModelForm):
     class Meta:
         model = IOList
         exclude = ['created_by', 'created_at', 'updated_at', 'io_address','channel']
         widgets = {
-            'project': forms.Select(attrs={'disabled': 'disabled'}),
-            # 'Cluster': forms.Select(attrs={'disabled': 'disabled'}),
+            'project': forms.TextInput(attrs={'class': 'form-control', 'readonly' : 'readonly'}),
         }
 
 
