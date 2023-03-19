@@ -352,10 +352,13 @@ class IolistView(View):
                 print(form.errors)
         else:
             form = IOListForm(instance=iolist)
+        project_id = request.session.get('project')
+        project = get_object_or_404(Project, pk=project_id)
         context = {
             'form': form,
             'iolist': iolist,
             'action': 'edit',
+            'project': project,
         }
         return render(request, 'projects/edit_iolist.html', context)
 
