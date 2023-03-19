@@ -318,6 +318,8 @@ class IolistView(View):
     def get(self, request, pk=None, action=None):
         project_id = request.session.get('project')
         iolists =IOList.objects.filter(project_id=project_id)
+        project = get_object_or_404(Project, pk=project_id)
+        self.context['project'] = project
         self.context['io_list'] = iolists
         return render(request, 'projects/iolist.html', self.context)
     

@@ -6,15 +6,23 @@
 {% endblock %}
 {% block content %}
 
-<div class = "container-flex">
-        <h1 id= "projectName">{{ project.name }}</h1>
-        <p>{{ project.description }}</p>
-</div>
+
   <div class="panel panel-primary filterable">
-<div class="panel-heading">
-    <button class="btn btn-primary mt-3 mybtns float-left" id= "FilterON"><span class="glyphicon glyphicon-filter"></span>Click To Apply Filter</button>
-<button class="btn btn-primary mt-3 mybtns float-right" id="export-iolist-btn">Export IO List</button>
-</div>
+    <div class = "container-flex">
+      
+      
+      <div class="panel-heading d-flex align-items-center">
+        <button class="btn btn-primary mt-3 mybtns mr-auto" id="FilterON">
+            <span class="glyphicon glyphicon-filter"></span>Click To Apply Filter
+        </button>
+        <div class="text-center mx-auto">
+            <h5 class="card-title mt-3">{{ project }}</h5>
+            <p class="card-text">{{ project.description }}</p>
+        </div>
+        <button class="btn btn-primary mt-3 mybtns ml-auto" id="export-iolist-btn">Export IO List</button>
+    </div>
+    
+    
 
   <table class="table-dark table-striped iotable table" id='example'>
     <thead>
