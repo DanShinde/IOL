@@ -12,7 +12,7 @@ class Project(models.Model):
     segment = models.CharField(max_length=50, blank=True, default =Segments[0][0], choices = Segments)
     created_by = models.CharField(max_length=30)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField()
     # segment = models.CharField(max_length=50, blank=True, default =Segments[0][0], choices = Segments)
 
     def __str__(self):

@@ -1,3 +1,4 @@
+from datetime import datetime
 from io import BytesIO
 import json
 import subprocess
@@ -96,6 +97,8 @@ def add_signals(request):
     
     project_id = request.session.get('project')
     project = get_object_or_404(Project, pk=project_id)
+    project.updated_at = datetime.now()
+    project.save()
     for signal in signal_ids:
         signalData = Signals.objects.get(id=signal)
         if signalData.signal_type == "DI":
@@ -105,7 +108,6 @@ def add_signals(request):
         else:
             pre = "Encoder_"
         
-
         entry = IOList(
             project=project,
             name=module_name,
@@ -120,6 +122,7 @@ def add_signals(request):
             created_by = request.user.get_full_name()
         )
         entry.save()
+        
     io_list = IOList.objects.filter(project = project).order_by('-id')
     # print(io_list)
     data = serializers.serialize('json', io_list)
@@ -191,9 +194,12 @@ class ModuleListView(LoginRequiredMixin, TemplateView):
 
 #Delete Cluster / Module
 def module_destroy(request, id):
-    module = Module.objects.get(id=id)
-    module.delete()
-    return redirect('/module_list')
+    if request.user.groups.filter(name='Managers').exists():
+        module = Module.objects.get(id=id)
+        module.delete()
+        return redirect('/module_list')
+    else :
+        return HttpResponse("User does not have permissions to delete")
 
 # form to add new module
 @login_required(login_url="/accounts/login")
@@ -300,13 +306,17 @@ class ClusterView(View):
 
     def delete(self, request, *args, **kwargs):
         # sourcery skip: class-extract-method
-        signal_list = get_object_or_404(Signals, id=kwargs.get('pk'))
-        signal_list.delete()
-        redirect_url = reverse('signals')
-        response = {'valid': 'success', 'message': 'Item deleted successfully', 'redirect_url': redirect_url}
-        # return JsonResponse(response)
-        return redirect('signals')
+        if request.user.groups.filter(name='Managers').exists():
+            signal_list = get_object_or_404(Signals, id=kwargs.get('pk'))
+            signal_list.delete()
+            redirect_url = reverse('signals')
+            response = {'valid': 'success', 'message': 'Item deleted successfully', 'redirect_url': redirect_url}
+            print("Deleted Cluster")
+            return redirect('signals')
+        else:
+            return HttpResponse("User does not have permissions to delete")
     
+
     def add(self, request, *args, **kwargs):  # sourcery skip: extract-method
         if request.method == 'POST':
             form = SignalsForm(request.POST)
@@ -314,8 +324,11 @@ class ClusterView(View):
                 signal = form.save(commit=False)
                 signal.created_by = request.user.get_full_name()
                 module_id = request.session.get('module')
-                signal.module = get_object_or_404(Module, id= module_id)
+                module = get_object_or_404(Module, id= module_id)
+                signal.module = module
                 signal.save()
+                module.updated_at = datetime.now()
+                module.save()
                 return redirect('signals')
         else:
             form = SignalsForm()

@@ -45,12 +45,12 @@
             <td class="Segment"   >{{ module.segment }}</td>
             <td class=""   >{{ module.created_by }}</td>
             <td><button class="button btn-warning" 
-              onclick= "location.href='{% url 'edit_module' module_id=module.id  %}'"> Edit Module</button>
+              onclick= "location.href='{% url 'edit_module' module_id=module.id  %}'"> Edit Cluster</button>
           </td>
             <td>
                 <button class="button btn-danger"  
                 data-confirm="Are you sure you want to delete this module?" 
-                onclick= "location.href='{% url 'module_delete' id=module.id %}'">Delete Module</button>
+                onclick= "location.href='{% url 'module_delete' id=module.id %}'">Delete Cluster</button>
             </td>
           </tr>
           {% endfor %}
