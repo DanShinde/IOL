@@ -18,17 +18,22 @@
           <th scope="col"><input type="text" class="form-control" placeholder="Segment" disabled></th>
           <th scope="col"><input type="text" class="form-control" placeholder="Created At" disabled></th>
           <th scope="col"><input type="text" class="form-control" placeholder="Created By" disabled></th>
+          <th scope="col">Edit IO List</th>
+          <th scope="col">Review IO List</th>
         </tr>
       </thead>
       <tbody>
         {% for project in projects %}
           <tr>
             <td> {{project.id}} </td>
-            <td ><a class ="btn-info btn-primary"  href="{% url 'project_detail' project_id=project.pk %}">{{ project.name }}</a></td>
+            <td>{{ project.name }}</td>
             <td>{{ project.description }}</td>
             <td>{{ project.segment }}</td>
             <td>{{ project.created_by }}</td>
             <td>{{ project.created_at }}</td>
+            <td ><a class ="nav-link active rounded-5 navbtns btn-secondary btn-outline-success"  href="{% url 'project_detail' project_id=project.pk %}">Edit IOList</a></td>
+            <td>
+              <button class="nav-link active rounded-5 navbtns btn-secondary"  onclick= "location.href='{% url 'iolist' project.id %}'">Review IO List</button></td>
           </tr>
         {% empty %}
           <tr>

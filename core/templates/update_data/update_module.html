@@ -12,23 +12,20 @@
 </style>
 {% endblock %}
 {% block content %}
-<div id="create-module" style="display:none;">
+<div id="create-module" >
 
-    <h2>Create Module</h2>
-    <form id="create-module-form">
-      {% csrf_token %}
-      <div class="form-group">
-        <label for="name">Name:</label>
-        <input type="text" class="form-control" id="name" name="name" required>
-      </div>
-      <div class="form-group">
-        <label for="description">Description:</label>
-        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
-      </div>
-      <button type="submit" class="btn btn-primary">Submit</button>
-    </form>
-  </div>
+
+
+
+
   <div>
+    <div class="panel-heading d-flex align-items-center">
+      <button class="btn btn-primary mt-3 mybtns mr-auto" id="FilterON">
+          <span class="glyphicon glyphicon-filter"></span>Click To Apply Filter
+      </button>
+      <a href="{% url 'create_module'  %}" class="btn mt-3 ml-auto mybtns btn-block btn-secondary">Add New Cluster</a>
+
+  </div>
   <table class="table table-striped">
     <thead>
       <tr>
@@ -46,9 +43,9 @@
             <td>{{ module.id }}</td>
             <td class="Cluster"   >{{ module.module }}</td>
             <td class="Segment"   >{{ module.segment }}</td>
-            <td class="Segment"   >{{ module.created_by }}</td>
+            <td class=""   >{{ module.created_by }}</td>
             <td><button class="button btn-warning" 
-              onclick= "location.href='{% url 'module_edit' id=module.id %}'"> Edit Module</button>
+              onclick= "location.href='{% url 'edit_module' module_id=module.id  %}'"> Edit Module</button>
           </td>
             <td>
                 <button class="button btn-danger"  

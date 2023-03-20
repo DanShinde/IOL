@@ -1,0 +1,167 @@
+{% extends 'base/base.html' %}
+{% load static%}
+
+{% block script %}
+<script src="{% static 'js/tables.js' %}"></script>
+{% endblock %}
+{% block content %}
+
+
+  <div class="panel panel-primary filterable text-center mx-auto">
+    <div class = "container-flex">
+      
+      
+      <div class="panel-heading d-flex align-items-center">
+        <button class="btn btn-primary mt-3 mybtns mr-auto" id="FilterON">
+            <span class="glyphicon glyphicon-filter"></span>Click To Apply Filter
+        </button>
+        <div class="text-center mx-auto float-left">
+            <h5 class="card-title mt-3 " id ="Module_Name">{{ module }}</h5>
+            <p class="card-text">{{ module.description }}</p>
+        </div>
+        <a href="{% url 'signals' action='add' %}" class="btn mt-3 ml-auto btn-block btn-secondary">Add Signal</a>
+      </div>
+    </div>
+    
+    
+
+  <table class="table-dark table-striped iotable table" id='example'>
+    <thead>
+
+
+      <tr class="filters">
+        <th><input type="text" class="form-control" placeholder="#" disabled></th>
+        <th><input type="text" class="form-control" placeholder="Equipment Code" disabled></th>
+        <th><input type="text" class="form-control" placeholder="Code" disabled></th>
+        <th><input type="text" class="form-control" placeholder="Component Description" disabled></th>
+        <th><input type="text" class="form-control" placeholder="Function Purpose" disabled></th>
+        <th><input type="text" class="form-control" placeholder="Signal Type" disabled></th>
+        <th><input type="text" class="form-control" placeholder="Device Type" disabled></th>
+        <th><input type="text" class="form-control" placeholder="Location" disabled></th>
+        <th><input type="text" class="form-control" placeholder="Initial State" disabled></th>
+        <th><input type="text" class="form-control" placeholder="Cluster" disabled></th>
+        <th><input type="text" class="form-control" placeholder="Created By" disabled></th>
+        <th><input type="text" class="form-control" placeholder="Created At" disabled></th>
+        <th>--</th>
+        <th>--</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for signal in signal_list %}
+      <tr>
+        <td>{{ forloop.counter }}</td>
+        <td>{{ signal.equipment_code }}</td>
+        <td>{{ signal.code }}</td>
+        <td>{{ signal.component_description }}</td>
+        <td>{{ signal.function_purpose }}</td>
+        <td>{{ signal.signal_type }}</td>
+        <td>{{ signal.device_type }}</td>
+        <td>{{ signal.location }}</td>
+        <td>{{ signal.module }}</td>
+        <td>{{ signal.created_by }}</td>
+        <td>{{ signal.created_at }}</td>
+        <td>
+          <a href="{% url 'signals' signal.id 'edit' %}" class="btn btn-sm btn-block btn-warning">Edit</a> 
+        </td>
+        <td>
+          <a href="{% url 'signals' signal.id 'delete' %}" class="btn btn-sm btn-block btn-danger">Delete</a> 
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5">No iolists found.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p>No.of Rows : <span id="rowcount"></span></p>
+</div>
+
+</div>
+
+<script>
+ 
+
+    {% comment %} $('#example').DataTable({
+      //Datatable configurations
+      paging: true, //Pagination
+      pageLength: 10, //Entries per page
+      lengthChange: true, //Show entries control for per page
+      autoWidth: true, // Control auto width
+      searching: true, // Show search
+      bInfo: true, // Info at footer
+      bSort: true, // Sorting for column
+
+    }); {% endcomment %}
+
+
+    $(document).ready(function() {
+    console.log('DataTable Ready')
+    $("#rowcount").html($(".filterable tr").length - 1);
+  
+    // Add a click event listener to the .btn-filter element
+    $("#FilterON").click(function() {
+      var table = $(this).parents(".filterable");
+      var filters = table.find(".filters input");
+      var tbody = table.find(".table tbody");
+      console.log('DataTable On click ' + table.length + filters.length + tbody.length)
+      if (filters.prop("disabled")) {
+        // If filters are disabled, enable them and focus on the first input field
+        filters.prop("disabled", false);
+        filters.first().focus();
+      } else {
+        // If filters are enabled, clear them and disable them
+        filters.val("").prop("disabled", true);
+        tbody.find(".no-result").remove();
+        tbody.find("tr").show();
+      }
+  
+      // Update the value of #rowcount to reflect the number of rows in the table
+      $("#rowcount").html($(".filterable tr").length - 1);
+    });
+  
+    // Listen for keyup events on the filter input fields
+    $(".filterable .filters input").keyup(function(event) {
+      // Ignore the Tab key
+      if (event.keyCode === 9) return;
+  
+      var input = $(this);
+      var value = input.val().toLowerCase();
+      var table = input.parents(".filterable");
+      var column = table.find(".filters th").index(input.parents("th"));
+      var tbody = table.find(".table tbody");
+      var rows = tbody.find("tr");
+      var matches = rows.filter(function() {
+        return $(this).find("td").eq(column).text().toLowerCase().indexOf(value) !== -1;
+      });
+  
+      // Hide rows that don't match the search term and show rows that do match
+      rows.hide();
+      matches.show();
+  
+      // If there are no matching rows, add a "No result found" message to the table
+      if (matches.length === 0) {
+        tbody.prepend('<tr class="no-result text-center"><td colspan="' + table.find(".filters th").length + '">No result found</td></tr>');
+      } else {
+        tbody.find(".no-result").remove();
+      }
+  
+      // Update the value of #rowcount to reflect the number of visible rows in the table
+      $("#rowcount").html(rows.filter(":visible").length - 1);
+  
+      // Call the checkval() function
+      checkval();
+    });
+  });
+  
+  // Define the checkval() function
+  function checkval() {
+    var visibleRows = $("tbody tr:visible").length;
+    var message = visibleRows === 1 ? "No result found" : visibleRows - 1;
+    $("#rowcount").html(message);
+  };
+             
+             
+</script>
+
+{% endblock %}

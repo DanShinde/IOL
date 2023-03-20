@@ -17,6 +17,12 @@
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
+                  <label class="label" for="panel_number">Panel Number</label>
+                  <input type="text" name="panel_number" maxlength="50" class="form-control" required="" id="panel_number" value = 'CP01'>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
                   <label class="label" for="module_name">Module Name</label>
                   <input type="text" name="name" maxlength="50" class="form-control" required="" id="module_name">
                 </div>
@@ -36,7 +42,7 @@
 
           <div class="divbtn">
           <button class="btn btn-primary mt-3 mybtns" id="add-signals-btn">Add</button>
-          <button class="btn btn-primary mt-3 mybtns" id="export-iolist-btn">Export IO List</button>
+          <button class="btn btn-primary mt-3 mybtns"  onclick= "location.href='{% url 'iolist' project.id %}'">Review IO List</button></td>
           <span></span>
         {% comment %} </form> {% endcomment %}
           </div>
@@ -171,7 +177,7 @@
     $.ajax({
       type: "POST",
       url: "/add_signals/",
-      data: JSON.stringify({'signals': selectedSignals, 'module_name': module_name }),
+      data: JSON.stringify({'signals': selectedSignals, 'module_name': module_name, 'panel_number': $("#panel_number").val() }),
       dataType: "json",
       contentType: "application/json; charset=utf-8",
       headers: {"X-CSRFToken": getCookie("csrftoken")},

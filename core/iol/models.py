@@ -26,6 +26,7 @@ class CountryManager(models.Manager):
 
 class Module(models.Model):
     module = models.CharField(max_length=50)
+    description = models.TextField(max_length=500, blank=True)
     created_by = models.CharField(max_length=30)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

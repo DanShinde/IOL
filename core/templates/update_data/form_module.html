@@ -1,0 +1,67 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+{% load widget_tweaks %}
+
+
+  <div class="row  ">
+    <div class="col-md-12 ">
+      <div class="wrapper ">
+        <div class="row justify-content-center">
+          <div class="col-lg-8 col-md-7 order-md-last d-flex align-items-stretch">
+            <div class="contact-wrap w-100 p-md-5 p-4">
+              <div class="panel-heading d-flex align-items-center">
+                </button>
+                <div class="text-center mx-auto">
+                    <h2 class="card-title mt-3">{{ module }}</h2>
+                    <h4 class="card-text">{{ module.description }}</h4>
+                </div>
+            </div>
+
+
+<form method="POST" id="iolistForm" name="iolistForm" class="iolistForm" novalidate="novalidate">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            {% comment %} <label for="id_project">Project:</label> {% endcomment %}
+            <label class="label" for="{{ form.module.id_for_label }}">{{ form.module.label_tag }}</label>
+            {% render_field form.module|add_class:"form-control"  %}
+          </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label class="label" for="{{ form.segment.id_for_label }}">{{ form.segment.label_tag }}</label>
+              
+              {% render_field form.segment|add_class:"form-control"  %}
+      
+            </div>
+          </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.description.id_for_label }}">{{ form.description.label_tag }}</label>
+          {% render_field form.description|add_class:"form-control" %}
+        </div>
+      </div>
+      
+
+
+                 <div class="col-md-12">
+                    <div class="form-group">
+                      <input type="submit" value="Add Module" class="btn btn-success">
+                      <a href="{% url 'module_list'  %}" class="btn float-right btn-danger">Cancel</a> 
+                      <div class="submitting"></div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+
+
+          </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+
+ {% endblock %}

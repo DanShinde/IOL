@@ -9,26 +9,27 @@ from django.views import View
 import pandas as pd
 from .utils import set_pagination
 from django.contrib import messages
-from django.db.models import Q
+from django.db.models import Q, OuterRef, Subquery
 from django.views.generic import TemplateView
 import xlsxwriter
 from django.template.loader import render_to_string
 from django.template import loader
 from rest_framework.response import Response
 from .serializers import SignalSerializer, ModuleSerializer
-from .forms import ProjectForm, SignalsForm, IOListForm
+from .forms import ProjectForm, SignalsForm, IOListForm, ClusterForm
 from .models import Project, Module, Signals, IOList
 from django.core import serializers
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required,permission_required
 from django.contrib.auth import login, logout, authenticate
 from django.http import QueryDict
-# from .forms import ModuleForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 def home(request):
     return redirect('project_list') 
+
+
 
 
 @login_required(login_url="/accounts/login")
@@ -45,11 +46,13 @@ def create_project(request):
     return render(request, 'projects/create_project.html', {'form': form})
 
 
+# To view list of projects
 @login_required(login_url="/accounts/login")
 def project_list(request):
     projects = Project.objects.all()
     return render(request, 'projects/project_list.html', {'projects': projects})
 
+# Window to add signals to project
 @login_required(login_url="/accounts/login")
 def project_detail(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
@@ -88,6 +91,9 @@ def add_signals(request):
     data = json.loads(request.body)
     signal_ids = data.get('signals', [])
     module_name = data.get('module_name')
+    panel_number = data.get('panel_number')
+    print(panel_number)
+    
     project_id = request.session.get('project')
     project = get_object_or_404(Project, pk=project_id)
     for signal in signal_ids:
@@ -110,6 +116,7 @@ def add_signals(request):
             device_type = signalData.device_type,
             actual_description=f"{signalData.component_description}, {signalData.function_purpose}",
             Cluster =  signalData.module,
+            panel_number = panel_number,
             created_by = request.user.get_full_name()
         )
         entry.save()
@@ -120,18 +127,11 @@ def add_signals(request):
     return JsonResponse({'success': True, 'data': data})
 
 
-#EXporting IO List to Excel file
-@login_required(login_url="/accounts/login")
-def export_to_excel(request):
-    project_id = request.session.get('project')
-    project = get_object_or_404(Project, id=project_id)
-    iolist = IOList.objects.filter(project_id=project_id).order_by('location','signal_type')
-    output = BytesIO()
-    # Feed a buffer to workbook
-    workbook = xlsxwriter.Workbook(output)
-    worksheet = workbook.add_worksheet(project.name)
+#function to write indivisual sheets while exporting
+def write_sheet(panel,workbook, project, iolist):
+    worksheet = workbook.add_worksheet(panel)
     bold = workbook.add_format({'bold': True})
-    columns = ["Project", "ModuleName",  "Code", "Tag", "Signal Type","Device Type", "Actual Description","Location"]
+    columns = ["Project", "ModuleName",  "Code", "Tag", "Signal Type","Device Type", "Actual Description","Panel Number","Location"]
     # Fill first row with columns
     row = 0
     for i,elem in enumerate(columns):
@@ -146,8 +146,31 @@ def export_to_excel(request):
         worksheet.write(row, 4, IO.signal_type)
         worksheet.write(row, 5, IO.device_type)
         worksheet.write(row, 6, IO.actual_description)
-        worksheet.write(row, 7, IO.location)
+        worksheet.write(row, 7, IO.panel_number)
+        worksheet.write(row, 8, IO.location)
         row += 1
+    return workbook
+
+
+#EXporting IO List to Excel file
+@login_required(login_url="/accounts/login")
+def export_to_excel(request):
+    project_id = request.session.get('project')
+    project = get_object_or_404(Project, id=project_id)
+    iolist = IOList.objects.filter(project_id=project_id).order_by('signal_type', 'location')
+    panels = IOList.objects.filter(
+    id=Subquery(
+        IOList.objects.filter(panel_number=OuterRef('panel_number')).order_by('id').values('id')[:1]
+        )
+    )
+    for panel in panels:
+        print(panel.panel_number)
+    output = BytesIO()
+    # Feed a buffer to workbook
+    workbook = xlsxwriter.Workbook(output)
+    for panel in panels:
+        panelIO = iolist.filter(panel_number=panel.panel_number)
+        workbook = write_sheet(panel.panel_number, workbook, project, panelIO)
 
     workbook.close()
     output.seek(0)
@@ -172,151 +195,38 @@ def module_destroy(request, id):
     module.delete()
     return redirect('/module_list')
 
-
-def edit_module(request, id):
-    module = get_object_or_404(Module, pk=id)
-    signals = Signals.objects.filter(module=module)
-    return render(request, 'update_data/edit_module.html', {'signals': signals})
-
-def signal_delete(request, id):
-    signal = Signals.objects.get(id=id)
-    signal.delete()
-    return redirect('/module_edit')
-
-#####Commented signal view for now
-# class SignalsView(View):
-#     context = {'segment': 'signals'}
-
-
-#     def get(self, request, pk=None, action=None):
-#         if HttpRequest.is_ajax(request):
-#             if pk and action == 'edit':
-#                 edit_row = self.edit_row(pk)
-#                 return JsonResponse({'edit_row': edit_row})
-#             elif pk and not action:
-#                 edit_row = self.get_row_item(pk)
-#                 return JsonResponse({'edit_row': edit_row})
-
-#         if pk and action == 'edit':
-#             context, template = self.edit(request, pk)
-#         else:
-#             context, template = self.list(request)
-
-#         if not context:
-#             html_template = loader.get_template('page-500.html')
-#             return HttpResponse(html_template.render(self.context, request))
-
-#         return render(request, template, context)
-#     # def get(self, request, pk=None, action=None):
-#     #     if request.is_ajax():
-#     #         if pk and action == 'edit':
-#     #             edit_row = self.edit_row(pk)
-#     #             return JsonResponse({'edit_row': edit_row})
-#     #         elif pk and not action:
-#     #             edit_row = self.get_row_item(pk)
-#     #             return JsonResponse({'edit_row': edit_row})
-
-#     #     if pk and action == 'edit':
-#     #         context, template = self.edit(request, pk)
-#     #     else:
-#     #         context, template = self.list(request)
-
-#     #     if not context:
-#     #         html_template = loader.get_template('page-500.html')
-#     #         return HttpResponse(html_template.render(self.context, request))
-
-#     #     return render(request, template, context)
-
-#     def post(self, request, pk=None, action=None):
-#         self.update_instance(request, pk)
-#         return redirect('signals')
-
-#     def put(self, request, pk, action=None):
-#         is_done, message = self.update_instance(request, pk, True)
-#         edit_row = self.get_row_item(pk)
-#         return JsonResponse({'valid': 'success' if is_done else 'warning', 'message': message, 'edit_row': edit_row})
-
-#     def delete(self, request, pk, action=None):
-#         signal = self.get_object(pk)
-#         signal.delete()
-
-#         redirect_url = None
-#         if action == 'single':
-#             messages.success(request, 'Item deleted successfully')
-#             redirect_url = reverse('signals')
-
-#         response = {'valid': 'success', 'message': 'Item deleted successfully', 'redirect_url': redirect_url}
-#         return JsonResponse(response)
-
-#     """ Get pages """
-
-#     def list(self, request):
-#         filter_params = None
-
-#         search = request.GET.get('search')
-#         if search:
-#             filter_params = None
-#             for key in search.split():
-#                 if key.strip():
-#                     if not filter_params:
-#                         filter_params = Q(code__icontains=key.strip())
-#                     else:
-#                         filter_params |= Q(code__icontains=key.strip())
-
-#         signals = Signals.objects.filter(filter_params) if filter_params else Signals.objects.all()
-
-#         self.context['signals'], self.context['info'] = set_pagination(request, signals)
-#         if not self.context['signals']:
-#             return False, self.context['info']
-
-#         return self.context, 'app/signals/list.html'
-
-#     def edit(self, request, pk):
-#         signal = self.get_object(pk)
-
-#         self.context['signal'] = signal
-#         self.context['form'] = SignalsForm(instance=signal)
-
-#         return self.context, 'update_data/edit.html'
-
-#     """ Get Ajax pages """
-
-#     def edit_row(self, pk):
-#         signal = self.get_object(pk)
-#         form = SignalsForm(instance=signal)
-#         context = {'instance': signal, 'form': form}
-#         return render_to_string('app/signals/edit_row.html', context)
-
-#     """ Common methods """
-
-#     def get_object(self, pk):
-#         signal = get_object_or_404(Signals, id=pk)
-#         return signal
-    
-#     def update_instance(self, request, pk, is_urlencode=False):
-#         signal = self.get_object(pk)
-#         form_data = QueryDict(request.body) if is_urlencode else request.POST
-#         form = SignalsForm(form_data, instance=signal)
-#         if form.is_valid():
-#             form.save()
-#             if not is_urlencode:
-#                 messages.success(request, 'Transaction saved successfully')
-
-#             return True, 'Transaction saved successfully'
-
-#         if not is_urlencode:
-#             messages.warning(request, 'Error Occurred. Please try again.')
-#         return False, 'Error Occurred. Please try again.'
+# form to add new module
+@login_required(login_url="/accounts/login")
+def create_module(request):
+    if request.method == 'POST':
+        form = ClusterForm(request.POST)
+        if form.is_valid():
+            module = form.save(commit=False)
+            module.created_by = request.user.get_full_name()
+            module.save()
+            request.session['module'] = module.id
+            return redirect('module_list') 
+    else:
+        form = ClusterForm()
+    return render(request, 'update_data/form_module.html', {'form': form})
 
 
+
+# For Editing Signal in CLusters/ Modules
+def edit_module(request, module_id):
+    request.session['module'] = module_id
+    return redirect('/signals')
+ 
+def iolist_project(request, project_id):
+    return redirect(f'/signals/{project_id}/get')
 
 class IolistView(View):
 
     context = {'segment': 'iolist'}
 
 
-    def get(self, request, pk=None, action=None):
-        project_id = request.session.get('project')
+    def get(self, request, *args, **kwargs):
+        project_id = kwargs.get('pk')
         iolists =IOList.objects.filter(project_id=project_id)
         project = get_object_or_404(Project, pk=project_id)
         self.context['project'] = project
@@ -363,7 +273,7 @@ class IolistView(View):
         return render(request, 'projects/edit_iolist.html', context)
 
     def dispatch(self, request, *args, **kwargs):
-        if kwargs.get('action') is None:
+        if kwargs.get('action') == 'get':
             return self.get(request, *args, **kwargs)
         elif kwargs.get('action') == 'delete':
             return self.delete(request, *args, **kwargs)
@@ -374,62 +284,81 @@ class IolistView(View):
 
 
 
-#Work in progress
-# from django.utils.decorators import method_decorator
-# from django.contrib.auth.decorators import login_required, permission_required
-# @method_decorator(login_required)
-# class ModuleView(View):
-#     context = {'segment': 'iolist'}
+class ClusterView(View):
 
-#     def get(self, request, pk=None, action=None):
-#         project_id = request.session.get('project')
-#         iolists =IOList.objects.filter(project_id=project_id)
-#         self.context['io_list'] = iolists
-#         return render(request, 'update_data/modulelist.html', self.context)
+    context = {'signal_list': 'signal_list'}
 
-#     def delete(self, request, *args, **kwargs):
-#         # sourcery skip: class-extract-method
-#         iolist = get_object_or_404(IOList, id=kwargs.get('pk'))
-#         iolist.delete()
-#         redirect_url = reverse('iolist')
-        
-#         response = {'valid': 'success', 'message': 'Item deleted successfully', 'redirect_url': redirect_url}
-        
-#         # return JsonResponse(response)
-#         return redirect('iolist')
 
-#     def edit(self, request, *args, **kwargs):
-#         iolist = get_object_or_404(Signals, id=kwargs.get('pk'))
-#         if request.method == 'POST':
-#             form = IOListForm(request.POST, instance=iolist)
-#             print("It's Post")
-#             if form.is_valid():
-#                 form.save()
-#                 print("It's Save")
-#                 messages.success(request, 'Item updated successfully')
-#                 redirect_url = reverse('iolist')
-#                 response = {'valid': 'success', 'message': 'Item updated successfully', 'redirect_url': redirect_url}
-#                 return redirect('iolist')
-#             else:
-#                 print(form.errors)
-#         else:
-#             form = IOListForm(instance=iolist)
-#         context = {
-#             'form': form,
-#             'iolist': iolist,
-#             'action': 'edit',
-#         }
-#         return render(request, 'update_data/edit_module.html', context)
+    def get(self, request, pk=None, action=None):
+        module_id = request.session.get('module')
+        signal_list =Signals.objects.filter(module_id=module_id)
+        module = get_object_or_404(Module, pk=module_id)
+        self.context['module'] = module
+        self.context['signal_list'] = signal_list
+        return render(request, 'update_data/cluster_signals.html', self.context)
+    
 
-#     def dispatch(self, request, *args, **kwargs):
-#         if kwargs.get('action') is None:
-#             return self.get(request, *args, **kwargs)
-#         elif kwargs.get('action') == 'delete':
-#             return self.delete(request, *args, **kwargs)
-#         elif kwargs.get('action') == 'edit':
-#             return self.edit(request, *args, **kwargs)
-#         else:
-#             return super().dispatch(request, *args, **kwargs)
+    def delete(self, request, *args, **kwargs):
+        # sourcery skip: class-extract-method
+        signal_list = get_object_or_404(Signals, id=kwargs.get('pk'))
+        signal_list.delete()
+        redirect_url = reverse('signals')
+        response = {'valid': 'success', 'message': 'Item deleted successfully', 'redirect_url': redirect_url}
+        # return JsonResponse(response)
+        return redirect('signals')
+    
+    def add(self, request, *args, **kwargs):  # sourcery skip: extract-method
+        if request.method == 'POST':
+            form = SignalsForm(request.POST)
+            if form.is_valid():
+                signal = form.save(commit=False)
+                signal.created_by = request.user.get_full_name()
+                module_id = request.session.get('module')
+                signal.module = get_object_or_404(Module, id= module_id)
+                signal.save()
+                return redirect('signals')
+        else:
+            form = SignalsForm()
+        return render(request, 'update_data/edit_signal.html', {'form': form})
 
+    
+
+    def edit(self, request, *args, **kwargs):
+        signal = get_object_or_404(Signals, id=kwargs.get('pk'))
+        if request.method == 'POST':
+            form = SignalsForm(request.POST, instance=signal)
+            print("It's Post")
+            if form.is_valid():
+                form.save()
+                print("It's Save")
+                messages.success(request, 'Item updated successfully')
+                redirect_url = reverse('signals')
+                response = {'valid': 'success', 'message': 'Item updated successfully', 'redirect_url': redirect_url}
+                return redirect('signals')
+            else:
+                print(form.errors)
+        else:
+            form = SignalsForm(instance=signal)
+        module_id = request.session.get('module')
+        module = get_object_or_404(Module, pk=module_id)
+        context = {
+            'form': form,
+            'signals': signal,
+            'action': 'edit',
+            'module': module,
+        }
+        return render(request, 'update_data/edit_signal.html', context)
+
+    def dispatch(self, request, *args, **kwargs):
+        if kwargs.get('action') is None:
+            return self.get(request, *args, **kwargs)
+        elif kwargs.get('action') == 'delete':
+            return self.delete(request, *args, **kwargs)
+        elif kwargs.get('action') == 'edit':
+            return self.edit(request, *args, **kwargs)
+        elif kwargs.get('action') == 'add':
+            return self.add(request, *args, **kwargs)
+        else:
+            return super().dispatch(request, *args, **kwargs)
 
 

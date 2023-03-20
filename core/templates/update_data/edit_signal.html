@@ -1,0 +1,98 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+{% load widget_tweaks %}
+
+
+  <div class="row  ">
+    <div class="col-md-12 ">
+      <div class="wrapper ">
+        <div class="row justify-content-center">
+          <div class="col-lg-8 col-md-7 order-md-last d-flex align-items-stretch">
+            <div class="contact-wrap w-100 p-md-5 p-4">
+              <div class="panel-heading d-flex align-items-center">
+                </button>
+                <div class="text-center mx-auto">
+                    <h2 class="card-title mt-3">{{ module }}</h2>
+                    <h4 class="card-text">{{ module.description }}</h4>
+                </div>
+            </div>
+
+
+<form method="POST" id="iolistForm" name="iolistForm" class="iolistForm" novalidate="novalidate">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+            {% comment %} <label for="id_project">Project:</label> {% endcomment %}
+            <label class="label" for="{{ form.equipment_code.id_for_label }}">{{ form.equipment_code.label_tag }}</label>
+            {{form.equipment_code}} 
+          </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label class="label" for="{{ form.code.id_for_label }}">{{ form.code.label_tag }}</label>
+              
+              {% render_field form.code|add_class:"form-control"  %}
+      
+            </div>
+          </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.component_description.id_for_label }}">{{ form.component_description.label_tag }}</label>
+          {% render_field form.component_description|add_class:"form-control" %}
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.function_purpose.id_for_label }}">{{ form.function_purpose.label_tag }}</label>
+          {% render_field form.function_purpose|add_class:"form-control" %}
+  
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.signal_type.id_for_label }}">{{ form.signal_type.label_tag }}</label>
+          {% render_field form.signal_type|add_class:"form-control" %}
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.device_type.id_for_label }}">{{ form.device_type.label_tag }}</label>
+          {% render_field form.device_type|add_class:"form-control" %}
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.location.id_for_label }}">{{ form.location.label_tag }}</label>
+          {% render_field form.location|add_class:"form-control" %}
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.module.id_for_label }}">{{ form.module.label_tag }}</label>
+          {% render_field form.module|add_class:"form-control" %}
+        </div>
+      </div>
+
+
+
+                 <div class="col-md-12">
+                    <div class="form-group">
+                      <input type="submit" value="Update Signal" class="btn btn-warning">
+                      <a href="{% url 'signals' signal.id 'delete' %}" class="btn float-right btn-danger">Delete</a> 
+                      <div class="submitting"></div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+
+
+          </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+
+ {% endblock %}

@@ -20,13 +20,14 @@ urlpatterns = [
     #To manage modules & signals
 
     path('module_list/', ModuleListView.as_view(), name='module_list'),
+    path('create_module/', views.create_module, name='create_module'),
     path('module_list/<int:id>/delete/', views.module_destroy, name='module_delete'),
-    path('module_edit/<int:id>/', views.edit_module, name = 'module_edit'),
-    path('module_edit/<int:id>/delete/', views.signal_delete, name='signal_delete'),
+    path('edit_module/<int:module_id>/', views.edit_module, name='edit_module'),
 
-    # re_path(r'^signals/(?:(?P<pk>\d+)/)?(?:(?P<action>\w+)/)?', views.SignalsView.as_view(), name='signals'),
 
+    path('iolist_project/<int:project_id>', views.iolist_project, name='iolist_project'),
     re_path(r'^iolist/(?:(?P<pk>\d+)/)?(?:(?P<action>\w+)/)?',  login_required(views.IolistView.as_view()), name='iolist'),
+    re_path(r'^signals/(?:(?P<pk>\d+)/)?(?:(?P<action>\w+)/)?',  login_required(views.ClusterView.as_view()), name='signals'),
 ]
 
 

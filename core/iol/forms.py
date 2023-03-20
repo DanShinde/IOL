@@ -32,6 +32,7 @@ class SignalsForm(forms.ModelForm):
     class Meta:
         model = Signals
         fields = '__all__'
+        exclude = ['created_by', 'created_at', 'updated_at', 'module']
         widgets = {
             'equipment_code': forms.TextInput(attrs={'class': 'form-control'}),
             'code': forms.TextInput(attrs={'class': 'form-control'}),
@@ -44,6 +45,7 @@ class SignalsForm(forms.ModelForm):
             'initial_state': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'location': forms.Select(attrs={'class': 'form-control'}),
             'module': forms.Select(attrs={'class': 'form-control'}),
+            
         }
 
 class IOListForm(forms.ModelForm):
@@ -54,4 +56,11 @@ class IOListForm(forms.ModelForm):
             'project': forms.TextInput(attrs={'class': 'form-control', 'readonly' : 'readonly'}),
         }
 
+class ClusterForm(forms.ModelForm):
+    class Meta:
+        model = Module
+        exclude = ['created_by', 'created_at', 'updated_at']
+        widgets = {
+            'project': forms.TextInput(attrs={'class': 'form-control', 'readonly' : 'readonly'}),
+        }
 
