@@ -27,7 +27,7 @@
 <body>
 
 
-        <ul class="nav nav-pills nav-fill gap-2 p-1 small bg-primary rounded-5 shadow-sm bg-dark" id="pillNav2" role="tablist" style="--bs-nav-link-color: var(--bs-white); --bs-nav-pills-link-active-color: var(--bs-primary); --bs-nav-pills-link-active-bg: var(--bs-white);">
+        <ul class="nav nav-pills nav-fill gap-2  small bg-primary rounded-5 shadow-sm bg-dark" id="pillNav2" role="tablist" style="--bs-nav-link-color: var(--bs-white); --bs-nav-pills-link-active-color: var(--bs-primary); --bs-nav-pills-link-active-bg: var(--bs-white);">
             <li class="nav-item" role="presentation">
               <button class="nav-link active rounded-5 navbtns btn-secondary " id="create-tab" data-bs-toggle="tab" type="button" role="tab" aria-selected="true"  onclick="location.href='{% url 'create_project' %}'">Create Project               
               </button>
@@ -55,7 +55,10 @@
               <button class="nav-link active rounded-5 navbtns" id="login-tab" data-bs-toggle="tab" type="button" role="tab" aria-selected="false" onclick="window.location.href='/accounts/login';">Login</button>
             </li>
             {% endif %}
+            <li class="nav-item" role="presentation">
+              <img class="nav-image" id="addmodule-tab" src ="{% static 'logo.png' %}"   >
 
+            </li>
           </ul>
 
         {% block content %}

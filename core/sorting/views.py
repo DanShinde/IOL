@@ -1,6 +1,7 @@
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.views.generic import ListView
+from django.core import serializers
 from iol.models import IOList
 # Create your views here.
 
@@ -22,16 +23,20 @@ def delete_tag(request, pk):
     return render (request, 'sorting/partials/table.html', {'tags' : IOs}) 
     
 def sort_IO(request):
-    # order_pk = request.POST.getlist('tag_ids')
-    # print(order_pk)
-    # Tags = []
-    # for idx, tag_key in enumerate(order_pk, start=1) :
-    #     Tag = IOList.objects.get(pk= tag_key)
-    #     Tag.order = idx
-    #     Tag.save()
-    #     Tags.append(Tag)
-    # print(Tags)
-    # return render (request, 'sorting/partials/list.html', {'tags' : Tags}) 
-    print(request.POST.get('text'))
-    return JsonResponse( {"tags" : "Hello"})
+    order_list = request.POST.getlist('tags')
+    print(order_list)
+    tag_pk_list = order_list[0].split(',')
+    tag_pk_list = [int(pk) for pk in tag_pk_list]
+    Tags = []
+    for idx, tag_key in enumerate(tag_pk_list, start=1) :
+        print("------------------------------")
+        print(f'Id is {idx} and key is {tag_key}.')
+        Tag = IOList.objects.get(pk= tag_key)
+        Tag.order = idx
+        Tag.save()
+        Tags.append(Tag)
+    print(Tags)
+    data = serializers.serialize('json', Tags)
+    return JsonResponse({"Tags": data}) 
+
 
