@@ -68,10 +68,16 @@
           {% render_field form.location|add_class:"form-control" %}
         </div>
       </div>
-      <div class="col-md-6">
+      {% comment %} <div class="col-md-6">
         <div class="form-group">
           <label class="label" for="{{ form.module.id_for_label }}">{{ form.module.label_tag }}</label>
           {% render_field form.module|add_class:"form-control" %}
+        </div>
+      </div> {% endcomment %}
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.initial_state.id_for_label }}">{{ form.initial_state.label_tag }}</label>
+          {% render_field form.initial_state|add_class:"form-control" %}
         </div>
       </div>
 
