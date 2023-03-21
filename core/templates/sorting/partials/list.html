@@ -1,0 +1,131 @@
+{% comment %} {% if tags %}
+
+    {% csrf_token %}
+    <form class="list-group col-4">
+    {% comment %} hx-trigger="submit" hx-post= "{% url 'sort_IO' %}"
+    hx-target = "#tag-list">
+    <div class= "htmx-indicator">Updating......</div> 
+    {% for tag in tags %}
+    <div draggable="true" id= "sortable">
+        <input type='hidden' name='tag_order' value='{{ tag.pk }}'/>
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            #{{ tag.order }} {{ tag.tag }}
+            <span class="badge badge-danger badge-pill" 
+                style="cursor: pointer;"
+                hx-delete="{% url 'tag-delete' tag.pk %}"
+                hx-target="#tag-list"
+                hx-confirm="Are you sure you wish to delete?">X</span>
+        </li>
+    </div>
+    {% endfor %}
+    <button class="btn btn-primary" type="submit">Save changes</button>
+    </form>
+{% else %}
+    <p>You do not have any tags in your list</p>
+{% endif %}
+
+
+<script>
+
+    $(document).ready(function() {
+        // Initialise the table
+        $("#sortable").tableDnD();
+    });
+{% comment %} 
+    htmx.onLoad(function(content) {
+        // Handle initial page load
+        var sortables = content.querySelectorAll(".sortable");
+        console.log(sortables.length);
+        for (var i = 0; i < sortables.length; i++) {
+            var sortable = sortables[i];
+            new Sortable(sortable, {
+                animation: 150,
+                ghostClass: 'blue-background-class'
+            });
+        }
+    });
+
+    document.body.addEventListener('htmx:afterSwap', function(event) {
+        // Handle htmx requests after the first one
+        var content = event.detail;
+        console.log("Event is as below");
+        console.log(content);
+        var sortables = content.querySelectorAll(".sortable");
+        console.log(sortables.length);
+        for (var i = 0; i < sortables.length; i++) {
+            var sortable = sortables[i];
+            new Sortable(sortable, {
+                animation: 150,
+                ghostClass: 'blue-background-class'
+            });
+        }
+    });
+    
+
+</script>
+<style>
+    .hx-confirm {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    </style>
+
+
+ {% endcomment %}
+
+
+ <div class="container">
+    <div class="row" >
+      <div class="col-sm-9 col-xl-10 order-2 order-sm-1 mt-3">
+        <h2 class="h6"><strong>Sortable List</strong></h2>
+        <div id="sortablelist" class="list-group mb-4 mt-3" data-id="1">
+          {% if tags %}
+            <form id="tag-form">
+              {% csrf_token %}              
+              <table id="table-1" class = "table-striped table-success" cellspacing="0" cellpadding="2">
+                {% for tag in tags %}
+                <tr id="row"><td>#{{ tag.order }} </td><td>{{ tag.tag }}</td></tr>
+                {% endfor %}
+            </table>
+            </form>
+          {% else %}
+            <p>You do not have any tags in your list</p>
+          {% endif %}
+        </div>
+        <button type="button" class="btn btn-primary" id = "update">Save Order</button>
+      </div>
+      <div id= 'Sample'>
+         {% csrf_token %}
+      </div>
+    </div>
+  </div>
+  
+  <style>
+
+  </style>
+
+  
+  <script type="text/javascript">
+    $(document).ready(function() {
+        var csrf = $("input[name=csrfmiddlewaretoken]").val()
+
+        // Initialise the table
+      $("#update").on("click", function(e) {
+        $.ajax({
+            url:'{% url "sort_IO" %}',
+            type: 'post',
+            data: {
+                text : $(this).text(),
+                csrfmiddlewaretoken : csrf
+        },
+        success: function(response) {
+            console.log(response.data)
+            $("#Sample").append('<li>' + response.data + '</li>')
+
+        }
+      })
+    });
+});
+    </script>

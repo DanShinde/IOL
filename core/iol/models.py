@@ -56,8 +56,14 @@ class IOList(models.Model):
     created_by = models.CharField(max_length=30)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    order = models.PositiveIntegerField(null=True)
+    cluster_number = models.PositiveIntegerField(null=True)
+
     def __str__(self):
         return self.tag
+    
+    class Meta:
+        ordering = ['order']
 
 
 class Signals(models.Model):

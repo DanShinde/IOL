@@ -20,5 +20,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('iol.urls')),
     path('accounts/', include('accounts.urls')),
+    path('sort/', include('sorting.urls')),
 
 ]

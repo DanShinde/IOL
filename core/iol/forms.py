@@ -10,6 +10,8 @@ class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
         fields = ['name', 'description', 'segment']
+        exclude = ['created_by', 'created_at', 'updated_at']
+
 
 class RegisterForm(UserCreationForm):
     first_name = forms.CharField(required=True)

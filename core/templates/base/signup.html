@@ -3,10 +3,77 @@
 {% block title %}Sign Up{% endblock %}
 
 {% block content %}
+{% load widget_tweaks %}
   <h2>Sign up</h2>
-  <form method="post">
+  <div class="col-lg-8 col-md-7 order-md-last d-flex align-items-center">
+  <form method="POST" id="iolistForm" name="iolistForm" class="iolistForm" novalidate="novalidate">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Sign Up</button>
-  </form>
+    <div class="row">
+        <div class="col-md-6">
+          <div class="form-group">
+
+            <label class="label" for="{{ form.first_name.id_for_label }}">{{ form.first_name.label_tag }}</label>
+            {% render_field form.first_name|add_class:"form-control"  %}
+          </div>
+          </div>
+          <div class="col-md-6">
+            <div class="form-group">
+              <label class="label" for="{{ form.last_name.id_for_label }}">{{ form.last_name.label_tag }}</label>
+              
+              {% render_field form.last_name|add_class:"form-control"  %}
+      
+            </div>
+          </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.username.id_for_label }}">{{ form.username.label_tag }}</label>
+          {% render_field form.username|add_class:"form-control" %}
+          <span class="helptext">Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.</span>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.email.id_for_label }}">{{ form.email.label_tag }}</label>
+          {% render_field form.email|add_class:"form-control" %}
+  
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.password1.id_for_label }}">{{ form.password1.label_tag }}</label>
+          {% render_field form.password1|add_class:"form-control" %}
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.password2.id_for_label }}">{{ form.password2.label_tag }}</label>
+          {% render_field form.password2|add_class:"form-control" %}
+        </div>
+      </div>
+
+      <ul class="errorlist">
+        {% if form.errors %}
+          {% for field in form %}
+
+              {% for error in field.errors %}
+                    {{field.label}}: {{ error|escape }} </br>
+              {% endfor %}
+
+          {% endfor %}
+        {% endif %}
+      </ul>
+
+
+                 <div class="col-md-12">
+                    <div class="form-group float-center">
+                      <input type="submit" value="SignUp" class="btn btn-success">
+                      <div class="submitting"></div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+
+
+
+</div>
 {% endblock %}

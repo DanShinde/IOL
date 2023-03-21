@@ -8,7 +8,9 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.views import View
 import pandas as pd
-from .utils import set_pagination
+
+from sorting.utils import get_max_order
+from .utils import get_max_cluster_number
 from django.contrib import messages
 from django.db.models import Q, OuterRef, Subquery
 from django.views.generic import TemplateView
@@ -40,6 +42,7 @@ def create_project(request):
         if form.is_valid():
             project = form.save(commit=False)
             project.created_by = request.user.get_full_name()
+            project.updated_at = datetime.now()
             project.save()
             return redirect('project_list') 
     else:
@@ -99,6 +102,8 @@ def add_signals(request):
     project = get_object_or_404(Project, pk=project_id)
     project.updated_at = datetime.now()
     project.save()
+    cluster_number = get_max_cluster_number(project)
+    print(f'Max cluster number is {cluster_number}.')
     for signal in signal_ids:
         signalData = Signals.objects.get(id=signal)
         if signalData.signal_type == "DI":
@@ -107,7 +112,7 @@ def add_signals(request):
             pre = "Qx_"
         else:
             pre = "Encoder_"
-        
+        order = get_max_order(project)
         entry = IOList(
             project=project,
             name=module_name,
@@ -119,7 +124,9 @@ def add_signals(request):
             actual_description=f"{signalData.component_description}, {signalData.function_purpose}",
             Cluster =  signalData.module,
             panel_number = panel_number,
-            created_by = request.user.get_full_name()
+            created_by = request.user.get_full_name(),
+            order = order,
+            cluster_number = cluster_number,
         )
         entry.save()
         
