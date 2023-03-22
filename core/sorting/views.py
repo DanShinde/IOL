@@ -7,11 +7,12 @@ from iol.models import IOList
 
 class IOListView(ListView):
     model = IOList
-    context_object_name = 'tags'
+    context_object_name = 'iolists'
     template_name='sorting/sorting.html'
 
-    def get_queryset(self):
+    def get_queryset(self, *args, **kwargs):
         project = self.request.session.get('project')
+        print(project, kwargs.get('project_id'))
         IOs = IOList.objects.filter(project_id = project)
         return IOs
     
@@ -20,23 +21,25 @@ def delete_tag(request, pk):
     project = request.session.get('project')
     io.delete()
     IOs = IOList.objects.filter(project_id = project)
-    return render (request, 'sorting/partials/table.html', {'tags' : IOs}) 
+    return render (request, 'sorting/partials/table.html', {'iolists' : IOs}) 
     
 def sort_IO(request):
-    order_list = request.POST.getlist('tags')
+    order_list = request.POST.getlist('iolists')
     print(order_list)
     tag_pk_list = order_list[0].split(',')
     tag_pk_list = [int(pk) for pk in tag_pk_list]
     Tags = []
     for idx, tag_key in enumerate(tag_pk_list, start=1) :
         print("------------------------------")
-        print(f'Id is {idx} and key is {tag_key}.')
         Tag = IOList.objects.get(pk= tag_key)
+        print(f'Id is {idx} and key is {tag_key}, {Tag.order}.')
         Tag.order = idx
         Tag.save()
         Tags.append(Tag)
+        Tag = IOList.objects.get(pk= tag_key)
+        print(Tag.order)
     print(Tags)
     data = serializers.serialize('json', Tags)
-    return JsonResponse({"Tags": data}) 
+    return JsonResponse({"iolists": data}) 
 
 

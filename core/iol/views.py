@@ -127,6 +127,7 @@ def add_signals(request):
             panel_number = panel_number,
             created_by = request.user.get_full_name(),
             order = order,
+            location = signalData.location,
             cluster_number = cluster_number,
         )
         entry.save()
@@ -138,7 +139,7 @@ def add_signals(request):
     return JsonResponse({'success': True, 'data': data})
 
 def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer):
-    worksheet.write(row, 0, row+1)
+    worksheet.write(row, 0, row-1)
     worksheet.write(row, 1, "Spare")
     worksheet.write(row, 2, "Spare")
     if IO.signal_type == "DI":
@@ -148,12 +149,12 @@ def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer):
     worksheet.write(row, 4, IO.signal_type)
     worksheet.write(row, 5, "Spare_Signal")
     if IO.signal_type == "DI":
-        print(f'I_Pointer {I_Pointer}.')
+        # print(f'I_Pointer {I_Pointer}.')
         x = f"I{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
-        print(x)
+        # print(x)
     elif IO.signal_type == "DO":
         x = f"Q{str(math.floor((Q_Pointer - 1) / 8))}.{str((Q_Pointer - 1) % 8)}"
-        print(x)
+        # print(x)
     worksheet.write(row, 6, x)
     worksheet.write(row, 7, "Spare Signal")
     worksheet.write(row, 8, IO.panel_number)
@@ -176,7 +177,7 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
     # Writing DIs to file
     for IO in iolist:
         if IO.signal_type == "DI":
-            worksheet.write(row, 0, project.name)
+            worksheet.write(row, 0, row-1)
             worksheet.write(row, 1, IO.name)
             worksheet.write(row, 2, IO.code)
             worksheet.write(row, 3, IO.tag)
@@ -198,7 +199,7 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
             i+= 1
             q+= 1
             IOOut = IO
-    print(IOOut.signal_type)
+    # print(IOOut.signal_type)
     print(F'Panel number {panel} of I_Pointer count {I_Pointer}.')
     #Adding Input spares
     for i in range(0,16- ( ((I_Pointer-1)%16))):
@@ -206,12 +207,12 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
         worksheet, I_Pointer, Q_Pointer = add_spares(worksheet,row,project,IOOut, count, I_Pointer, Q_Pointer)
         I_Pointer+= 1
         row += 1
-        print(I_Pointer)
+        # print(I_Pointer)
 
     #Writing DOs to file
     for IO in iolist:
         if IO.signal_type == "DO":
-            worksheet.write(row, 0, project.name)
+            worksheet.write(row, 0, row-1)
             worksheet.write(row, 1, IO.name)
             worksheet.write(row, 2, IO.code)
             worksheet.write(row, 3, IO.tag)
@@ -240,7 +241,7 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
         worksheet, I_Pointer, Q_Pointer = add_spares(worksheet,row,project,IOOut, count, I_Pointer, Q_Pointer)
         row += 1
         Q_Pointer+= 1
-        print(Q_Pointer)
+        # print(Q_Pointer)
     print(F'Panel number {panel} of count {I_Pointer}, {Q_Pointer}.')
     return workbook, I_Pointer, Q_Pointer
 
@@ -250,7 +251,7 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
 def export_to_excel(request):
     project_id = request.session.get('project')
     project = get_object_or_404(Project, id=project_id)
-    iolist = IOList.objects.filter(project_id=project_id).order_by('signal_type', 'location')
+    iolist = IOList.objects.filter(project_id=project_id).order_by('signal_type', 'location','order')
     panels = [i.panel_number for i in iolist]
     panels =[*set(panels)]
     print(panels)

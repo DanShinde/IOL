@@ -14,28 +14,51 @@
       <div class="col-sm-9 col-xl-10 order-2 order-sm-1 mt-3">
         <h2 class="h6"><strong>Sortable List</strong></h2>
         <div id="sortable" class="  d-flex justify-content-between align-items-center list-group mb-4 mt-3" data-id="1">
-          {% if tags %}
+          {% if iolists %}
             <div id="tag-form" class= "sortable" >
               {% csrf_token %}             
               <table id="tablesort" class = " table-striped table-success" cellspacing="0" cellpadding="2">
                 <thead>
-                    <tr>
-                      <th scope="col">#</th>
-                      <th scope="col">Tag</th>
-                    </tr>
-                  </thead>
+                  <tr>
+                    <th>Order</th>
+                    <th>Project</th>
+                    <th>Name</th>
+                    <th>Code</th>
+                    <th>Tag</th>
+                    <th>Signal Type</th>
+                    <th>Device Type</th>
+                    <th>Panel Number</th>
+                    <th>Terminal Number</th>
+                    <th>Location</th>
+                    <th>Cluster</th>
+                    <th>Cluster Number</th>
+                    <th>Delete</th>
+                  </tr>
+                </thead>
                   <tbody>
-                {% for tag in tags %}
-                <tr class = " item" id="{{forloop.counter}}" data-pk="{{ tag.pk }}">
-                    <input type='hidden' name='tag_order' value='{{tag.pk}}'/>
-                    <td>#{{ tag.order }} </td>
-                    <td>{{ tag.tag }}</td>
-                    <td><span class = "badge badge-danger badgr-pill"
-                    style= "cursor: pointer;"
-                    hx-delete= "{% url 'tag-delete' tag.pk %}"
-                    hx-target="#tag-list"
-                    hx-confirm = "Confirm the delete"
-                    >X</span></td>
+                {% for iolist in iolists %}
+                <tr class="item" id="{{forloop.counter}}" data-pk="{{ iolist.pk }}">
+                  <input type="hidden" name="iolist_order" value="{{iolist.id}}"/>
+                  <td>{{ iolist.order }}</td>
+                  <td>{{ iolist.project }}</td>
+                  <td>{{ iolist.name }}</td>
+                  <td>{{ iolist.code }}</td>
+                  <td>{{ iolist.tag }}</td>
+                  <td>{{ iolist.signal_type }}</td>
+                  <td>{{ iolist.device_type }}</td>
+                  <td>{{ iolist.panel_number }}</td>
+                  <td>{{ iolist.terminal_number }}</td>
+                  <td>{{ iolist.location }}</td>
+                  <td>{{ iolist.Cluster }}</td>
+                  <td>{{ iolist.cluster_number }}</td>
+                  <td>
+                    <span class="badge badge-danger badge-pill"
+                          style="cursor: pointer;"
+                          hx-delete="{% url 'iolist' iolist.pk 'delete' %}"
+                          hx-target="#iolist-list"
+                          hx-confirm="Confirm the delete"
+                    >X</span>
+                  </td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -60,44 +83,55 @@
     var csrf = $("input[name=csrfmiddlewaretoken]").val()
 
     $(document).ready(function() {
-        // Initialise the table
-        $("#tablesort").tableDnD({
-            onDragClass: "table-warning",
-            onDrop: function(table, row) {
-                var rows = table.tBodies[0].rows;
-                var tagOrderList = [];
-                for (var i = 0; i < rows.length; i++) {
-                    var tagPk = parseInt(rows[i].querySelector('input[name="tag_order"]').value);
-                    tagOrderList.push(tagPk);
-                }
-                var formData = new FormData();
-                formData.append('tags', tagOrderList);
-                formData.append('csrfmiddlewaretoken', csrf);
-                
-                console.log(rows);
-                $.ajax({
-                    url: '{% url "sort_IO" %}',
-                    type: 'POST',
-                    data: formData,
-                    processData: false,
-                    contentType: false,
-                    success: function(response) {
-                        console.log('Tag order updated successfully');
-                        console.log(response)
-                        var tags = JSON.parse(data.Tags);
-                        $.each(tags, function(index, tag) {
-                            var row = tbody.find('tr[data-pk="' + tag.pk + '"]');
-                            row.find('.name').text(tag.name);
-                            row.find('.order').text('#' + tag.order);
-                        });
-                    },
-                    error: function(xhr, status, error) {
-                        console.log('Error updating tag order');
-                    }
-                });
-            }
-            
-        });
-        });
-
+      var tbody = $("#tablesort tbody");
+      $("#tablesort").tableDnD({
+          onDragClass: "table-warning",
+          onDrop: function(table, row) {
+              var rows = table.tBodies[0].rows;
+              var iolistsOrderList = [];
+              for (var i = 0; i < rows.length; i++) {
+                  var iolistPk = parseInt(rows[i].querySelector('input[name="iolist_order"]').value);
+                  iolistsOrderList.push(iolistPk);
+              }
+              var formData = new FormData();
+              formData.append('iolists', iolistsOrderList);
+              formData.append('csrfmiddlewaretoken', csrf);
+              console.log(iolistsOrderList)
+              console.log(rows);
+              $.ajax({
+                  url: '{% url "sort_IO" %}',
+                  type: 'POST',
+                  data: formData,
+                  processData: false,
+                  contentType: false,
+                  success: function(response) {
+                      console.log('IOList order updated successfully');
+                      console.log(response)
+                      var counter = 0;
+                      var iolists = JSON.parse(response.iolists);
+                      $.each(iolists, function(index, iolist) {
+                        var row = tbody.find('tr[data-pk="' + iolist.pk + '"]');
+                        row.find('.name').text(iolist.name);
+                        row.find('.code').text(iolist.code);
+                        row.find('.tag').text(iolist.tag);
+                        row.find('.signal_type').text(iolist.signal_type);
+                        row.find('.device_type').text(iolist.device_type);
+                        row.find('.panel_number').text(iolist.panel_number);
+                        row.find('.terminal_number').text(iolist.terminal_number);
+                        row.find('.location').text(iolist.location);
+                        row.find('.Cluster').text(iolist.Cluster);
+                        row.find('.order').text(counter);
+                        row.find('.cluster_number').text(iolist.cluster_number);
+                        counter+=1;
+                        console.log(counter);
+                    });
+                  },
+                  error: function(xhr, status, error) {
+                      console.log('Error updating IOList order');
+                  }
+              });
+          }
+          
+      });
+  });
     </script>
