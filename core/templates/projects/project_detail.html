@@ -11,8 +11,9 @@
 
         {% load static %}
         <script src="{% static 'js/details.js' %}"></script>
-        {% comment %} <form id="module-form" method="post"  data-url="{% url 'get_filtered_signals' %}"> {% endcomment %}
-          <form method="POST" id="contactForm" name="contactForm" class="contactForm" novalidate="novalidate">
+        {% comment %} <form id="module-form" method="post"  hx-post= "{% url 'add_signals' %}"
+          hx-target= '#IOList' id="contactForm" data-url="{% url 'get_filtered_signals' %}"> {% endcomment %}
+          <form method="POST"  name="contactForm" class="contactForm" novalidate="novalidate">
             {% csrf_token %}
             <div class="row">
               <div class="col-md-6">
@@ -38,66 +39,40 @@
                 </div>
               </div>
             </div>
-          </form>
+          
 
           <div class="divbtn">
-          <button class="btn btn-primary mt-3 mybtns" id="add-signals-btn">Add</button>
+          <input  id="add-signals-btn" class="btn btn-primary mt-3 mybtns" style="cursor: pointer;" >
           <button class="btn btn-primary mt-3 mybtns"  onclick= "location.href='{% url 'iolist' project.id %}'">Review IO List</button></td>
           <button class="btn btn-primary mt-3 mybtns"  onclick= "location.href='{% url 'sorting' project.id %}'">Re-Order IO List</button></td>
           <span></span>
-        {% comment %} </form> {% endcomment %}
           </div>
         <div class="row">
           
-          <div class="col-5 offset-1" id="di-signals-container">
+          <div class="col-5 offset-1 form-group" id="di-signals-container">
             DI Signals
-            <!-- The DI signals will be dynamically added here -->
+            <!-- The DI signals will be  id="add-signals-btn"  dynamically added here -->
           </div>
           
-          <div class="col-5" id="do-signals-container">
+          <div class="col-5 form-group" id="do-signals-container">
             DO Signals
             <!-- The DO signals will be dynamically added here -->
           </div>
         </div>
+      </form>
       </div>
-    <div class="col-md-6 right">
-      <div class="div">
-        <table class="table" id='io-list-table'>
-          <thead>
-            <tr>
-              <th>Sr.No</th>
-              <th>Module Name</th>
-              <th>Code</th>
-              <th>Tag</th>
-              <th>Signal Type</th>
-              <th>Delete</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for iolist in io_list %}
-            <tr>
-              <td>{{ forloop.counter }}</td>
-              <td>{{ iolist.name }}</td>
-              <td>{{ iolist.code }}</td>
-              <td>{{ iolist.tag }}</td>
-              <td>{{ iolist.signal_type }}</td>
-              <td>
-                {% comment %} <a href="{% url 'edit_iolist' iolist.id %}" class="btn btn-sm btn-primary">Edit</a>
-                <a href="{% url 'delete_iolist' iolist.id %}" class="btn btn-sm btn-danger">Delete</a> {% endcomment %}
-              </td>
-            </tr>
-            {% empty %}
-            <tr>
-              <td colspan="5">No iolists found.</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+    <div class="col-md-6 right" id= "IOList">
+          {% include 'projects/iolist_in_add.html' %}
     </div>
   </div>
 </div>
 
+<script>
+  document.body.addEventListener('htmx:configRequest', (event) => {
+      event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+  }) 
+
+  </script>
 <script>
   window.onload = function() {
   console.log("Loading");
@@ -164,7 +139,6 @@
 }
 
 
-
   document.getElementById('add-signals-btn').addEventListener('click', function(event) {
     event.preventDefault(); // prevent form from submitting normally
     var module_name = $("#module_name").val();
@@ -184,49 +158,20 @@
       headers: {"X-CSRFToken": getCookie("csrftoken")},
       success: function(response) {
         console.log("Selected signals sent to server.");
-        var ioListTable = document.getElementById('io-list-table');
-    ioListTable.innerHTML = '';
-    var ioListData = JSON.parse(response.data);
-    for (var i = 0; i < ioListData.length; i++) {
-      var ioListRow = ioListTable.insertRow();
-      var ioListFields = ioListData[i].fields;
-      ioListRow.insertCell().innerHTML = i+1;
-      ioListRow.insertCell().innerHTML = ioListFields['name'];
-      ioListRow.insertCell().innerHTML = ioListFields['code'];
-      ioListRow.insertCell().innerHTML = ioListFields['tag'];
-      ioListRow.insertCell().innerHTML = ioListFields['signal_type'];
-    }
+        $('#IOList').html(response.data);
+
+    
   },
       error: function(xhr, status, error) {
         // handle error response
+        console.log('error')
       }
     });
-  });
-
-  document.getElementById('export-iolist-btn').addEventListener('click', function(event) {
-    xhttp = new XMLHttpRequest();
-    var project= document.getElementById("projectName");
-    console.log(project.textContent);
-    projectName = project.textContent; 
-    xhttp.onreadystatechange = function() {
-        var a, today;
-        if (xhttp.readyState === 4 && xhttp.status === 200) {
-            a = document.createElement('a');
-            a.href = window.URL.createObjectURL(xhttp.response);
-            today = new Date();
-            a.download = projectName +"_IO_List_R0"+ ".xls";
-            a.style.display = 'none';
-            document.body.appendChild(a);
-            return a.click();
-        }
-    };
-    xhttp.open("GET", "/toexcel", true);
-    xhttp.setRequestHeader("Content-Type", "application/json");
-    xhttp.responseType = 'blob';
-    xhttp.send();
-});
+  }); 
 
 }
+
+
 </script>
 
 {% endblock %}

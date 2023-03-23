@@ -1,0 +1,68 @@
+<div class="div">
+    <table class="table" id='io-list-table' hx-trigger='load'>
+      <thead>
+        <tr>
+          <th>Sr.No</th>
+          <th>Module Name</th>
+          <th>Code</th>
+          <th>Tag</th>
+          <th>Signal Type</th>
+          <th>Delete</th>
+        </tr>
+      </thead>
+      <tbody id = "IOBody">
+        {% for iolist in io_list %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ iolist.name }}</td>
+          <td>{{ iolist.code }}</td>
+          <td>{{ iolist.tag }}</td>
+          <td>{{ iolist.signal_type }}</td>
+          <td>
+            <a><span class= "badge badge-danger badge-pill"
+                style="cursor: pointer;"
+                onclick="deleteSignal({{ iolist.id }})">X</span></a>
+            
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5">No iolists found.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    function deleteSignal(pk) {
+      var url = "{% url 'delete-signal' 0 %}".replace('0', pk);
+      console.log(pk);
+      $.ajax({
+        url: url,
+        type: 'DELETE',
+        headers: {"X-CSRFToken": getCookie("csrftoken")},
+        success: function(response) {
+          $('#IOList').html(response.data);
+        },
+        error: function(xhr, status, error) {
+          // Handle error
+        }
+      });
+    }
+
+    function getCookie(name) {
+      var cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+          var cookies = document.cookie.split(';');
+          for (var i = 0; i < cookies.length; i++) {
+              var cookie = cookies[i].trim();
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+  }
+  </script>

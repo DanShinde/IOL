@@ -24,6 +24,8 @@ urlpatterns = [
     path('module_list/<int:id>/delete/', views.module_destroy, name='module_delete'),
     path('edit_module/<int:module_id>/', views.edit_module, name='edit_module'),
 
+    #Delete signal while adding
+    path('delete_signal/<int:pk>/', views.delete_IO, name='delete-signal'),
 
     path('iolist_project/<int:project_id>', views.iolist_project, name='iolist_project'),
     re_path(r'^iolist/(?:(?P<pk>\d+)/)?(?:(?P<action>\w+)/)?',  login_required(views.IolistView.as_view()), name='iolist'),

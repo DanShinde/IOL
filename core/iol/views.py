@@ -4,7 +4,7 @@ import json
 import math
 import subprocess
 from django.forms import inlineformset_factory
-from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseNotFound, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.views import View
@@ -136,8 +136,7 @@ def add_signals(request):
         signal.order = index + 1
     IOList.objects.bulk_update(io_list_to_order, ['order'])
     io_list = IOList.objects.filter(project = project).order_by('-id')
-    # print(io_list)
-    data = serializers.serialize('json', io_list)
+    data = render_to_string('projects/iolist_in_add.html', {'io_list': io_list})
     return JsonResponse({'success': True, 'data': data})
 
 def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer):
@@ -386,6 +385,32 @@ class IolistView(View):
         else:
             return super().dispatch(request, *args, **kwargs)
 
+# To delete IO in Detail view.
+def delete_IO(request,pk):
+    io_queryset = IOList.objects.filter(pk=pk)
+    print(io_queryset)
+    if io_queryset.exists():
+        io = io_queryset.first()
+        project = io.project
+        io.delete()
+        io_list = IOList.objects.filter(project = project).order_by('-id')
+        data = render_to_string('projects/iolist_in_add.html', {'io_list': io_list})
+        return JsonResponse(({'success': True, 'data': data}))
+        # return render(request, 'projects/iolist_in_add.html', {'io_list': iolists})
+    else:
+        return HttpResponseNotFound()
+
+#Update IOList on details page
+def update_IO(request,pk):
+    io_queryset = IOList.objects.filter(pk=pk)
+    if io_queryset.exists():
+        io = io_queryset.first()
+        project = io.project
+        iolists = IOList.objects.filter(project=project).order_by('-id')
+        return JsonResponse(({'success': True}))
+        # return render(request, 'projects/iolist_in_add.html', {'io_list': iolists})
+    else:
+        return HttpResponseNotFound()
 
 
 class ClusterView(View):

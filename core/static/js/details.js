@@ -18,26 +18,28 @@ window.onload = function() {
         return cookieValue;
     }
 
-      exportBtn.addEventListener('click', function(event) {
-        xhttp = new XMLHttpRequest();
-        var project= document.getElementById("projectName");
-        console.log(project.textContent);
-        projectName = project.textContent; 
-        xhttp.onreadystatechange = function() {
-            var a, today;
-            if (xhttp.readyState === 4 && xhttp.status === 200) {
-                a = document.createElement('a');
-                a.href = window.URL.createObjectURL(xhttp.response);
-                today = new Date();
-                a.download = projectName +"_IO_List_R0"+ ".xls";
-                a.style.display = 'none';
-                document.body.appendChild(a);
-                return a.click();
-            }
-        };
-        xhttp.open("GET", "/toexcel", true);
-        xhttp.setRequestHeader("Content-Type", "application/json");
-        xhttp.responseType = 'blob';
-        xhttp.send();
-    });
+    //   exportBtn.addEventListener('click', function(event) {
+    //     xhttp = new XMLHttpRequest();
+    //     var project= document.getElementById("projectName");
+    //     console.log(project.textContent);
+    //     projectName = project.textContent; 
+    //     xhttp.onreadystatechange = function() {
+    //         var a, today;
+    //         if (xhttp.readyState === 4 && xhttp.status === 200) {
+    //             a = document.createElement('a');
+    //             a.href = window.URL.createObjectURL(xhttp.response);
+    //             today = new Date();
+    //             a.download = projectName +"_IO_List_R0"+ ".xls";
+    //             a.style.display = 'none';
+    //             document.body.appendChild(a);
+    //             return a.click();
+    //         }
+    //     };
+    //     xhttp.open("GET", "/toexcel", true);
+    //     xhttp.setRequestHeader("Content-Type", "application/json");
+    //     xhttp.responseType = 'blob';
+    //     xhttp.send();
+    // });
 };
+
+// 
