@@ -42,7 +42,7 @@
           
 
           <div class="divbtn">
-          <input  id="add-signals-btn" class="btn btn-primary mt-3 mybtns" style="cursor: pointer;" >
+          <input  id="add-signals-btn" class="btn btn-primary mt-3 mybtns" style="cursor: pointer;" value= "Add Signals" >
           <button class="btn btn-primary mt-3 mybtns"  onclick= "location.href='{% url 'iolist' project.id %}'">Review IO List</button></td>
           <button class="btn btn-primary mt-3 mybtns"  onclick= "location.href='{% url 'sorting' project.id %}'">Re-Order IO List</button></td>
           <span></span>
@@ -76,7 +76,7 @@
 <script>
   window.onload = function() {
   console.log("Loading");
-  document.getElementById('module').addEventListener('change', function(event) {
+  document.getElementById('module').addEventListener('change', 'load', function(event) {
     event.preventDefault();
     var module_id = document.getElementById('module').value;
     var url = "{% url 'get_filtered_signals' %}?module=" + module_id;

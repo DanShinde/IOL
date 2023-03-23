@@ -37,13 +37,13 @@
   <script>
     function deleteSignal(pk) {
       var url = "{% url 'delete-signal' 0 %}".replace('0', pk);
-      console.log(pk);
       $.ajax({
         url: url,
         type: 'DELETE',
         headers: {"X-CSRFToken": getCookie("csrftoken")},
         success: function(response) {
           $('#IOList').html(response.data);
+          console.log(" Signal Deleted Successfully.")
         },
         error: function(xhr, status, error) {
           // Handle error

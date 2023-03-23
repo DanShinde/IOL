@@ -97,14 +97,11 @@ def add_signals(request):
     signal_ids = data.get('signals', [])
     module_name = data.get('module_name')
     panel_number = data.get('panel_number')
-    print(panel_number)
-    
     project_id = request.session.get('project')
     project = get_object_or_404(Project, pk=project_id)
     project.updated_at = datetime.now()
     project.save()
     cluster_number = get_max_cluster_number(project)
-    print(f'Max cluster number is {cluster_number}.')
     for signal in signal_ids:
         signalData = Signals.objects.get(id=signal)
         if signalData.signal_type == "DI":
