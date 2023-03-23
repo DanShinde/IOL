@@ -13,7 +13,7 @@ class IOListView(ListView):
     def get_queryset(self, *args, **kwargs):
         project = self.request.session.get('project')
         print(project, kwargs.get('project_id'))
-        IOs = IOList.objects.filter(project_id = project)
+        IOs = IOList.objects.filter(project_id = project).order_by('order','signal_type', 'location')
         return IOs
     
 def delete_tag(request, pk):

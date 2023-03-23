@@ -131,15 +131,18 @@ def add_signals(request):
             cluster_number = cluster_number,
         )
         entry.save()
-        
+    signals = IOList.objects.filter(project = project).order_by('signal_type', 'location')
+    for index, signal in enumerate(signals):
+        signal.iolist.order = index + 1
+        signal.iolist.save()
     io_list = IOList.objects.filter(project = project).order_by('-id')
     # print(io_list)
     data = serializers.serialize('json', io_list)
-
     return JsonResponse({'success': True, 'data': data})
 
 def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer):
-    worksheet.write(row, 0, row-1)
+    channel = (row - 1) % 16 + 1
+    worksheet.write(row, 0, row)
     worksheet.write(row, 1, "Spare")
     worksheet.write(row, 2, "Spare")
     if IO.signal_type == "DI":
@@ -157,27 +160,28 @@ def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer):
         # print(x)
     worksheet.write(row, 6, x)
     worksheet.write(row, 7, "Spare Signal")
-    worksheet.write(row, 8, IO.panel_number)
-    worksheet.write(row, 9, "CP")
+    worksheet.write(row, 8, channel)
+    worksheet.write(row, 9, IO.panel_number)
+    worksheet.write(row, 10, "CP")
     return worksheet, I_Pointer, Q_Pointer
 
 #function to write indivisual sheets while exporting
 def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
     worksheet = workbook.add_worksheet(panel)
     bold = workbook.add_format({'bold': True})
-    columns = ["Project", "ModuleName",  "Code", "Tag", "Signal Type","Device Type","I/O Address","Actual Description","Panel Number","Location"]
+    columns = ["Sr.No.", "ModuleName",  "Code", "Tag", "Signal Type","Device Type","I/O Address","Actual Description", 'Channel',"Panel Number","Location"]
     # Fill first row with columns
     row = 0
     for i,elem in enumerate(columns):
         worksheet.write(row, i, elem, bold)
     row += 1
     # Now fill other rows with columns
-    i = 0
-    q = 0
+
     # Writing DIs to file
     for IO in iolist:
         if IO.signal_type == "DI":
-            worksheet.write(row, 0, row-1)
+            channel = (row - 1) % 16 + 1
+            worksheet.write(row, 0, row)
             worksheet.write(row, 1, IO.name)
             worksheet.write(row, 2, IO.code)
             worksheet.write(row, 3, IO.tag)
@@ -193,11 +197,10 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
             IO.save()
             worksheet.write(row, 6, IO.io_address)
             worksheet.write(row, 7, IO.actual_description)
-            worksheet.write(row, 8, IO.panel_number)
-            worksheet.write(row, 9, IO.location)
+            worksheet.write(row, 8, channel)
+            worksheet.write(row, 9, IO.panel_number)
+            worksheet.write(row, 10, IO.location)
             row += 1
-            i+= 1
-            q+= 1
             IOOut = IO
     # print(IOOut.signal_type)
     print(F'Panel number {panel} of I_Pointer count {I_Pointer}.')
@@ -212,7 +215,8 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
     #Writing DOs to file
     for IO in iolist:
         if IO.signal_type == "DO":
-            worksheet.write(row, 0, row-1)
+            channel = (row - 1) % 16 + 1
+            worksheet.write(row, 0, row)
             worksheet.write(row, 1, IO.name)
             worksheet.write(row, 2, IO.code)
             worksheet.write(row, 3, IO.tag)
@@ -228,11 +232,10 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
             IO.save()
             worksheet.write(row, 6, IO.io_address)
             worksheet.write(row, 7, IO.actual_description)
-            worksheet.write(row, 8, IO.panel_number)
-            worksheet.write(row, 9, IO.location)
+            worksheet.write(row, 8, channel)
+            worksheet.write(row, 9, IO.panel_number)
+            worksheet.write(row, 10, IO.location)
             row += 1
-            i+= 1
-            q+= 1
             IOOut = IO
     print(F'Panel number {panel} of I_Pointer count {Q_Pointer}.')
     #Adding Output spares
