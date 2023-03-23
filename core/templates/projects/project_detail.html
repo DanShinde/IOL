@@ -76,9 +76,7 @@
 <script>
   window.onload = function() {
   console.log("Loading");
-  document.getElementById('module').addEventListener('change', load_signals(event));
-  document.getElementById('module').addEventListener('load', load_signals(event));
-    function load_signals(event) {
+  document.getElementById('module').addEventListener('change', function(event) {
     event.preventDefault();
     var module_id = document.getElementById('module').value;
     var url = "{% url 'get_filtered_signals' %}?module=" + module_id;
@@ -122,8 +120,9 @@
       }
     };
     xhr.send();
-  };
+  });
 
+  
 
   function getCookie(name) {
     var cookieValue = null;
