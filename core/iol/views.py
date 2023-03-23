@@ -131,10 +131,10 @@ def add_signals(request):
             cluster_number = cluster_number,
         )
         entry.save()
-    signals = IOList.objects.filter(project = project).order_by('signal_type', 'location')
-    for index, signal in enumerate(signals):
-        signal.iolist.order = index + 1
-        signal.iolist.save()
+    io_list_to_order = IOList.objects.filter(project = project).order_by('signal_type', 'location')
+    for index, signal in enumerate(io_list_to_order):
+        signal.order = index + 1
+    IOList.objects.bulk_update(io_list_to_order, ['order'])
     io_list = IOList.objects.filter(project = project).order_by('-id')
     # print(io_list)
     data = serializers.serialize('json', io_list)

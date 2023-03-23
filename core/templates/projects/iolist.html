@@ -15,6 +15,9 @@
         <button class="btn btn-primary mt-3 mybtns mr-auto" id="FilterON">
             <span class="glyphicon glyphicon-filter"></span>Click To Apply Filter
         </button>
+        <button class="btn btn-primary mt-3 mybtns mr-auto" onclick= "location.href='{% url 'project_detail' project.id %}'">
+          <span class="glyphicon glyphicon-filter">Edit IO List </span>
+      </button>
         <div class="text-center mx-auto">
             <h5 class="card-title mt-3" id ="projectName">{{ project }}</h5>
             <p class="card-text">{{ project.description }}</p>
