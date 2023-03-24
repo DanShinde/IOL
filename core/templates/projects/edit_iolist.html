@@ -22,6 +22,7 @@
 <form method="POST" id="iolistForm" name="iolistForm" class="iolistForm" novalidate="novalidate">
     {% csrf_token %}
     <div class="row">
+      
         <div class="col-md-6">
           <div class="form-group">
             {% comment %} <label for="id_project">Project:</label> {% endcomment %}
@@ -109,7 +110,17 @@
   
         </div>
       </div>
+      <ul class="errorlist list-group-item list-group-item-danger">
+        {% if form.errors %}
+          {% for field in form %}
 
+              {% for error in field.errors %}
+                    {{field.label}}: {{ error|escape }} </br>
+              {% endfor %}
+
+          {% endfor %}
+        {% endif %}
+      </ul>
                  <div class="col-md-12">
                     <div class="form-group">
                       <input type="submit" value="Update Signal" class="btn btn-warning">

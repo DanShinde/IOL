@@ -43,8 +43,8 @@
 
           <div class="divbtn">
           <input  id="add-signals-btn" class="btn btn-primary mt-3 mybtns" style="cursor: pointer;" value= "Add Signals" >
-          <button class="btn btn-primary mt-3 mybtns"  onclick= "location.href='{% url 'iolist' project.id %}'">Review IO List</button></td>
-          <button class="btn btn-primary mt-3 mybtns"  onclick= "location.href='{% url 'sorting' project.id %}'">Re-Order IO List</button></td>
+          <a class="btn btn-primary mt-3 mybtns"  onclick= "location.href='{% url 'iolist_project' project.id %}'">Review IO List</a></td>
+          <a class="btn btn-primary mt-3 mybtns"  onclick= "location.href='{% url 'sorting' project.id %}'">Re-Order IO List</a></td>
           <span></span>
           </div>
         <div class="row">

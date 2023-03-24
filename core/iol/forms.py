@@ -53,7 +53,7 @@ class SignalsForm(forms.ModelForm):
 class IOListForm(forms.ModelForm):
     class Meta:
         model = IOList
-        exclude = ['created_by', 'created_at', 'updated_at', 'io_address','channel']
+        exclude = ['created_by', 'created_at', 'updated_at', 'io_address','channel', 'cluster_number', 'order']
         widgets = {
             'project': forms.TextInput(attrs={'class': 'form-control', 'readonly' : 'readonly'}),
         }

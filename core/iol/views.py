@@ -348,6 +348,8 @@ class IolistView(View):
 
     def edit(self, request, *args, **kwargs):
         iolist = get_object_or_404(IOList, id=kwargs.get('pk'))
+        project_id = request.session.get('project')
+        project = get_object_or_404(Project, pk=project_id)
         if request.method == 'POST':
             form = IOListForm(request.POST, instance=iolist)
             print("It's Post")
@@ -357,13 +359,11 @@ class IolistView(View):
                 messages.success(request, 'Item updated successfully')
                 redirect_url = reverse('iolist')
                 response = {'valid': 'success', 'message': 'Item updated successfully', 'redirect_url': redirect_url}
-                return redirect('iolist')
+                return redirect('iolist', project_id )
             else:
                 print(form.errors)
         else:
             form = IOListForm(instance=iolist)
-        project_id = request.session.get('project')
-        project = get_object_or_404(Project, pk=project_id)
         context = {
             'form': form,
             'iolist': iolist,
