@@ -241,6 +241,9 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
         row += 1
         Q_Pointer+= 1
         # print(Q_Pointer)
+    dup_format = workbook.add_format({'bg_color': '#FFC7CE','font_color': '#9C0006'})
+
+    worksheet.conditional_format(f'D2:D{row}', {'type': 'duplicate','format': dup_format})
     print(F'Panel number {panel} of count {I_Pointer}, {Q_Pointer}.')
     return workbook, I_Pointer, Q_Pointer
 
