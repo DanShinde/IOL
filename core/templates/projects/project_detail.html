@@ -62,11 +62,18 @@
       </form>
       </div>
     <div class="col-md-6 right" id= "IOList">
+      <button id= "HideIO">Hide</button>
           {% include 'projects/iolist_in_add.html' %}
     </div>
   </div>
 </div>
-
+<script>
+  $(document).ready(function(){
+    $("HideIO").click(function(){
+      $("#toHide").toggle();
+    });
+  });
+</script>
 <script>
   document.body.addEventListener('htmx:configRequest', (event) => {
       event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';

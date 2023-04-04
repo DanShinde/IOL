@@ -13,6 +13,7 @@ htmx_views = [
     path('<int:project_id>/', views.IOListView.as_view(template_name='sorting/sorting.html'), name='sorting'),
     path('tag-delete/<int:pk>/', views.delete_tag, name='tag-delete'),
     path('sort_IO/', views.sort_IO, name= "sort_IO"),
+    path('cluster_number_update/<int:pk>/<str:action>', views.cluster_number_update, name= "cluster_number_update"),
 ]
 
 urlpatterns += htmx_views

@@ -7,7 +7,8 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/TableDnD/0.9.1/jquery.tablednd.js" integrity="sha256-d3rtug+Hg1GZPB7Y/yTcRixO/wlI78+2m08tosoRn7A=" crossorigin="anonymous"></script>
 <script src="{% static 'js/htmx.js' %}" defer></script>
-
+<link href="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/css/bootstrap-editable.css" rel="stylesheet"/>
+<script src="//cdnjs.cloudflare.com/ajax/libs/x-editable/1.5.0/bootstrap3-editable/js/bootstrap-editable.min.js"></script>
 
 <div class="container">
     <div class="row" >
@@ -50,7 +51,12 @@
                   <td>{{ iolist.terminal_number }}</td>
                   <td>{{ iolist.location }}</td>
                   <td>{{ iolist.Cluster }}</td>
-                  <td>{{ iolist.cluster_number }}</td>
+                  <td>
+                    <a href="#" class="editable clusternumber" contenteditable="true" data-pk="{{ iolist.pk }}" data-name="cluster_number"
+                    hx-get="{% url 'cluster_number_update' iolist.pk 'update' %}" hx-swap="outerHTML">{{ iolist.cluster_number }}</a>
+                  </td>
+                  
+                  {% comment %} <td>{{ iolist.cluster_number }}</td> {% endcomment %}
                   <td>
                     <span class="badge badge-danger badge-pill"
                           style="cursor: pointer;"
@@ -83,6 +89,26 @@
     var csrf = $("input[name=csrfmiddlewaretoken]").val()
 
     $(document).ready(function() {
+      //Editable logic for Cluster Number
+        // Listen for changes to the editable cell
+      $('a.editable.clusternumber').on('blur', function() {
+        // Get the edited value
+        var editedValue = $(this).text();
+        // Send an HTTP request to update the value on the server-side
+        $.ajax({
+          url: $(this).attr('hx-get'),
+          type: 'POST',
+          data: {
+            value: editedValue
+          },
+          success: function(response) {
+            // Update the table cell with the new value
+            $(this).closest('td').html(response);
+          }
+        });
+      });
+
+
       var tbody = $("#tablesort tbody");
       $("#tablesort").tableDnD({
           onDragClass: "table-warning",

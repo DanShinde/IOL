@@ -86,6 +86,7 @@
                  <div class="col-md-12">
                     <div class="form-group">
                       <input type="submit" value="Update Signal" class="btn btn-warning">
+                      <a href="{% url 'edit_module' module_id=module.id %}" class="btn float-none btn-info">Cancel</a> 
                       <a href="{% url 'signals' signal.id 'delete' %}" class="btn float-right btn-danger">Delete</a> 
                       <div class="submitting"></div>
                     </div>

@@ -1,5 +1,5 @@
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.views.generic import ListView
 from django.core import serializers
 from iol.models import IOList
@@ -13,6 +13,7 @@ class IOListView(ListView):
     def get_queryset(self, *args, **kwargs):
         project = self.request.session.get('project')
         print(project, kwargs.get('project_id'))
+        
         IOs = IOList.objects.filter(project_id = project).order_by('panel_number', 'order','signal_type', 'location')
         return IOs
     
@@ -34,6 +35,21 @@ def sort_IO(request):
     IOList.objects.bulk_update(io_list_queryset, ['order'])
     data = serializers.serialize('json', io_list_queryset)
     return JsonResponse({"iolists": data})
+
+
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def cluster_number_update(request, pk, action):
+    iolist = get_object_or_404(IOList, pk=pk)
+    if action == 'update':
+        parts = request.body.decode('utf-8').split("=")
+        value = parts[1]
+        iolist.cluster_number = int(value)
+        iolist.save()
+        return JsonResponse({'cluster_number': iolist.cluster_number})
+    else:
+        return JsonResponse({'error': 'Invalid request method'})
 
 
     # order_list = request.POST.getlist('iolists')

@@ -110,6 +110,12 @@
   
         </div>
       </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.cluster_namber.id_for_label }}">{{ form.cluster_namber.label_tag }}</label>
+          {% render_field form.cluster_namber|add_class:"form-control" %}
+        </div>
+      </div>
       <ul class="errorlist list-group-item list-group-item-danger">
         {% if form.errors %}
           {% for field in form %}
@@ -125,7 +131,7 @@
                     <div class="form-group">
                       <input type="submit" value="Update Signal" class="btn btn-warning">
 
-
+                      <a href="{% url 'iolist_project' project.id %}" class="btn float-md-none btn-info">Cancel</a> 
                       <a href="{% url 'iolist' iolist.id 'delete' %}" class="btn float-right btn-danger">Delete</a> 
                       <div class="submitting"></div>
                     </div>

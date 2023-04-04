@@ -52,6 +52,7 @@
         <th><input type="text" class="form-control" placeholder="Device Type" disabled></th>
         <th><input type="text" class="form-control" placeholder="Location" disabled></th>
         <th><input type="text" class="form-control" placeholder="Panel Number" disabled></th>
+        <th><input type="text" class="form-control" placeholder="Cluster Number" disabled></th>
         <th><input type="text" class="form-control" placeholder="Created By" disabled></th>
         <th>--</th>
         <th>--</th>
@@ -68,6 +69,7 @@
         <td>{{ iolist.device_type }}</td>
         <td>{{ iolist.location }}</td>
         <td>{{ iolist.panel_number }}</td>
+        <td>{{ iolist.cluster_number }}</td>
         <td>{{ iolist.created_by }}</td>
         <td>
           <a href="{% url 'iolist' iolist.id 'edit' %}" class="btn btn-sm btn-block btn-warning">Edit</a> 

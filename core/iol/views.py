@@ -175,7 +175,7 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
 
     # Writing DIs to file
     for IO in iolist:
-        if IO.signal_type == "DI":
+        if IO.signal_type == "DI" or project.is_Murr:
             channel = (row - 1) % 16 + 1
             worksheet.write(row, 0, row)
             worksheet.write(row, 1, IO.name)
@@ -183,14 +183,24 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
             worksheet.write(row, 3, IO.tag)
             worksheet.write(row, 4, IO.signal_type)
             worksheet.write(row, 5, IO.device_type)
-            if IO.signal_type == "DI":
-                x = f"I{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
-                I_Pointer+= 1
-            elif IO.signal_type == "DO":
-                x = f"Q{str(math.floor((Q_Pointer - 1) / 8))}.{str((Q_Pointer - 1) % 8)}"
-                Q_Pointer+= 1
-            IO.io_address =  x
-            IO.save()
+            if project.is_Murr:
+                if IO.signal_type == "DI":
+                    x = f"I{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
+                    I_Pointer+= 1
+                elif IO.signal_type == "DO":
+                    x = f"Q{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
+                    I_Pointer+= 1
+                IO.io_address =  x
+                IO.save()
+            else:
+                if IO.signal_type == "DI":
+                    x = f"I{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
+                    I_Pointer+= 1
+                elif IO.signal_type == "DO":
+                    x = f"Q{str(math.floor((Q_Pointer - 1) / 8))}.{str((Q_Pointer - 1) % 8)}"
+                    Q_Pointer+= 1
+                IO.io_address =  x
+                IO.save()
             worksheet.write(row, 6, IO.io_address)
             worksheet.write(row, 7, IO.actual_description)
             worksheet.write(row, 8, channel)
@@ -209,30 +219,31 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
         # print(I_Pointer)
 
     #Writing DOs to file
-    for IO in iolist:
-        if IO.signal_type == "DO":
-            channel = (row - 1) % 16 + 1
-            worksheet.write(row, 0, row)
-            worksheet.write(row, 1, IO.name)
-            worksheet.write(row, 2, IO.code)
-            worksheet.write(row, 3, IO.tag)
-            worksheet.write(row, 4, IO.signal_type)
-            worksheet.write(row, 5, IO.device_type)
-            if IO.signal_type == "DI":
-                x = f"I{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
-                I_Pointer+= 1
-            elif IO.signal_type == "DO":
-                x = f"Q{str(math.floor((Q_Pointer - 1) / 8))}.{str((Q_Pointer - 1) % 8)}"
-                Q_Pointer+= 1
-            IO.io_address =  x
-            IO.save()
-            worksheet.write(row, 6, IO.io_address)
-            worksheet.write(row, 7, IO.actual_description)
-            worksheet.write(row, 8, channel)
-            worksheet.write(row, 9, IO.panel_number)
-            worksheet.write(row, 10, IO.location)
-            row += 1
-            IOOut = IO
+    if not project.is_Murr:
+        for IO in iolist:
+            if IO.signal_type == "DO"  :
+                channel = (row - 1) % 16 + 1
+                worksheet.write(row, 0, row)
+                worksheet.write(row, 1, IO.name)
+                worksheet.write(row, 2, IO.code)
+                worksheet.write(row, 3, IO.tag)
+                worksheet.write(row, 4, IO.signal_type)
+                worksheet.write(row, 5, IO.device_type)
+                if IO.signal_type == "DI":
+                    x = f"I{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
+                    I_Pointer+= 1
+                elif IO.signal_type == "DO":
+                    x = f"Q{str(math.floor((Q_Pointer - 1) / 8))}.{str((Q_Pointer - 1) % 8)}"
+                    Q_Pointer+= 1
+                IO.io_address =  x
+                IO.save()
+                worksheet.write(row, 6, IO.io_address)
+                worksheet.write(row, 7, IO.actual_description)
+                worksheet.write(row, 8, channel)
+                worksheet.write(row, 9, IO.panel_number)
+                worksheet.write(row, 10, IO.location)
+                row += 1
+                IOOut = IO
     print(F'Panel number {panel} of I_Pointer count {Q_Pointer}.')
     #Adding Output spares
     for i in range(0,16- ( ((Q_Pointer-1)%16))):
@@ -253,7 +264,11 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
 def export_to_excel(request):
     project_id = request.session.get('project')
     project = get_object_or_404(Project, id=project_id)
-    iolist = IOList.objects.filter(project_id=project_id).order_by('signal_type', 'location','order')
+    if project.is_Murr:
+        iolist = IOList.objects.filter(project_id=project_id).order_by('cluster_number','order')
+        print('Its Murr')
+    else:
+        iolist = IOList.objects.filter(project_id=project_id).order_by('signal_type', 'location','order')
     panels = [i.panel_number for i in iolist]
     panels =[*set(panels)]
     print(panels)
