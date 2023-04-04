@@ -141,18 +141,26 @@ def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer):
     worksheet.write(row, 0, row)
     worksheet.write(row, 1, "Spare")
     worksheet.write(row, 2, "Spare")
-    if IO.signal_type == "DI":
-        worksheet.write(row, 3, f'Ix_Spare_Spare_{count}')
-    elif IO.signal_type == "DO":
-        worksheet.write(row, 3, f'Qx_Spare_Spare_{count}')
+    
     worksheet.write(row, 4, IO.signal_type)
     worksheet.write(row, 5, "Spare_Signal")
-    if IO.signal_type == "DI":
-        # print(f'I_Pointer {I_Pointer}.')
+    if project.is_Murr:
         x = f"I{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
-        # print(x)
-    elif IO.signal_type == "DO":
-        x = f"Q{str(math.floor((Q_Pointer - 1) / 8))}.{str((Q_Pointer - 1) % 8)}"
+        worksheet.write(row, 3, f'Ix_Spare_Spare_{count}')
+        I_Pointer+= 1
+    else:
+        if IO.signal_type == "DI":
+            worksheet.write(row, 3, f'Ix_Spare_Spare_{count}')
+            I_Pointer+= 1
+        elif IO.signal_type == "DO":
+            worksheet.write(row, 3, f'Qx_Spare_Spare_{count}')
+            Q_Pointer+= 1
+        if IO.signal_type == "DI":
+            # print(f'I_Pointer {I_Pointer}.')
+            x = f"I{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
+            # print(x)
+        elif IO.signal_type == "DO":
+            x = f"Q{str(math.floor((Q_Pointer - 1) / 8))}.{str((Q_Pointer - 1) % 8)}"
         # print(x)
     worksheet.write(row, 6, x)
     worksheet.write(row, 7, "Spare Signal")
@@ -214,7 +222,6 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
     for i in range(0,16- ( ((I_Pointer-1)%16))):
         count = i+1
         worksheet, I_Pointer, Q_Pointer = add_spares(worksheet,row,project,IOOut, count, I_Pointer, Q_Pointer)
-        I_Pointer+= 1
         row += 1
         # print(I_Pointer)
 
@@ -246,12 +253,12 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
                 IOOut = IO
     print(F'Panel number {panel} of I_Pointer count {Q_Pointer}.')
     #Adding Output spares
-    for i in range(0,16- ( ((Q_Pointer-1)%16))):
-        count = i+1
-        worksheet, I_Pointer, Q_Pointer = add_spares(worksheet,row,project,IOOut, count, I_Pointer, Q_Pointer)
-        row += 1
-        Q_Pointer+= 1
-        # print(Q_Pointer)
+    if not project.is_Murr:
+        for i in range(0,16- ( ((Q_Pointer-1)%16))):
+            count = i+1
+            worksheet, I_Pointer, Q_Pointer = add_spares(worksheet,row,project,IOOut, count, I_Pointer, Q_Pointer)
+            row += 1
+            # print(Q_Pointer)
     dup_format = workbook.add_format({'bg_color': '#FFC7CE','font_color': '#9C0006'})
 
     worksheet.conditional_format(f'D2:D{row}', {'type': 'duplicate','format': dup_format})
