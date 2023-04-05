@@ -8,6 +8,7 @@
 
         <h1 id= "projectName">{{ project.name }}</h1>
         <p>{{ project.description }}</p>
+        <button id= "HideIO" class="btn btn-primary mt-3 mybtns" style="color:white; cursor: pointer;">Hide IO List</button>
 
         {% load static %}
         <script src="{% static 'js/details.js' %}"></script>
@@ -45,7 +46,7 @@
           <input  id="add-signals-btn" class="btn btn-primary mt-3 mybtns" style="cursor: pointer;" value= "Add Signals" >
           <a class="btn btn-primary mt-3 mybtns" style="color:white; cursor: pointer;" onclick= "location.href='{% url 'iolist_project' project.id %}'">Review IO List</a></td>
           <a class="btn btn-primary mt-3 mybtns" style="color:white; cursor: pointer;" onclick= "location.href='{% url 'sorting' project.id %}'">Re-Order IO List</a></td>
-          <button id= "HideIO" class="btn btn-primary mt-3 mybtns" style="color:white; cursor: pointer;">Hide IO List</button>
+          
           <span></span>
           </div>
         <div class="row">
