@@ -71,6 +71,7 @@
 <script>
   window.onload = function() {
     document.getElementById('HideIO').addEventListener('click', function(event) {
+      event.preventDefault(); 
       var x = document.getElementById("IOList");
       console.log("Hiding");
       if (x.style.display === "none") {
