@@ -71,7 +71,7 @@
   </div>
 </div>
 <script>
-  window.onload = function() {
+  {% comment %} window.onload = function() {
     document.getElementById('toHide').addEventListener('click', function(event) {
       event.preventDefault(); 
       var x = document.getElementById("IOList");
@@ -83,7 +83,7 @@
       }
     });
   };
-  
+   {% endcomment %}
 </script>
 <script>
   document.body.addEventListener('htmx:configRequest', (event) => {
