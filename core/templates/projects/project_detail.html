@@ -45,6 +45,7 @@
           <input  id="add-signals-btn" class="btn btn-primary mt-3 mybtns" style="cursor: pointer;" value= "Add Signals" >
           <a class="btn btn-primary mt-3 mybtns" style="color:white; cursor: pointer;" onclick= "location.href='{% url 'iolist_project' project.id %}'">Review IO List</a></td>
           <a class="btn btn-primary mt-3 mybtns" style="color:white; cursor: pointer;" onclick= "location.href='{% url 'sorting' project.id %}'">Re-Order IO List</a></td>
+          <button id= "HideIO" class="btn btn-primary mt-3 mybtns" style="color:white; cursor: pointer;">Hide IO List</button>
           <span></span>
           </div>
         <div class="row">
@@ -62,17 +63,24 @@
       </form>
       </div>
     <div class="col-md-6 right" id= "IOList">
-      <button id= "HideIO">Hide</button>
+      
           {% include 'projects/iolist_in_add.html' %}
     </div>
   </div>
 </div>
 <script>
-  $(document).ready(function(){
-    $("HideIO").click(function(){
-      $("#toHide").toggle();
+  window.onload = function() {
+    document.getElementById('HideIO').addEventListener('click', function(event) {
+      var x = document.getElementById("IOList");
+      console.log("Hiding");
+      if (x.style.display === "none") {
+        x.style.display = "block";
+      } else {
+        x.style.display = "none";
+      }
     });
-  });
+  };
+  
 </script>
 <script>
   document.body.addEventListener('htmx:configRequest', (event) => {
