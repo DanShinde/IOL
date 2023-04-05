@@ -2,7 +2,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.generic import ListView
 from django.core import serializers
-from iol.models import IOList
+from iol.models import IOList, Project
 # Create your views here.
 
 class IOListView(ListView):
@@ -13,9 +13,15 @@ class IOListView(ListView):
     def get_queryset(self, *args, **kwargs):
         project = self.request.session.get('project')
         print(project, kwargs.get('project_id'))
-        
-        IOs = IOList.objects.filter(project_id = project).order_by('panel_number', 'order','signal_type', 'location')
-        return IOs
+        project_ins = get_object_or_404(Project, pk=project)
+        if project_ins.is_Murr:
+            return IOList.objects.filter(project_id=project).order_by(
+                'panel_number', 'cluster_number', 'order'
+            )
+        else:
+            return IOList.objects.filter(project_id=project).order_by(
+                'panel_number', 'order', 'signal_type', 'location'
+            )
     
 def delete_tag(request, pk):
     io = IOList.objects.get(pk= pk)
@@ -28,10 +34,17 @@ def sort_IO(request):
     order_list = request.POST.getlist('iolists')
     tag_pk_list = [int(pk) for pk in order_list[0].split(',')]
     io_list_queryset = IOList.objects.filter(pk__in=tag_pk_list)
+    project = io_list_queryset[0].project
     io_list_dict = {tag.pk: tag for tag in io_list_queryset}
+    temp_Add = 0
     for idx, tag_key in enumerate(tag_pk_list, start=1):
         tag = io_list_dict[tag_key]
-        tag.order = idx
+        if project.is_Murr and ((idx) % 16 ) in [15,16]:
+            temp_Add += 2
+
+        tag.order = idx + temp_Add
+        print(f'Order is {tag.order}')
+    
     IOList.objects.bulk_update(io_list_queryset, ['order'])
     data = serializers.serialize('json', io_list_queryset)
     return JsonResponse({"iolists": data})
@@ -50,24 +63,5 @@ def cluster_number_update(request, pk, action):
         return JsonResponse({'cluster_number': iolist.cluster_number})
     else:
         return JsonResponse({'error': 'Invalid request method'})
-
-
-    # order_list = request.POST.getlist('iolists')
-    # print(order_list)
-    # tag_pk_list = order_list[0].split(',')
-    # tag_pk_list = [int(pk) for pk in tag_pk_list]
-    # Tags = []
-    # for idx, tag_key in enumerate(tag_pk_list, start=1) :
-    #     print("------------------------------")
-    #     Tag = IOList.objects.get(pk= tag_key)
-    #     print(f'Id is {idx} and key is {tag_key}, {Tag.order}.')
-    #     Tag.order = idx
-    #     Tag.save()
-    #     Tags.append(Tag)
-    #     Tag = IOList.objects.get(pk= tag_key)
-    #     print(Tag.order)
-    # print(Tags)
-    # data = serializers.serialize('json', Tags)
-    # return JsonResponse({"iolists": data}) 
 
 

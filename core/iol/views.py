@@ -11,7 +11,7 @@ from django.views import View
 import pandas as pd
 
 from sorting.utils import get_max_order
-from .utils import get_max_cluster_number
+from .utils import get_max_cluster_number, add_Murr_spares
 from django.contrib import messages
 from django.db.models import Q, OuterRef, Subquery
 from django.views.generic import TemplateView
@@ -128,9 +128,19 @@ def add_signals(request):
             cluster_number = cluster_number,
         )
         entry.save()
-    io_list_to_order = IOList.objects.filter(project = project).order_by('signal_type', 'location')
+    if project.is_Murr:
+        io_list_to_order = IOList.objects.filter(project = project).order_by('cluster_number', 'order')
+    else:
+        io_list_to_order = IOList.objects.filter(project = project).order_by('signal_type', 'location')
+    temp_Add = 0
     for index, signal in enumerate(io_list_to_order):
-        signal.order = index + 1
+        if project.is_Murr and (index) % 16 + 1 in [15,16]:
+            temp_Add += 2
+        # print(f'Index is {index}' , f'Order is {signal.order}')
+        # print((index - 1) % 16 + 1)
+        signal.order = index + 1 + temp_Add
+        # print(f'order is {signal.order}',temp_Add)
+    
     IOList.objects.bulk_update(io_list_to_order, ['order'])
     io_list = IOList.objects.filter(project = project).order_by('-id')
     data = render_to_string('projects/iolist_in_add.html', {'io_list': io_list})
@@ -184,6 +194,12 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
     # Writing DIs to file
     for IO in iolist:
         if IO.signal_type == "DI" or project.is_Murr:
+            while project.is_Murr and ((row-1) % 16 )+1 in [15,16]:
+                worksheet, I_Pointer = add_Murr_spares(worksheet,row,project,IO,I_Pointer)
+                print(f'Spare added row is - {row} & {((row) % 16 )}')
+                row += 1
+        
+            print('Signal Added')
             channel = (row - 1) % 16 + 1
             worksheet.write(row, 0, row)
             worksheet.write(row, 1, IO.name)
@@ -217,7 +233,7 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
             row += 1
             IOOut = IO
     # print(IOOut.signal_type)
-    print(F'Panel number {panel} of I_Pointer count {I_Pointer}.')
+    # print(F'Panel number {panel} of I_Pointer count {I_Pointer}.')
     #Adding Input spares
     for i in range(0,16- ( ((I_Pointer-1)%16))):
         count = i+1
