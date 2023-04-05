@@ -8,8 +8,7 @@
 
         <h1 id= "projectName">{{ project.name }}</h1>
         <p>{{ project.description }}</p>
-        <button id= "HideIO" class="btn btn-primary mt-3 mybtns" style="color:white; cursor: pointer;">Hide IO List</button>
-
+       
         {% load static %}
         <script src="{% static 'js/details.js' %}"></script>
         {% comment %} <form id="module-form" method="post"  hx-post= "{% url 'add_signals' %}"
@@ -64,6 +63,8 @@
       </form>
       </div>
     <div class="col-md-6 right" id= "IOList">
+      <button id= "HideIO" class="btn btn-primary mt-3 mybtns" style="color:white; cursor: pointer;">Hide IO List</button>
+
       
           {% include 'projects/iolist_in_add.html' %}
     </div>
@@ -71,7 +72,7 @@
 </div>
 <script>
   window.onload = function() {
-    document.getElementById('HideIO').addEventListener('click', function(event) {
+    document.getElementById('toHide').addEventListener('click', function(event) {
       event.preventDefault(); 
       var x = document.getElementById("IOList");
       console.log("Hiding");
