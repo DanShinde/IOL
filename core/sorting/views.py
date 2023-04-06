@@ -43,7 +43,7 @@ def sort_IO(request):
             temp_Add += 2
 
         tag.order = idx + temp_Add
-        print(f'Order is {tag.order}')
+        # print(f'Order is {tag.order}')
     
     IOList.objects.bulk_update(io_list_queryset, ['order'])
     data = serializers.serialize('json', io_list_queryset)

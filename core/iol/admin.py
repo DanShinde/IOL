@@ -20,6 +20,11 @@ class SignalsAdmin(ImportExportMixin, admin.ModelAdmin):
 
     resource_class = SignalResource
     list_filter = ('segment', 'module_id')
+    search_fields = (
+        "module_id",
+        "equipment_code",
+        "segment"
+    )
 
 
 
@@ -40,7 +45,13 @@ class IOListAdmin(ImportExportMixin, admin.ModelAdmin):
 
     # list_filter = [IOListFilter]
     list_filter = ('project', 'cluster_number')
-    resource_class = SignalResource
+    search_fields = (
+        "name",
+        "tag",
+        "device_type"
+    )
+
+    resource_class = IOListResource
     
 
 

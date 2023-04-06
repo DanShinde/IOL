@@ -22,6 +22,8 @@ def add_Murr_spares(worksheet,row, project, IO, I_Pointer):
     worksheet.write(row, 8, channel)
     worksheet.write(row, 9, IO.panel_number)
     worksheet.write(row, 10, "CP")
+    if project.is_Murr:
+        worksheet.write(row, 11, "X4" if row%2 == 0 else "X2")
     return worksheet, I_Pointer
     
 def get_max_cluster_number(project_id):

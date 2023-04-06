@@ -183,7 +183,7 @@ def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer):
 def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
     worksheet = workbook.add_worksheet(panel)
     bold = workbook.add_format({'bold': True})
-    columns = ["Sr.No.", "ModuleName",  "Code", "Tag", "Signal Type","Device Type","I/O Address","Actual Description", 'Channel',"Panel Number","Location"]
+    columns = ["Sr.No.", "ModuleName",  "Code", "Tag", "Signal Type","Device Type","I/O Address","Actual Description", 'Channel',"Panel Number","Location","Port"]
     # Fill first row with columns
     row = 0
     for i,elem in enumerate(columns):
@@ -196,10 +196,10 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
         if IO.signal_type == "DI" or project.is_Murr:
             while project.is_Murr and ((row-1) % 16 )+1 in [15,16]:
                 worksheet, I_Pointer = add_Murr_spares(worksheet,row,project,IO,I_Pointer)
-                print(f'Spare added row is - {row} & {((row) % 16 )}')
+                # print(f'Spare added row is - {row} & {((row) % 16 )}')
                 row += 1
         
-            print('Signal Added')
+            # print('Signal Added')
             channel = (row - 1) % 16 + 1
             worksheet.write(row, 0, row)
             worksheet.write(row, 1, IO.name)
@@ -230,6 +230,8 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
             worksheet.write(row, 8, channel)
             worksheet.write(row, 9, IO.panel_number)
             worksheet.write(row, 10, IO.location)
+            if project.is_Murr:
+                worksheet.write(row, 11, "X4" if row%2 == 0 else "X2")
             row += 1
             IOOut = IO
     # print(IOOut.signal_type)
@@ -267,7 +269,7 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
                 worksheet.write(row, 10, IO.location)
                 row += 1
                 IOOut = IO
-    print(F'Panel number {panel} of I_Pointer count {Q_Pointer}.')
+    # print(F'Panel number {panel} of I_Pointer count {Q_Pointer}.')
     #Adding Output spares
     if not project.is_Murr:
         for i in range(0,16- ( ((Q_Pointer-1)%16))):
@@ -278,7 +280,7 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
     dup_format = workbook.add_format({'bg_color': '#FFC7CE','font_color': '#9C0006'})
 
     worksheet.conditional_format(f'D2:D{row}', {'type': 'duplicate','format': dup_format})
-    print(F'Panel number {panel} of count {I_Pointer}, {Q_Pointer}.')
+    # print(F'Panel number {panel} of count {I_Pointer}, {Q_Pointer}.')
     return workbook, I_Pointer, Q_Pointer
 
 
@@ -289,12 +291,12 @@ def export_to_excel(request):
     project = get_object_or_404(Project, id=project_id)
     if project.is_Murr:
         iolist = IOList.objects.filter(project_id=project_id).order_by('cluster_number','order')
-        print('Its Murr')
+        # print('Its Murr')
     else:
         iolist = IOList.objects.filter(project_id=project_id).order_by('signal_type', 'location','order')
     panels = [i.panel_number for i in iolist]
     panels =[*set(panels)]
-    print(panels)
+    # print(panels)
     I_Pointer = 1
     Q_Pointer = 1
     output = BytesIO()
@@ -306,7 +308,7 @@ def export_to_excel(request):
         panels.remove(None)
     
     for panel in sorted(panels):
-        print(panel)
+        # print(panel)
         panelIO = iolist.filter(panel_number=panel)
         workbook, I_Pointer, Q_Pointer = write_sheet(panel, workbook, project, panelIO, I_Pointer, Q_Pointer )
 
@@ -393,10 +395,10 @@ class IolistView(View):
         project = get_object_or_404(Project, pk=project_id)
         if request.method == 'POST':
             form = IOListForm(request.POST, instance=iolist)
-            print("It's Post")
+            # print("It's Post")
             if form.is_valid():
                 form.save()
-                print("It's Save")
+                # print("It's Save")
                 messages.success(request, 'Item updated successfully')
                 redirect_url = reverse('iolist')
                 response = {'valid': 'success', 'message': 'Item updated successfully', 'redirect_url': redirect_url}
@@ -426,7 +428,7 @@ class IolistView(View):
 # To delete IO in Detail view.
 def delete_IO(request,pk):
     io_queryset = IOList.objects.filter(pk=pk)
-    print(io_queryset)
+    # print(io_queryset)
     if io_queryset.exists():
         io = io_queryset.first()
         project = io.project
@@ -472,7 +474,7 @@ class ClusterView(View):
             signal_list.delete()
             redirect_url = reverse('signals')
             response = {'valid': 'success', 'message': 'Item deleted successfully', 'redirect_url': redirect_url}
-            print("Deleted Cluster")
+            # print("Deleted Cluster")
             return redirect('signals')
         else:
             return HttpResponse("User does not have permissions to delete")
@@ -501,10 +503,10 @@ class ClusterView(View):
         signal = get_object_or_404(Signals, id=kwargs.get('pk'))
         if request.method == 'POST':
             form = SignalsForm(request.POST, instance=signal)
-            print("It's Post")
+            # print("It's Post")
             if form.is_valid():
                 form.save()
-                print("It's Save")
+                # print("It's Save")
                 messages.success(request, 'Item updated successfully')
                 redirect_url = reverse('signals')
                 response = {'valid': 'success', 'message': 'Item updated successfully', 'redirect_url': redirect_url}
