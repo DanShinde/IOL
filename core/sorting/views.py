@@ -16,7 +16,7 @@ class IOListView(ListView):
         project_ins = get_object_or_404(Project, pk=project)
         if project_ins.is_Murr:
             return IOList.objects.filter(project_id=project).order_by(
-                'panel_number', 'cluster_number', 'order'
+                'panel_number',  'order' # 'cluster_number',
             )
         else:
             return IOList.objects.filter(project_id=project).order_by(
