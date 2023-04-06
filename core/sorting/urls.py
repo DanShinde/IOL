@@ -14,6 +14,7 @@ htmx_views = [
     path('tag-delete/<int:pk>/', views.delete_tag, name='tag-delete'),
     path('sort_IO/', views.sort_IO, name= "sort_IO"),
     path('cluster_number_update/<int:pk>/<str:action>', views.cluster_number_update, name= "cluster_number_update"),
+    path('order_update/<int:pk>/<str:action>', views.order_update, name= "order_update"),
 ]
 
 urlpatterns += htmx_views

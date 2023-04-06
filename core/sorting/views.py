@@ -64,4 +64,16 @@ def cluster_number_update(request, pk, action):
     else:
         return JsonResponse({'error': 'Invalid request method'})
 
+@csrf_exempt
+def order_update(request, pk, action):
+    iolist = get_object_or_404(IOList, pk=pk)
+    if action == 'update':
+        parts = request.body.decode('utf-8').split("=")
+        value = parts[1]
+        iolist.order = int(value)
+        iolist.save()
+        return JsonResponse({'cluster_number': iolist.order})
+    else:
+        return JsonResponse({'error': 'Invalid request method'})
+
 

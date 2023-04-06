@@ -40,7 +40,11 @@
                 {% for iolist in iolists %}
                 <tr class="item" id="{{forloop.counter}}" data-pk="{{ iolist.pk }}">
                   <input type="hidden" name="iolist_order" value="{{iolist.id}}"/>
-                  <td>{{ iolist.order }}</td>
+                  <td>
+                    <a href="#" class="editable order" contenteditable="true" data-pk="{{ iolist.pk }}" data-name="order"
+                    hx-get="{% url 'order_update' iolist.pk 'update' %}" hx-swap="outerHTML">{{ iolist.order }}</a>
+                  </td>
+                  {% comment %} <td>{{ iolist.order }}</td> {% endcomment %}
                   <td>{{ iolist.project }}</td>
                   <td>{{ iolist.name }}</td>
                   <td>{{ iolist.code }}</td>
@@ -91,6 +95,23 @@
       //Editable logic for Cluster Number
         // Listen for changes to the editable cell
       $('a.editable.clusternumber').on('blur', function() {
+        // Get the edited value
+        var editedValue = $(this).text();
+        // Send an HTTP request to update the value on the server-side
+        $.ajax({
+          url: $(this).attr('hx-get'),
+          type: 'POST',
+          data: {
+            value: editedValue
+          },
+          success: function(response) {
+            // Update the table cell with the new value
+            $(this).closest('td').html(response);
+          }
+        });
+      });
+//Order  edit
+      $('a.editable.order').on('blur', function() {
         // Get the edited value
         var editedValue = $(this).text();
         // Send an HTTP request to update the value on the server-side

@@ -19,10 +19,32 @@ class SignalsAdmin(ImportExportMixin, admin.ModelAdmin):
                     'remarks', 'segment', 'initial_state', 'location', 'module_id']
 
     resource_class = SignalResource
+    list_filter = ('segment', 'module_id')
 
 
 
 
-admin.site.register(IOList)
+
+
+class IOListResource(resources.ModelResource):
+    class Meta:
+        model = IOList
+        fields = '__all__'
+
+
+@admin.register(IOList)
+class IOListAdmin(ImportExportMixin, admin.ModelAdmin):
+    list_display = ['id', 'order', 'cluster_number', 'project', 'name', 
+                    'code', 'tag', 'device_type',	'signal_type',	
+                    'io_address', 'location']
+
+    # list_filter = [IOListFilter]
+    list_filter = ('project', 'cluster_number')
+    resource_class = SignalResource
+    
+
+
+
+# admin.site.register(IOList)
 admin.site.register(Project)
 admin.site.register(Module)
