@@ -183,7 +183,9 @@ def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer):
 def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
     worksheet = workbook.add_worksheet(panel)
     bold = workbook.add_format({'bold': True})
-    columns = ["Sr.No.", "ModuleName",  "Code", "Tag", "Signal Type","Device Type","I/O Address","Actual Description", 'Channel',"Panel Number","Location","Port"]
+    columns = ["Sr.No.", "ModuleName",  "Code", "Tag", "Signal Type","Device Type","I/O Address","Actual Description", 'Channel',"Panel Number","Location"]
+    if project.is_Murr:
+        columns.append("Port")
     # Fill first row with columns
     row = 0
     for i,elem in enumerate(columns):
