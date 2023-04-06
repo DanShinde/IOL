@@ -15,6 +15,8 @@ htmx_views = [
     path('sort_IO/', views.sort_IO, name= "sort_IO"),
     path('cluster_number_update/<int:pk>/<str:action>', views.cluster_number_update, name= "cluster_number_update"),
     path('order_update/<int:pk>/<str:action>', views.order_update, name= "order_update"),
+    path('delete_signal/<int:pk>/', views.delete_in_Reorder, name='delete-signal-reorder'),
 ]
 
 urlpatterns += htmx_views
+

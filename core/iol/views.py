@@ -177,6 +177,9 @@ def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer):
     worksheet.write(row, 8, channel)
     worksheet.write(row, 9, IO.panel_number)
     worksheet.write(row, 10, "CP")
+    if project.is_Murr:
+                worksheet.write(row, 11, "X4" if row%2 == 0 else "X2")
+                worksheet.write(row, 12, f'X{(row-1 % 16+1) // 2}')
     return worksheet, I_Pointer, Q_Pointer
 
 #function to write indivisual sheets while exporting
@@ -185,7 +188,7 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
     bold = workbook.add_format({'bold': True})
     columns = ["Sr.No.", "ModuleName",  "Code", "Tag", "Signal Type","Device Type","I/O Address","Actual Description", 'Channel',"Panel Number","Location"]
     if project.is_Murr:
-        columns.append("Port")
+        columns.extend(("Port", "Murr Channel"))
     # Fill first row with columns
     row = 0
     for i,elem in enumerate(columns):
@@ -200,7 +203,7 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
                 worksheet, I_Pointer = add_Murr_spares(worksheet,row,project,IO,I_Pointer)
                 # print(f'Spare added row is - {row} & {((row) % 16 )}')
                 row += 1
-        
+
             # print('Signal Added')
             channel = (row - 1) % 16 + 1
             worksheet.write(row, 0, row)
@@ -209,24 +212,22 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
             worksheet.write(row, 3, IO.tag)
             worksheet.write(row, 4, IO.signal_type)
             worksheet.write(row, 5, IO.device_type)
-            if project.is_Murr:
-                if IO.signal_type == "DI":
-                    x = f"I{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
-                    I_Pointer+= 1
-                elif IO.signal_type == "DO":
-                    x = f"Q{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
-                    I_Pointer+= 1
-                IO.io_address =  x
-                IO.save()
-            else:
-                if IO.signal_type == "DI":
-                    x = f"I{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
-                    I_Pointer+= 1
-                elif IO.signal_type == "DO":
-                    x = f"Q{str(math.floor((Q_Pointer - 1) / 8))}.{str((Q_Pointer - 1) % 8)}"
-                    Q_Pointer+= 1
-                IO.io_address =  x
-                IO.save()
+            if (
+                project.is_Murr
+                and IO.signal_type == "DI"
+                or not project.is_Murr
+                and IO.signal_type == "DI"
+            ):
+                x = f"I{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
+                I_Pointer+= 1
+            elif project.is_Murr and IO.signal_type == "DO":
+                x = f"Q{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
+                I_Pointer+= 1
+            elif not project.is_Murr and IO.signal_type == "DO":
+                x = f"Q{str(math.floor((Q_Pointer - 1) / 8))}.{str((Q_Pointer - 1) % 8)}"
+                Q_Pointer+= 1
+            IO.io_address =  x
+            IO.save()
             worksheet.write(row, 6, IO.io_address)
             worksheet.write(row, 7, IO.actual_description)
             worksheet.write(row, 8, channel)
@@ -234,12 +235,16 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
             worksheet.write(row, 10, IO.location)
             if project.is_Murr:
                 worksheet.write(row, 11, "X4" if row%2 == 0 else "X2")
+                if ((row-1 % 16)+1) %2 == 0:
+                    worksheet.write(row, 12, f'X{((row-1 % 16)+1) }')
+                # worksheet.write(row, 12, f'X{((row-1 % 16)+1) }')
             row += 1
             IOOut = IO
+        # Channel_Dict= {0:[0,1], 1:[2,3], 2:[4,5], 3:[6,7], 4:[8,9]}
     # print(IOOut.signal_type)
     # print(F'Panel number {panel} of I_Pointer count {I_Pointer}.')
     #Adding Input spares
-    for i in range(0,16- ( ((I_Pointer-1)%16))):
+    for i in range(16- ( ((I_Pointer-1)%16))):
         count = i+1
         worksheet, I_Pointer, Q_Pointer = add_spares(worksheet,row,project,IOOut, count, I_Pointer, Q_Pointer)
         row += 1
@@ -274,7 +279,7 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
     # print(F'Panel number {panel} of I_Pointer count {Q_Pointer}.')
     #Adding Output spares
     if not project.is_Murr:
-        for i in range(0,16- ( ((Q_Pointer-1)%16))):
+        for i in range(16- ( ((Q_Pointer-1)%16))):
             count = i+1
             worksheet, I_Pointer, Q_Pointer = add_spares(worksheet,row,project,IOOut, count, I_Pointer, Q_Pointer)
             row += 1

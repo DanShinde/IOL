@@ -1,8 +1,9 @@
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, render
 from django.views.generic import ListView
 from django.core import serializers
 from iol.models import IOList, Project
+from django.template.loader import render_to_string
 # Create your views here.
 
 class IOListView(ListView):
@@ -77,3 +78,17 @@ def order_update(request, pk, action):
         return JsonResponse({'error': 'Invalid request method'})
 
 
+# To delete IO in Detail view.
+def delete_in_Reorder(request,pk):
+    io_queryset = IOList.objects.filter(pk=pk)
+    # print(io_queryset)
+    if io_queryset.exists():
+        io = io_queryset.first()
+        project = io.project
+        io.delete()
+        io_list = IOList.objects.filter(project = project).order_by('-id')
+        data = render_to_string('sorting/partials/table.html', {'iolists': io_list})
+        return JsonResponse(({'success': True, 'data': data}))
+        # return render(request, 'projects/iolist_in_add.html', {'io_list': iolists})
+    else:
+        return HttpResponseNotFound()
