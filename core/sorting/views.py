@@ -11,6 +11,11 @@ class IOListView(ListView):
     context_object_name = 'iolists'
     template_name='sorting/sorting.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['project'] = IOList.objects.first()
+        return context
+
     def get_queryset(self, *args, **kwargs):
         project = self.request.session.get('project')
         print(project, kwargs.get('project_id'))
@@ -40,19 +45,22 @@ def sort_IO(request):
     temp_Add = 0
     for idx, tag_key in enumerate(tag_pk_list, start=1):
         tag = io_list_dict[tag_key]
-        if project.is_Murr and ((idx) % 16 ) in [15,16]:
+        if project.is_Murr and ((idx - temp_Add) % 16 ) in [15,16]:
             temp_Add += 2
 
-        tag.order = idx + temp_Add
+        tag.order = (((idx-1)//14)*2) + idx         #idx + temp_Add
         # print(f'Order is {tag.order}')
-    
+    # io_list_queryset = IOList.objects.filter(project_id = project).order_by('order')
     IOList.objects.bulk_update(io_list_queryset, ['order'])
-    data = serializers.serialize('json', io_list_queryset)
-    return JsonResponse({"iolists": data})
+    data = render_to_string('sorting/partials/table.html', {'iolists': io_list_queryset})
+    return JsonResponse(({'success': True, 'data': data}))
+    # data = serializers.serialize('json', io_list_queryset)
+    # return JsonResponse({"iolists": data})
 
 
 from django.views.decorators.csrf import csrf_exempt
 
+# cluster number update by editing cluster number in table
 @csrf_exempt
 def cluster_number_update(request, pk, action):
     iolist = get_object_or_404(IOList, pk=pk)
@@ -65,6 +73,7 @@ def cluster_number_update(request, pk, action):
     else:
         return JsonResponse({'error': 'Invalid request method'})
 
+# Order update by editing order number in table
 @csrf_exempt
 def order_update(request, pk, action):
     iolist = get_object_or_404(IOList, pk=pk)
@@ -86,7 +95,7 @@ def delete_in_Reorder(request,pk):
         io = io_queryset.first()
         project = io.project
         io.delete()
-        io_list = IOList.objects.filter(project = project).order_by('-id')
+        io_list = IOList.objects.filter(project = project).order_by('panel_number',  'order')
         data = render_to_string('sorting/partials/table.html', {'iolists': io_list})
         return JsonResponse(({'success': True, 'data': data}))
         # return render(request, 'projects/iolist_in_add.html', {'io_list': iolists})

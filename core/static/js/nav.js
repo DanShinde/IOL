@@ -26,3 +26,23 @@ function setActiveNavButton() {
   window.onload = function() {
     setActiveNavButton(); 
   };
+
+  // console.log(response)
+  //                     var counter = 0;
+  //                     var iolists = JSON.parse(response.iolists);
+  //                     $.each(iolists, function(index, iolist) {
+  //                       var row = tbody.find('tr[data-pk="' + iolist.pk + '"]');
+  //                       row.find('.name').text(iolist.name);
+  //                       row.find('.code').text(iolist.code);
+  //                       row.find('.tag').text(iolist.tag);
+  //                       row.find('.signal_type').text(iolist.signal_type);
+  //                       row.find('.device_type').text(iolist.device_type);
+  //                       row.find('.panel_number').text(iolist.panel_number);
+  //                       row.find('.terminal_number').text(iolist.terminal_number);
+  //                       row.find('.location').text(iolist.location);
+  //                       row.find('.Cluster').text(iolist.Cluster);
+  //                       row.find('.order').text(iolist.order);
+  //                       row.find('.cluster_number').text(iolist.cluster_number);
+  //                       counter+=1;
+  //                       console.log(row.find('.order').text());
+  //                   });

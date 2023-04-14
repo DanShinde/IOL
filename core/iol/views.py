@@ -234,7 +234,7 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
             worksheet.write(row, 9, IO.panel_number)
             worksheet.write(row, 10, IO.location)
             if project.is_Murr:
-                worksheet.write(row, 11, "X4" if row%2 == 0 else "X2")
+                worksheet.write(row, 11, "X2" if row%2 == 0 else "X4")
                 if ((row-1 % 16)+1) %2 == 0:
                     worksheet.write(row, 12, f'X{((row-1 % 16)+1) }')
                 # worksheet.write(row, 12, f'X{((row-1 % 16)+1) }')

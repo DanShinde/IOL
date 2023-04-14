@@ -3,7 +3,12 @@
 
 
 <div class="container">
-    <div class="row" >
+  {% with first_iolist=iolists.first %}
+    <a href="{% url 'project_detail' first_iolist.project_id %}" class="btn float-md-none btn-info">Edit IO List</a>
+    <a href="{% url 'iolist_project' first_iolist.project_id %}" class="btn float-md-none btn-info">Review IO List</a>
+{% endwith %}
+
+    <div class="row" >{{project.name}}
       <div class="col-sm-9 col-xl-10 order-2 order-sm-1 mt-3">
         <h2 class="h6"><strong>Sortable List</strong></h2>
         <div id="sortable" class="  d-flex justify-content-between align-items-center list-group mb-4 mt-3" data-id="1">
@@ -143,26 +148,11 @@
                   data: formData,
                   processData: false,
                   contentType: false,
+                  headers: {"X-CSRFToken": getCookie("csrftoken")},
                   success: function(response) {
-                      console.log('IOList order updated successfully');
-                      console.log(response)
-                      var counter = 0;
-                      var iolists = JSON.parse(response.iolists);
-                      $.each(iolists, function(index, iolist) {
-                        var row = tbody.find('tr[data-pk="' + iolist.pk + '"]');
-                        row.find('.name').text(iolist.name);
-                        row.find('.code').text(iolist.code);
-                        row.find('.tag').text(iolist.tag);
-                        row.find('.signal_type').text(iolist.signal_type);
-                        row.find('.device_type').text(iolist.device_type);
-                        row.find('.panel_number').text(iolist.panel_number);
-                        row.find('.terminal_number').text(iolist.terminal_number);
-                        row.find('.location').text(iolist.location);
-                        row.find('.Cluster').text(iolist.Cluster);
-                        row.find('.order').text(counter);
-                        row.find('.cluster_number').text(iolist.cluster_number);
-                        counter+=1;
-                    });
+                    console.log('IOList order updated successfully');  
+                    $('#tag-list').html(response.data);
+                    console.log("Updated")
                   },
                   error: function(xhr, status, error) {
                       console.log('Error updating IOList order');
