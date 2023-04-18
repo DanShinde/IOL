@@ -1,3 +1,4 @@
+import subprocess
 from django.shortcuts import redirect, render
 from .forms import RegisterForm
 from django.views.decorators.csrf import csrf_exempt
@@ -22,6 +23,17 @@ def git_update(request):
     repo = git.Repo('/home/iol/IOL')
     origin = repo.remotes.origin
     origin.pull()
+    # Run 'collectstatic' command using subprocess
+    cmd = 'python manage.py collectstatic'
+    cmd = 'echo "yes" | python manage.py collectstatic'
+
+    subprocess.run(cmd, shell=True, cwd='/home/iol/IOL/core')
+    #
+    cmd = 'python manage.py makemigrations'
+    subprocess.run(cmd, shell=True, cwd='/home/iol/IOL/core')
+    #
+    cmd = 'python manage.py migrate'
+    subprocess.run(cmd, shell=True, cwd='/home/iol/IOL/core')
     return HttpResponse("Updated code on PythonAnywhere")
 
 class SignUpView(CreateView):

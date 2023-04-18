@@ -14,6 +14,7 @@ class Project(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField()
     is_Murr = models.BooleanField(default=False)
+    isFreeze = models.BooleanField(default=False)
     # segment = models.CharField(max_length=50, blank=True, default =Segments[0][0], choices = Segments)
 
     def __str__(self):

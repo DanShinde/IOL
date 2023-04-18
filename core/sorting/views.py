@@ -20,6 +20,12 @@ class IOListView(ListView):
         project = self.request.session.get('project')
         print(project, kwargs.get('project_id'))
         project_ins = get_object_or_404(Project, pk=project)
+        io_list_queryset = IOList.objects.filter(project_id=project) 
+        for idx, io in enumerate(io_list_queryset, start=1):
+            if project_ins.is_Murr:
+                io.module_position =1 + ( (idx-1)//14) 
+                io.save()
+
         if project_ins.is_Murr:
             return IOList.objects.filter(project_id=project).order_by(
                 'panel_number',  'order' # 'cluster_number',
@@ -42,14 +48,13 @@ def sort_IO(request):
     io_list_queryset = IOList.objects.filter(pk__in=tag_pk_list)
     project = io_list_queryset[0].project
     io_list_dict = {tag.pk: tag for tag in io_list_queryset}
-    temp_Add = 0
+
     for idx, tag_key in enumerate(tag_pk_list, start=1):
         tag = io_list_dict[tag_key]
-        if project.is_Murr and ((idx - temp_Add) % 16 ) in [15,16]:
-            temp_Add += 2
+        tag.order = (((idx-1)//14)*2) + idx if project.is_Murr else idx
+        tag.module_position = (idx-1)//14
+                  #idx + temp_Add
 
-        tag.order = (((idx-1)//14)*2) + idx         #idx + temp_Add
-        # print(f'Order is {tag.order}')
     # io_list_queryset = IOList.objects.filter(project_id = project).order_by('order')
     IOList.objects.bulk_update(io_list_queryset, ['order'])
     data = render_to_string('sorting/partials/table.html', {'iolists': io_list_queryset})

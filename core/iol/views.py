@@ -133,15 +133,15 @@ def add_signals(request):
     else:
         io_list_to_order = IOList.objects.filter(project = project).order_by('signal_type', 'location')
     temp_Add = 0
-    for index, signal in enumerate(io_list_to_order):
-        if project.is_Murr and (index) % 16 + 1 in [15,16]:
-            temp_Add += 2
-        # print(f'Index is {index}' , f'Order is {signal.order}')
-        # print((index - 1) % 16 + 1)
-        signal.order = index + 1 + temp_Add
-        # print(f'order is {signal.order}',temp_Add)
+    for index, signal in enumerate(io_list_to_order, start=1):
+        signal.order = (((index-1)//14)*2) + index if project.is_Murr else index
+        # print(f'Order is {signal.order}')
+        signal.module_position =1+ (index-1)//14 if project.is_Murr else 1+ (index-1)//16
+        # signal.save()
+
     
     IOList.objects.bulk_update(io_list_to_order, ['order'])
+    IOList.objects.bulk_update(io_list_to_order, ['module_position'])
     io_list = IOList.objects.filter(project = project).order_by('-id')
     data = render_to_string('projects/iolist_in_add.html', {'io_list': io_list})
     return JsonResponse({'success': True, 'data': data})
@@ -175,11 +175,12 @@ def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer):
     worksheet.write(row, 6, x)
     worksheet.write(row, 7, "Spare Signal")
     worksheet.write(row, 8, channel)
-    worksheet.write(row, 9, IO.panel_number)
-    worksheet.write(row, 10, "CP")
+    worksheet.write(row, 9, IO.module_position)
+    worksheet.write(row, 10, IO.panel_number)
+    worksheet.write(row, 11, "CP")
     if project.is_Murr:
-                worksheet.write(row, 11, "X4" if row%2 == 0 else "X2")
-                worksheet.write(row, 12, f'X{(row-1 % 16+1) // 2}')
+                worksheet.write(row, 12, "X4" if row%2 == 0 else "X2")
+                worksheet.write(row, 13, f'X{(row-1 % 16+1) // 2}')
     return worksheet, I_Pointer, Q_Pointer
 
 #function to write indivisual sheets while exporting
@@ -231,12 +232,13 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
             worksheet.write(row, 6, IO.io_address)
             worksheet.write(row, 7, IO.actual_description)
             worksheet.write(row, 8, channel)
-            worksheet.write(row, 9, IO.panel_number)
-            worksheet.write(row, 10, IO.location)
+            worksheet.write(row, 9, IO.module_position)
+            worksheet.write(row, 10, IO.panel_number)
+            worksheet.write(row, 11, IO.location)
             if project.is_Murr:
-                worksheet.write(row, 11, "X2" if row%2 == 0 else "X4")
+                worksheet.write(row, 12, "X2" if row%2 == 0 else "X4")
                 if ((row-1 % 16)+1) %2 == 0:
-                    worksheet.write(row, 12, f'X{((row-1 % 16)+1) }')
+                    worksheet.write(row, 13, f'X{((row-1 % 16)+1) }')
                 # worksheet.write(row, 12, f'X{((row-1 % 16)+1) }')
             row += 1
             IOOut = IO
@@ -272,8 +274,9 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
                 worksheet.write(row, 6, IO.io_address)
                 worksheet.write(row, 7, IO.actual_description)
                 worksheet.write(row, 8, channel)
-                worksheet.write(row, 9, IO.panel_number)
-                worksheet.write(row, 10, IO.location)
+                worksheet.write(row, 9, IO.module_position)
+                worksheet.write(row, 10, IO.panel_number)
+                worksheet.write(row, 11, IO.location)
                 row += 1
                 IOOut = IO
     # print(F'Panel number {panel} of I_Pointer count {Q_Pointer}.')
@@ -297,7 +300,7 @@ def export_to_excel(request):
     project_id = request.session.get('project')
     project = get_object_or_404(Project, id=project_id)
     if project.is_Murr:
-        iolist = IOList.objects.filter(project_id=project_id).order_by('cluster_number','order')
+        iolist = IOList.objects.filter(project_id=project_id).order_by('order')
         # print('Its Murr')
     else:
         iolist = IOList.objects.filter(project_id=project_id).order_by('signal_type', 'location','order')
