@@ -185,6 +185,7 @@ def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer):
 
 #function to write indivisual sheets while exporting
 def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer):
+    # sourcery skip: low-code-quality
     worksheet = workbook.add_worksheet(panel)
     bold = workbook.add_format({'bold': True})
     columns = ["Sr.No.", "ModuleName",  "Code", "Tag", "Signal Type","Device Type","I/O Address","Actual Description", 'Channel',"Panel Number","Location"]

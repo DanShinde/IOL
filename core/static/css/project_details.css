@@ -1,0 +1,8 @@
+/* CSS for hover effect on signal-xx checkboxes */
+.di-signals-container input[type='checkbox'][name^='signals-']:hover {
+    background-color: red;
+  }
+  
+  .di-signals-container label:hover {
+    background-color: #f2f2f2;
+  }

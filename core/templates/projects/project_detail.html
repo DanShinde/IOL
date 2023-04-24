@@ -2,6 +2,8 @@
 
 {% block title %}<title>{{ project.name }} IO List</title>{% endblock %}
 {% block content %}
+ {% load static  %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/project_details.css' %}">
 <div class = "container-fluid">
   <div class = "row row-height">
     <div class="col-md-6 left">
@@ -115,14 +117,15 @@
             var signalItem = document.createElement('div');
             var checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
-            checkbox.name = 'signals';
+            checkbox.name = 'signals-'+signal['id'];
+            checkbox.id = 'signals-'+signal['id'];
             checkbox.value = signal['id'];
             if (signal['initial_state'] === true){
               checkbox.checked = true;
             }                        
             signalItem.appendChild(checkbox);
             var label = document.createElement('label');
-            label.htmlFor = 'signal-' + signal['id'];
+            label.htmlFor = 'signals-' + signal['id'];
             label.appendChild(document.createTextNode(signal['code']));
             signalItem.appendChild(label);
             if (signal['signal_type'] === 'DI') {
@@ -161,9 +164,9 @@
   document.getElementById('add-signals-btn').addEventListener('click', function(event) {
     event.preventDefault(); // prevent form from submitting normally
     var module_name = $("#module_name").val();
-    var selectedSignals = $("input[name='signals']:checked").map(function(){
+    var selectedSignals = $("input[name^='signals-']:checked").map(function(){
       return $(this).val();
-    }).get();
+    }).get();    
     console.log(module_name)
     console.log("selecetd signals")
     console.log(selectedSignals)
