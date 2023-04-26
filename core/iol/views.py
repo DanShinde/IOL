@@ -492,13 +492,13 @@ class ClusterView(View):
     
 
     def add(self, request, *args, **kwargs):  # sourcery skip: extract-method
+        module_id = request.session.get('module')
+        module = get_object_or_404(Module, id= module_id)
         if request.method == 'POST':
             form = SignalsForm(request.POST)
             if form.is_valid():
                 signal = form.save(commit=False)
                 signal.created_by = request.user.get_full_name()
-                module_id = request.session.get('module')
-                module = get_object_or_404(Module, id= module_id)
                 signal.module = module
                 signal.save()
                 module.updated_at = datetime.now()
