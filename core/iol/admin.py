@@ -44,7 +44,7 @@ class IOListAdmin(ImportExportMixin, admin.ModelAdmin):
                     'io_address', 'location']
 
     # list_filter = [IOListFilter]
-    list_filter = ('project', 'cluster_number')
+    list_filter = ('project', 'cluster_number', 'equipment_code')
     search_fields = (
         "name",
         "tag",

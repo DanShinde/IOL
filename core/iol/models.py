@@ -44,7 +44,7 @@ class IOList(models.Model):
     tag = models.CharField(max_length=100, editable=False)
     signal_type = models.CharField(max_length=10)
     device_type = models.TextField(max_length=100, blank=True)
-    actual_description = models.TextField(max_length=100)
+    actual_description = models.TextField(max_length=200)
     panel_number = models.CharField(max_length=10, blank=True, null=True, default='CP01')
     node = models.CharField(max_length=10, blank=True, null=True)
     rack = models.IntegerField(blank=True, null=True)

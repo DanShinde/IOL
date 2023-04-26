@@ -506,7 +506,7 @@ class ClusterView(View):
                 return redirect('signals')
         else:
             form = SignalsForm()
-        return render(request, 'update_data/edit_signal.html', {'form': form})
+        return render(request, 'update_data/edit_signal.html', {'form': form, 'module' : module})
 
     
 
