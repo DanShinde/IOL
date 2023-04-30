@@ -5,6 +5,8 @@ from django.contrib.auth.models import User
 Segments=(('Carton/Tote Handling','Carton/Tote Handling'),
           ('Slit Roll','Slit Roll'),
           ('CBS', 'CBS'))
+ChoicesPLC=(('Siemens','Siemens'),
+            ('Allen Bradley', 'Allen Bradley'))
 
 class Project(models.Model):
     name = models.CharField(max_length=50)
@@ -15,6 +17,7 @@ class Project(models.Model):
     updated_at = models.DateTimeField()
     is_Murr = models.BooleanField(default=False)
     isFreeze = models.BooleanField(default=False)
+    PLC = models.CharField(max_length=50, default='Siemens', choices = ChoicesPLC)
     # segment = models.CharField(max_length=50, blank=True, default =Segments[0][0], choices = Segments)
 
     def __str__(self):
@@ -41,7 +44,7 @@ class IOList(models.Model):
     name = models.CharField(max_length=30)
     equipment_code = models.CharField(max_length=30)
     code = models.CharField(max_length=40)
-    tag = models.CharField(max_length=100, editable=False)
+    tag = models.CharField(max_length=100, editable=True)
     signal_type = models.CharField(max_length=10)
     device_type = models.TextField(max_length=100, blank=True)
     actual_description = models.TextField(max_length=200)

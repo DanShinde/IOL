@@ -25,7 +25,7 @@
     
     
 
-  <table class="table-dark table-striped iotable table" id='example'>
+  <table class=" table-striped  iotable table" id='example'>
     <thead>
 
 
@@ -38,8 +38,8 @@
         <th><input type="text" class="form-control" placeholder="Signal Type" disabled></th>
         <th><input type="text" class="form-control" placeholder="Device Type" disabled></th>
         <th><input type="text" class="form-control" placeholder="Location" disabled></th>
-        <th><input type="text" class="form-control" placeholder="Initial State" disabled></th>
         <th><input type="text" class="form-control" placeholder="Cluster" disabled></th>
+        <th><input type="text" class="form-control" placeholder="Initial State" disabled></th>
         <th><input type="text" class="form-control" placeholder="Created By" disabled></th>
         <th><input type="text" class="form-control" placeholder="Created At" disabled></th>
         <th>--</th>
@@ -58,6 +58,10 @@
         <td>{{ signal.device_type }}</td>
         <td>{{ signal.location }}</td>
         <td>{{ signal.module }}</td>
+        <td>
+          <input type="checkbox" name="initial_state" class="form-control" 
+          id="id_initial_state" {% if signal.initial_state %}checked{% endif %}>
+        </td>
         <td>{{ signal.created_by }}</td>
         <td>{{ signal.created_at }}</td>
         <td>

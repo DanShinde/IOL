@@ -15,7 +15,7 @@ class SignalResource(resources.ModelResource):
 @admin.register(Signals)
 class SignalsAdmin(ImportExportMixin, admin.ModelAdmin):
     list_display = ['id', 'equipment_code', 'code','component_description',
-                    'function_purpose',	'device_type',	'signal_type',	
+                    'function_purpose',	'device_type',	'signal_type',
                     'remarks', 'segment', 'initial_state', 'location', 'module_id']
 
     resource_class = SignalResource
@@ -39,12 +39,12 @@ class IOListResource(resources.ModelResource):
 
 @admin.register(IOList)
 class IOListAdmin(ImportExportMixin, admin.ModelAdmin):
-    list_display = ['id', 'order', 'cluster_number', 'project', 'name', 
-                    'code', 'tag', 'device_type',	'signal_type',	
+    list_display = ['id','tag', 'order', 'cluster_number', 'project', 'name',
+                    'code',  'device_type',	'signal_type',
                     'io_address', 'location']
 
     # list_filter = [IOListFilter]
-    list_filter = ('project', 'cluster_number', 'equipment_code')
+    list_filter = ('project', 'cluster_number', 'equipment_code', 'panel_number', 'Cluster')
     search_fields = (
         "name",
         "tag",
@@ -52,7 +52,7 @@ class IOListAdmin(ImportExportMixin, admin.ModelAdmin):
     )
 
     resource_class = IOListResource
-    
+
 
 
 
