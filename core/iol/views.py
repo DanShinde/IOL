@@ -151,12 +151,12 @@ def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer, panel_n):
     worksheet.write(row, 0, row)
     worksheet.write(row, 1, "Spare")
     worksheet.write(row, 2, "Spare")
-
+    letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     worksheet.write(row, 4, IO.signal_type)
     worksheet.write(row, 5, "Spare_Signal")
     if project.is_Murr:
         if project.PLC == "Allen Bradley":
-            letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            
             x = f"RACK{letters[panel_n]}:1:I{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
         else:
             x = f"I{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
