@@ -171,12 +171,14 @@ def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer, panel_n):
             Q_Pointer+= 1
         if IO.signal_type == "DI":
             # print(f'I_Pointer {I_Pointer}.')
+            letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
             if project.PLC == "Allen Bradley":
                 x = f"RACK{letters[panel_n]}:1:I{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
             else:
                 x = f"I{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
             # print(x)
         elif IO.signal_type == "DO":
+            letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
             if project.PLC == "Allen Bradley":
                 x = f"RACK{letters[panel_n]}:1:O{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
             else:
