@@ -206,7 +206,7 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer, panel_n):
         worksheet.write(row, i, elem, bold)
     row += 1
     # Now fill other rows with columns
-
+    letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     # Writing DIs to file
     for IO in iolist:
         if IO.signal_type == "DI" or project.is_Murr:
