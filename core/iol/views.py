@@ -362,6 +362,8 @@ def export_to_excel(request):
         panels.remove(None)
     for panel_n, panel in enumerate(panels, start=0):
         panelIO = iolist.filter(panel_number=panel)
+        if project.PLC == "Allen Bradley":
+            I_Pointer = 1
         workbook, I_Pointer, Q_Pointer = write_sheet(panel, workbook, project, panelIO, I_Pointer, Q_Pointer , panel_n)
 
     workbook.close()
