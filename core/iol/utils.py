@@ -5,7 +5,7 @@ from django.core.paginator import Paginator
 from django.template.loader import render_to_string
 from .models import IOList
 
-def add_Murr_spares(worksheet,row, project, IO, I_Pointer):
+def add_Murr_spares(worksheet,row, project, IO, I_Pointer,panel_n):
     channel = (row - 1) % 16 + 1
     worksheet.write(row, 0, row)
     worksheet.write(row, 1, "Spare")
@@ -17,6 +17,12 @@ def add_Murr_spares(worksheet,row, project, IO, I_Pointer):
         x = f"I{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
         worksheet.write(row, 3, f'Ix_Spare_Spare_{x}')
         I_Pointer+= 1
+    else:
+        letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        if project.PLC == "Allen Bradley":
+            x = f"RACK{letters[panel_n]}:{math.floor((I_Pointer - 1) / 8) + 1}:I.{(I_Pointer - 1) % 8 + 1}"
+            
+
     worksheet.write(row, 6, x)
     worksheet.write(row, 7, "Spare Signal")
     worksheet.write(row, 8, channel)

@@ -156,7 +156,7 @@ def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer, panel_n):
     worksheet.write(row, 5, "Spare_Signal")
     if project.is_Murr:
         if project.PLC == "Allen Bradley":
-            x = f"RACK{letters[panel_n]}:1:I{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
+            x = f"RACK{letters[panel_n]}:{math.floor((I_Pointer - 1) / 8) + 1}:I.{(I_Pointer - 1) % 8 + 1}"
         else:
             x = f"I{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
         worksheet.write(row, 3, f'Ix_Spare_Spare_{count}')
@@ -164,15 +164,13 @@ def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer, panel_n):
     else:
         if IO.signal_type == "DI":
             worksheet.write(row, 3, f'Ix_Spare_Spare_{count}')
-            I_Pointer+= 1
         elif IO.signal_type == "DO":
             worksheet.write(row, 3, f'Qx_Spare_Spare_{count}')
-            Q_Pointer+= 1
         if IO.signal_type == "DI":
             # print(f'I_Pointer {I_Pointer}.')
             letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
             if project.PLC == "Allen Bradley":
-                x = f"RACK{letters[panel_n]}:{math.floor((I_Pointer - 1) / 8) + 1}:I.{(I_Pointer - 1) % 8 + 1}"
+                x = f"RACK{letters[panel_n]}:{math.floor((I_Pointer - 1) / 8) + 1}:I.{(I_Pointer - 1) % 8}"
             else:
                 x = f"I{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
             I_Pointer+= 1
@@ -180,10 +178,11 @@ def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer, panel_n):
         elif IO.signal_type == "DO":
             letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
             if project.PLC == "Allen Bradley":
-                x = f"RACK{letters[panel_n]}:{math.floor((I_Pointer - 1) / 8) + 1}:O.{(I_Pointer - 1) % 8 + 1}"
+                x = f"RACK{letters[panel_n]}:{math.floor((I_Pointer - 1) / 8) + 1}:O.{(I_Pointer - 1) % 8}"
+                I_Pointer+= 1
             else:
                 x = f"Q{str(math.floor((Q_Pointer - 1) / 8))}.{str((Q_Pointer - 1) % 8)}"
-            Q_Pointer+= 1
+                Q_Pointer+= 1
         # print(x)
     worksheet.write(row, 6, x)
     worksheet.write(row, 7, "Spare Signal")
@@ -214,8 +213,7 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer, panel_n):
     for IO in iolist:
         if IO.signal_type == "DI" or project.is_Murr:
             while project.is_Murr and ((row-1) % 16 )+1 in [15,16]:
-                worksheet, I_Pointer = add_Murr_spares(worksheet,row,project,IO,I_Pointer)
-                # print(f'Spare added row is - {row} & {((row) % 16 )}')
+                worksheet, I_Pointer = add_Murr_spares(worksheet,row,project,IO,I_Pointer, panel_n)
                 row += 1
 
             # print('Signal Added')
@@ -227,10 +225,10 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer, panel_n):
             worksheet.write(row, 4, IO.signal_type)
             worksheet.write(row, 5, IO.device_type)
             if (
-                project.is_Murr
-                and IO.signal_type == "DI"
-                or not project.is_Murr
-                and IO.signal_type == "DI"
+                (project.is_Murr
+                and IO.signal_type == "DI")
+                or (not project.is_Murr
+                and IO.signal_type == "DI")
             ):
                 if project.PLC == "Allen Bradley":
                     x = f"RACK{letters[panel_n]}:{math.floor((I_Pointer - 1) / 8) + 1}:I.{(I_Pointer - 1) % 8 }"
@@ -244,11 +242,14 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer, panel_n):
                     x = f"Q{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
                 I_Pointer+= 1
             elif not project.is_Murr and IO.signal_type == "DO":
+                print("DO it is")
                 if project.PLC == "Allen Bradley":
                     x = f"RACK{letters[panel_n]}:{math.floor((I_Pointer - 1) / 8) + 1}:O.{(I_Pointer - 1) % 8 }"
+                    I_Pointer+= 1
+                    print(x)
                 else:
                     x = f"Q{str(math.floor((Q_Pointer - 1) / 8))}.{str((Q_Pointer - 1) % 8)}"
-                Q_Pointer+= 1
+                    Q_Pointer+= 1
             IO.io_address =  x
             IO.save()
             worksheet.write(row, 6, IO.io_address)
@@ -289,16 +290,17 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer, panel_n):
                 worksheet.write(row, 5, IO.device_type)
                 if IO.signal_type == "DI":
                     if project.PLC == "Allen Bradley":
-                        x = f"RACK{letters[panel_n]}:1:I{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
+                        x = f"RACK{letters[panel_n]}:{math.floor((I_Pointer - 1) / 8) + 1}:I.{(I_Pointer - 1) % 8 }"
                     else:
                         x = f"I{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
                     I_Pointer+= 1
                 elif IO.signal_type == "DO":
                     if project.PLC == "Allen Bradley":
-                        x = f"RACK{letters[panel_n]}:1:O{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
+                        x = f"RACK{letters[panel_n]}:{math.floor((I_Pointer - 1) / 8) + 1}:O.{(I_Pointer - 1) % 8 }"
+                        I_Pointer+= 1
                     else:
                         x = f"Q{str(math.floor((Q_Pointer - 1) / 8))}.{str((Q_Pointer - 1) % 8)}"
-                    Q_Pointer+= 1
+                        Q_Pointer+= 1
                 IO.io_address =  x
                 IO.save()
                 worksheet.write(row, 6, IO.io_address)
@@ -312,11 +314,17 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer, panel_n):
     # print(F'Panel number {panel} of I_Pointer count {Q_Pointer}.')
     #Adding Output spares
     if not project.is_Murr:
-        for i in range(16- ( ((Q_Pointer-1)%16))):
-            count = i+1
-            worksheet, I_Pointer, Q_Pointer = add_spares(worksheet,row,project,IOOut, count, I_Pointer, Q_Pointer, panel_n)
-            row += 1
-            # print(Q_Pointer)
+
+        if project.PLC == "Allen Bradley":
+            for i in range(16- ( ((I_Pointer-1)%16))):
+                count = i+1
+                worksheet, I_Pointer, Q_Pointer = add_spares(worksheet,row,project,IOOut, count, I_Pointer, Q_Pointer, panel_n)
+                row += 1
+        else:
+            for i in range(16- ( ((Q_Pointer-1)%16))):
+                count = i+1
+                worksheet, I_Pointer, Q_Pointer = add_spares(worksheet,row,project,IOOut, count, I_Pointer, Q_Pointer, panel_n)
+                row += 1
     dup_format = workbook.add_format({'bg_color': '#FFC7CE','font_color': '#9C0006'})
 
     worksheet.conditional_format(f'D2:D{row}', {'type': 'duplicate','format': dup_format})
@@ -346,7 +354,7 @@ def export_to_excel(request):
     while None in panels:
         # removing None from list using remove method
         panels.remove(None)
-    for panel_n, panel in enumerate(sorted(panels), start=1):
+    for panel_n, panel in enumerate(sorted(panels), start=0):
         panelIO = iolist.filter(panel_number=panel)
         workbook, I_Pointer, Q_Pointer = write_sheet(panel, workbook, project, panelIO, I_Pointer, Q_Pointer , panel_n)
 
