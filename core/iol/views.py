@@ -343,11 +343,13 @@ def export_to_excel(request):
         # print('Its Murr')
     else:
         iolist = IOList.objects.filter(project_id=project_id).order_by('signal_type', 'location','order')
-    if project.panel_numbers:
+    if len(project.panel_numbers) > 2:
         panels = project.panel_numbers.split(",")
+        print(panels)
     else:
         panels = [i.panel_number for i in iolist]
         panels =[*set(panels)]
+        panels = sorted(panels)
     # print(panels)
     I_Pointer = 1
     Q_Pointer = 1
@@ -358,7 +360,7 @@ def export_to_excel(request):
     while None in panels:
         # removing None from list using remove method
         panels.remove(None)
-    for panel_n, panel in enumerate(sorted(panels), start=0):
+    for panel_n, panel in enumerate(panels, start=0):
         panelIO = iolist.filter(panel_number=panel)
         workbook, I_Pointer, Q_Pointer = write_sheet(panel, workbook, project, panelIO, I_Pointer, Q_Pointer , panel_n)
 
