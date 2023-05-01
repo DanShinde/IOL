@@ -342,8 +342,11 @@ def export_to_excel(request):
         # print('Its Murr')
     else:
         iolist = IOList.objects.filter(project_id=project_id).order_by('signal_type', 'location','order')
-    panels = [i.panel_number for i in iolist]
-    panels =[*set(panels)]
+    if project.panel_numbers:
+        panels = project.panel_numbers.split(",")
+    else:
+        panels = [i.panel_number for i in iolist]
+        panels =[*set(panels)]
     # print(panels)
     I_Pointer = 1
     Q_Pointer = 1

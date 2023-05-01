@@ -24,6 +24,7 @@ class Project(models.Model):
     isFreeze = models.BooleanField(default=False)
     PLC = models.CharField(max_length=50, default='Siemens', choices = ChoicesPLC)
     panels = models.JSONField(blank=True, null=True)
+    panel_numbers = models.CharField(max_length=1000, blank=True, null=True)
     # segment = models.CharField(max_length=50, blank=True, default =Segments[0][0], choices = Segments)
 
     def __str__(self):
