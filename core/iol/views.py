@@ -211,6 +211,7 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer, panel_n):
     letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     # Writing DIs to file
     for IO in iolist:
+        IOOut = IO
         if IO.signal_type == "DI" or project.is_Murr:
             while project.is_Murr and ((row-1) % 16 )+1 in [15,16]:
                 worksheet, I_Pointer = add_Murr_spares(worksheet,row,project,IO,I_Pointer, panel_n)
