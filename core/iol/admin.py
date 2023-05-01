@@ -48,7 +48,8 @@ class IOListAdmin(ImportExportMixin, admin.ModelAdmin):
     search_fields = (
         "name",
         "tag",
-        "device_type"
+        "device_type",
+        "panel_number"
     )
 
     resource_class = IOListResource

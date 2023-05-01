@@ -5,43 +5,60 @@
 <div class="container">
   {% with first_iolist=iolists.first %}
     <a href="{% url 'project_detail' first_iolist.project_id %}" class="btn float-md-none btn-info">Edit IO List</a>
+    <span id = "projects" value = "{{ first_iolist.project_id }}" >
     <a href="{% url 'iolist_project' first_iolist.project_id %}" class="btn float-md-none btn-info">Review IO List</a>
 {% endwith %}
 
-    <div class="row" >{{project.name}}
-      <div class="col-sm-9 col-xl-10 order-2 order-sm-1 mt-3">
-        <h2 class="h6"><strong>Sortable List</strong></h2>
-        <div id="sortable" class="  d-flex justify-content-between align-items-center list-group mb-4 mt-3" data-id="1">
-          {% if iolists %}
-            <div id="tag-form" class= "sortable" >
-              {% csrf_token %}             
-              <table id="tablesort" class = " table-striped table-success" cellspacing="0" cellpadding="2">
-                <thead>
-                  <tr>
-                    <th>Order</th>
-                    <th>Project</th>
-                    <th>Name</th>
-                    <th>Code</th>
-                    <th>Tag</th>
-                    <th>Signal Type</th>
-                    <th>Device Type</th>
-                    <th>Panel Number</th>
-                    <th>Card Number</th>
-                    <th>Location</th>
-                    <th>Cluster</th>
-                    <th>Cluster Number</th>
-                    <th>Delete</th>
-                  </tr>
-                </thead>
-                  <tbody>
-                {% for iolist in iolists %}
-                <tr class="item" id="{{forloop.counter}}" data-pk="{{ iolist.pk }}">
-                  <input type="hidden" name="iolist_order" value="{{iolist.id}}"/>
+<div id= "projectrow" class="row" data-project-id="{{ first_iolist.project_id }}">{{project.name}}  
+  <div class="col-sm-9 col-xl-10 order-2 order-sm-1 mt-3">
+    <h2 class="h6"><strong>Sortable List</strong></h2>
+    <div id="sortable" class="  d-flex justify-content-between align-items-center list-group mb-4 mt-3" data-id="1">
+      <div class="filter-panel mb-3">
+        <div class="card-body">
+          <h4 class="card-title">Filters</h4>
+          <form id="filter-form">
+            <div class="form-group">
+              <label for="panel-number">Panel Number:</label>
+              <select class="form-control" id="panel-number">
+                <option value="">All</option>
+                {% for panel_number in panel_numbers %}
+                  <option value="{{ panel_number }}">{{ panel_number }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Filter</button>
+          </form>
+        </div>
+      </div>
+      {% if iolists %}
+        <div id="tag-form" class="sortable">
+          {% csrf_token %}             
+          <table id="tablesort" class="table-striped table-success" cellspacing="0" cellpadding="2">
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Project</th>
+                <th>Name</th>
+                <th>Code</th>
+                <th>Tag</th>
+                <th>Signal Type</th>
+                <th>Device Type</th>
+                <th>Panel Number</th>
+                <th>Card Number</th>
+                <th>Location</th>
+                <th>Cluster</th>
+                <th>Cluster Number</th>
+                <th>Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for iolist in iolists %}
+                <tr class="item" id="{{ forloop.counter }}" data-pk="{{ iolist.pk }}" data-panel="{{ iolist.panel_number }}">
+                  <input type="hidden" name="iolist_order" value="{{ iolist.id }}"/>
                   <td>
                     <a href="#" class="editable order" contenteditable="true" data-pk="{{ iolist.pk }}" data-name="order"
-                    hx-get="{% url 'order_update' iolist.pk 'update' %}" hx-swap="outerHTML">{{ iolist.order }}</a>
+                      hx-get="{% url 'order_update' iolist.pk 'update' %}" hx-swap="outerHTML">{{ iolist.order }}</a>
                   </td>
-                  {% comment %} <td>{{ iolist.order }}</td> {% endcomment %}
                   <td>{{ iolist.project }}</td>
                   <td>{{ iolist.name }}</td>
                   <td>{{ iolist.code }}</td>
@@ -54,41 +71,71 @@
                   <td>{{ iolist.Cluster }}</td>
                   <td>
                     <a href="#" class="editable clusternumber" contenteditable="true" data-pk="{{ iolist.pk }}" data-name="cluster_number"
-                    hx-get="{% url 'cluster_number_update' iolist.pk 'update' %}" hx-swap="outerHTML">{{ iolist.cluster_number }}</a>
+                      hx-get="{% url 'cluster_number_update' iolist.pk 'update' %}" hx-swap="outerHTML">{{ iolist.cluster_number }}</a>
                   </td>
-                  
-                  {% comment %} <td>{{ iolist.cluster_number }}</td>
-                  hx-confirm="Confirm the delete" 
-                  hx-delete="{% url 'iolist' iolist.pk 'delete' %}"
-                          hx-target="#iolist-list"
-                          {% endcomment %}
                   <td>
                     <span class="badge badge-danger badge-pill"
-                          style="cursor: pointer;"
-                          
-                          onclick="deleteSignal({{ iolist.id }})"
+                      style="cursor: pointer;"
+                      onclick="deleteSignal({{ iolist.id }})"
                     >X</span>
                   </td>
                 </tr>
-                {% endfor %}
+              {% endfor %}
             </tbody>
-            </table>
+          </table>
         </div>
-          {% else %}
-            <p>You do not have any tags in your list</p>
-          {% endif %}
-        </div>
-      </div>
+      {% else %}
+        <p>You do not have any tags in your list</p>
+      {% endif %}
+    </div>
+  </div>
+  <div
+
       <div id= 'Sample'>
       </div>
     </div>
   </div>
-  
+  <script>
+// Get the select element for panel number filter
+const panelNumberSelect = document.querySelector('#panel-number');
+
+// Listen to the change event on the select element
+panelNumberSelect.addEventListener('change', (event) => {
+  // Get the selected panel number
+  const selectedPanelNumber = event.target.value;
+
+  // Construct the query string with panel number parameter
+  const queryString = new URLSearchParams({panel_number: selectedPanelNumber}).toString();
+  const projectRow = document.querySelector('#projects');
+  const projectId = projectRow.getAttribute('value');
+  console.log(projectId); // this will print the project ID to the console
+
+  const url = "{% url 'sorting' 0 %}";
+  const newUrl = url.replace("0", projectId);
+  console.log(newUrl); // this will print the constructed URL to the console
+
+  // Send an AJAX request to fetch the filtered data
+  fetch(url, {
+    method: 'POST',
+    headers: {"X-CSRFToken": getCookie("csrftoken")},
+    body: JSON.stringify({panel_number: selectedPanelNumber})
+  })
+    .then(response => response.text())
+    .then(html => {
+      // Replace the existing table with the filtered table
+      $('#tag-list').html(html);
+    })
+    .catch(error => {
+      console.error(error);
+    });
+});
+
+  </script>
 
 
   <script type="text/javascript">
     var csrf = $("input[name=csrfmiddlewaretoken]").val()
-
+    
     $(document).ready(function() {
       //Editable logic for Cluster Number
         // Listen for changes to the editable cell
