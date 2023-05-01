@@ -146,13 +146,14 @@ def add_signals(request):
     data = render_to_string('projects/iolist_in_add.html', {'io_list': io_list})
     return JsonResponse({'success': True, 'data': data})
 
-def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer, panel_n):
+def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer, panel_n, signal_type):
     channel = (row - 1) % 16 + 1
     worksheet.write(row, 0, row)
     worksheet.write(row, 1, "Spare")
     worksheet.write(row, 2, "Spare")
     letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    worksheet.write(row, 4, IO.signal_type)
+
+    worksheet.write(row, 4, signal_type)
     worksheet.write(row, 5, "Spare_Signal")
     if project.is_Murr:
         if project.PLC == "Allen Bradley":
@@ -162,11 +163,11 @@ def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer, panel_n):
         worksheet.write(row, 3, f'Ix_Spare_Spare_{count}')
         I_Pointer+= 1
     else:
-        if IO.signal_type == "DI":
+        if signal_type == "DI":
             worksheet.write(row, 3, f'Ix_Spare_Spare_{count}')
-        elif IO.signal_type == "DO":
+        elif signal_type == "DO":
             worksheet.write(row, 3, f'Qx_Spare_Spare_{count}')
-        if IO.signal_type == "DI":
+        if signal_type == "DI":
             # print(f'I_Pointer {I_Pointer}.')
             letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
             if project.PLC == "Allen Bradley":
@@ -175,7 +176,7 @@ def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer, panel_n):
                 x = f"I{str(math.floor((I_Pointer - 1) / 8))}.{str((I_Pointer - 1) % 8)}"
             I_Pointer+= 1
             # print(x)
-        elif IO.signal_type == "DO":
+        elif signal_type == "DO":
             letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
             if project.PLC == "Allen Bradley":
                 x = f"RACK{letters[panel_n]}:{math.floor((I_Pointer - 1) / 8) + 1}:O.{(I_Pointer - 1) % 8}"
@@ -272,7 +273,7 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer, panel_n):
     #Adding Input spares
     for i in range(16- ( ((I_Pointer-1)%16))):
         count = i+1
-        worksheet, I_Pointer, Q_Pointer = add_spares(worksheet,row,project,IOOut, count, I_Pointer, Q_Pointer, panel_n)
+        worksheet, I_Pointer, Q_Pointer = add_spares(worksheet,row,project,IOOut, count, I_Pointer, Q_Pointer, panel_n, "DI")
         row += 1
         # print(I_Pointer)
 
@@ -319,12 +320,12 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer, panel_n):
         if project.PLC == "Allen Bradley":
             for i in range(16- ( ((I_Pointer-1)%16))):
                 count = i+1
-                worksheet, I_Pointer, Q_Pointer = add_spares(worksheet,row,project,IOOut, count, I_Pointer, Q_Pointer, panel_n)
+                worksheet, I_Pointer, Q_Pointer = add_spares(worksheet,row,project,IOOut, count, I_Pointer, Q_Pointer, panel_n, "DO")
                 row += 1
         else:
             for i in range(16- ( ((Q_Pointer-1)%16))):
                 count = i+1
-                worksheet, I_Pointer, Q_Pointer = add_spares(worksheet,row,project,IOOut, count, I_Pointer, Q_Pointer, panel_n)
+                worksheet, I_Pointer, Q_Pointer = add_spares(worksheet,row,project,IOOut, count, I_Pointer, Q_Pointer, panel_n, "DO")
                 row += 1
     dup_format = workbook.add_format({'bg_color': '#FFC7CE','font_color': '#9C0006'})
 
