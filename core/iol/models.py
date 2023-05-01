@@ -1,6 +1,11 @@
 from django.db import models
 from django.db.models.base import ModelBase
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+
+from django.dispatch import receiver
+
+
 
 Segments=(('Carton/Tote Handling','Carton/Tote Handling'),
           ('Slit Roll','Slit Roll'),
@@ -18,6 +23,7 @@ class Project(models.Model):
     is_Murr = models.BooleanField(default=False)
     isFreeze = models.BooleanField(default=False)
     PLC = models.CharField(max_length=50, default='Siemens', choices = ChoicesPLC)
+    panels = models.JSONField(blank=True, null=True)
     # segment = models.CharField(max_length=50, blank=True, default =Segments[0][0], choices = Segments)
 
     def __str__(self):
@@ -48,7 +54,7 @@ class IOList(models.Model):
     signal_type = models.CharField(max_length=10)
     device_type = models.TextField(max_length=100, blank=True)
     actual_description = models.TextField(max_length=200)
-    panel_number = models.CharField(max_length=10, blank=True, null=True, default='CP01')
+    panel_number = models.CharField(max_length=10, blank=True, null=True, default='CP01') #models.CharField(max_length=30, choices=[(k, k) for k in project.panel_keys]) 
     node = models.CharField(max_length=10, blank=True, null=True)
     rack = models.IntegerField(blank=True, null=True)
     module_position = models.IntegerField(blank=True, null=True)
@@ -92,6 +98,8 @@ class Signals(models.Model):
         else:
             return self.code
 
+# @receiver(post_save, sender=Project)
+# def create_profile(sender, instance, **kwargs):
 
 
 

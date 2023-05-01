@@ -13,7 +13,7 @@ import pandas as pd
 from sorting.utils import get_max_order
 from .utils import get_max_cluster_number, add_Murr_spares
 from django.contrib import messages
-from django.db.models import Q, OuterRef, Subquery
+from django.db.models import Q, OuterRef, Subquery, Count
 from django.views.generic import TemplateView
 import xlsxwriter
 from django.template.loader import render_to_string
@@ -360,6 +360,14 @@ def export_to_excel(request):
 
     workbook.close()
     output.seek(0)
+    panel_counts = iolist.filter(tag__icontains='spare') \
+                    .values('panel_number') \
+                    .annotate(count=Count('tag', filter=Q(tag__icontains='spare'))) \
+                    .values_list('panel_number', 'count')
+    
+    project.panels = dict(panel_counts)
+    print(project.panels)
+    project.save()
     response = HttpResponse(output.read(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     return response
 
