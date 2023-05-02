@@ -25,6 +25,7 @@ class Project(models.Model):
     PLC = models.CharField(max_length=50, default='Siemens', choices = ChoicesPLC)
     panels = models.JSONField(blank=True, null=True)
     panel_numbers = models.CharField(max_length=1000, blank=True, null=True)
+
     # segment = models.CharField(max_length=50, blank=True, default =Segments[0][0], choices = Segments)
 
     def __str__(self):
@@ -70,6 +71,7 @@ class IOList(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     order = models.PositiveIntegerField(null=True)
     cluster_number = models.PositiveIntegerField(null=True)
+    Demo_3d_Property = models.CharField(max_length=200, blank=True, null=True)
 
     def __str__(self):
         return self.tag
@@ -93,6 +95,7 @@ class Signals(models.Model):
     created_by = models.CharField(max_length=30)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    Demo_3d_Property = models.CharField(max_length=200, blank=True, null=True)
     def __str__(self):
         if self.equipment_code != '':
             return f'{self.equipment_code}_{self.code}'

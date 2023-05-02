@@ -43,8 +43,13 @@
           {% render_field form.description|add_class:"form-control" %}
         </div>
       </div>
-      
 
+      
+        {% if messages %}
+        {% for message in messages%}
+        <h2 class= "text-danger text-center" >{{message}}</h2>
+        {% endfor %}
+        {% endif %}
 
                  <div class="col-md-12">
                     <div class="form-group">

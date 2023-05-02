@@ -80,14 +80,20 @@
           {% render_field form.initial_state|add_class:"form-control" %}
         </div>
       </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.Demo_3d_Property.id_for_label }}">{{ form.Demo_3d_Property.label_tag }}</label>
+          {% render_field form.Demo_3d_Property|add_class:"form-control" %}
+        </div>
+      </div>
 
 
 
                  <div class="col-md-12">
                     <div class="form-group">
                       <input type="submit" value="Update Signal" class="btn btn-warning">
-                      <a href="{% url 'edit_module' module_id=module.id %}" class="btn float-none btn-info">Cancel</a> 
-                      <a href="{% url 'signals' signal.id 'delete' %}" class="btn float-right btn-danger">Delete</a> 
+                      {% comment %} <a href="{% url 'edit_module' module_id=module.id %}" class="btn float-none btn-info">Cancel</a>  {% endcomment %}
+                      <a href="{% url 'signals' signal.id 'delete' %}" class="btn float-right btn-info">Cancel</a> 
                       <div class="submitting"></div>
                     </div>
                   </div>

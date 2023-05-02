@@ -47,8 +47,28 @@ class SignalsForm(forms.ModelForm):
             'initial_state': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'location': forms.Select(attrs={'class': 'form-control'}),
             'module': forms.Select(attrs={'class': 'form-control'}),
+            'Demo_3d_Property': forms.TextInput(attrs={'class': 'form-control'}),
             
         }
+
+    def __init__(self, *args, **kwargs):
+        user = kwargs.pop('user', None)
+        super().__init__(*args, **kwargs)
+        if user and user.groups.filter(name='Emulation').exists():
+            # Disable fields that are not allowed for emulation group
+            self.fields['equipment_code'].widget.attrs['readonly'] = True
+            self.fields['code'].widget.attrs['readonly'] = True
+            self.fields['component_description'].widget.attrs['readonly'] = True
+            self.fields['function_purpose'].widget.attrs['readonly'] = True
+            self.fields['device_type'].widget.attrs['readonly'] = True
+            self.fields['signal_type'].widget.attrs['style'] = 'display: none;'
+            self.fields['segment'].widget.attrs['readonly'] = True
+            self.fields['remarks'].widget.attrs['readonly'] = True
+            self.fields['initial_state'].widget.attrs['style'] = 'display: none;'
+            self.fields['location'].widget.attrs['style'] = 'display: none;'
+            # self.fields['module'].widget.attrs['readonly'] = True
+            
+            
 
 class IOListForm(forms.ModelForm):
     class Meta:

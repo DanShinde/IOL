@@ -4,12 +4,12 @@ import json
 import math
 import subprocess
 from django.forms import inlineformset_factory
-from django.http import HttpRequest, HttpResponse, HttpResponseNotFound, JsonResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseForbidden, HttpResponseNotFound, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.views import View
 import pandas as pd
-
+from django.utils.decorators import method_decorator
 from sorting.utils import get_max_order
 from .utils import get_max_cluster_number, add_Murr_spares
 from django.contrib import messages
@@ -54,13 +54,21 @@ def create_project(request):
 # To view list of projects
 @login_required(login_url="/accounts/login")
 def project_list(request):
-    projects = Project.objects.all()
+    user_groups = request.user.groups.values_list('name', flat=True)
+    projects = Project.objects.filter(segment__in=user_groups).distinct()
     return render(request, 'projects/project_list.html', {'projects': projects})
+
+    # projects = Project.objects.all()
+    # return render(request, 'projects/project_list.html', {'projects': projects})
 
 # Window to add signals to project
 @login_required(login_url="/accounts/login")
 def project_detail(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
+    segment = project.segment
+    if not request.user.groups.filter(name= segment).exists():
+        print("Not in group")
+        return HttpResponseForbidden()
     modules = Module.objects.all()
     signals = None
     request.session['project'] = project_id
@@ -386,16 +394,23 @@ class ModuleListView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        modules = Module.objects.all()
-        serializer = ModuleSerializer(modules, many = True)
-        context["modules"] = serializer.data
+        user_groups = self.request.user.groups.values_list('name', flat=True)
+        # if 'Managers' in user_groups:
+        #     modules = Module.objects.all()
+        # else:
+        if self.request.user.groups.filter(name="Emulation"):
+            modules= Module.objects.all()
+        else:
+            modules = Module.objects.filter(segment__in=user_groups)
+        serializer = ModuleSerializer(modules, many=True)
+        context['modules'] = serializer.data
         return context
 
 
 #Delete Cluster / Module
 def module_destroy(request, id):
-    if request.user.groups.filter(name='Managers').exists():
-        module = Module.objects.get(id=id)
+    module = Module.objects.get(id=id)
+    if request.user.groups.filter(name='Managers').exists() and request.user.groups.filter(name=module.segment).exists():
         module.delete()
         return redirect('/module_list')
     else :
@@ -406,12 +421,15 @@ def module_destroy(request, id):
 def create_module(request):
     if request.method == 'POST':
         form = ClusterForm(request.POST)
-        if form.is_valid():
+        user_groups = request.user.groups.values_list('name', flat=True)
+        if form.is_valid() and form.cleaned_data['segment'] in user_groups:
             module = form.save(commit=False)
             module.created_by = request.user.get_full_name()
             module.save()
             request.session['module'] = module.id
             return redirect('module_list') 
+        else:
+            messages.error(request, f"Invalid form data or you don't have the required rights for this segment - {form.cleaned_data['segment']}.")
     else:
         form = ClusterForm()
     return render(request, 'update_data/form_module.html', {'form': form})
@@ -427,6 +445,7 @@ def iolist_project(request, project_id):
     request.session['project'] = project_id
     return redirect(f'/iolist/{project_id}/get')
 
+@method_decorator(login_required, name='dispatch')
 class IolistView(View):
 
     context = {'segment': 'iolist'}
@@ -436,6 +455,8 @@ class IolistView(View):
         project_id = kwargs.get('pk')
         iolists =IOList.objects.filter(project_id=project_id)
         project = get_object_or_404(Project, pk=project_id)
+        if not request.user.groups.filter(name=project.segment).exists():
+            return HttpResponseForbidden()
         self.context['project'] = project
         self.context['io_list'] = iolists
         return render(request, 'projects/iolist.html', self.context)
@@ -445,6 +466,8 @@ class IolistView(View):
         # sourcery skip: class-extract-method
         iolist = get_object_or_404(IOList, id=kwargs.get('pk'))
         project= iolist.project
+        if not request.user.groups.filter(name=project.segment).exists():
+            return HttpResponseForbidden()
         iolist.delete()
         redirect_url = reverse('iolist')
         
@@ -456,6 +479,8 @@ class IolistView(View):
         iolist = get_object_or_404(IOList, id=kwargs.get('pk'))
         project_id = request.session.get('project')
         project = get_object_or_404(Project, pk=project_id)
+        if not request.user.groups.filter(name=project.segment).exists():
+            return HttpResponseForbidden()
         if request.method == 'POST':
             form = IOListForm(request.POST, instance=iolist)
             # print("It's Post")
@@ -481,6 +506,18 @@ class IolistView(View):
     def dispatch(self, request, *args, **kwargs):
         if kwargs.get('action') == 'get':
             return self.get(request, *args, **kwargs)
+        try:
+            project_id = request.session.get('project')
+            project = get_object_or_404(Project, pk=project_id)
+            print(project)
+            segment = project.segment
+        except:
+            segment = "Test"
+        print(segment)
+        if not request.user.groups.filter(name= segment).exists():
+            print("Not in group")
+            return HttpResponseForbidden()
+
         elif kwargs.get('action') == 'delete':
             return self.delete(request, *args, **kwargs)
         elif kwargs.get('action') == 'edit':
@@ -547,7 +584,7 @@ class ClusterView(View):
         module_id = request.session.get('module')
         module = get_object_or_404(Module, id= module_id)
         if request.method == 'POST':
-            form = SignalsForm(request.POST)
+            form = SignalsForm(request.POST, user=request.user)
             if form.is_valid():
                 signal = form.save(commit=False)
                 signal.created_by = request.user.get_full_name()
@@ -557,7 +594,7 @@ class ClusterView(View):
                 module.save()
                 return redirect('signals')
         else:
-            form = SignalsForm()
+            form = SignalsForm(user=request.user)
         return render(request, 'update_data/edit_signal.html', {'form': form, 'module' : module})
 
     
@@ -565,11 +602,10 @@ class ClusterView(View):
     def edit(self, request, *args, **kwargs):
         signal = get_object_or_404(Signals, id=kwargs.get('pk'))
         if request.method == 'POST':
-            form = SignalsForm(request.POST, instance=signal)
-            # print("It's Post")
+            form = SignalsForm(request.POST,user=request.user, instance=signal)
+            
             if form.is_valid():
                 form.save()
-                # print("It's Save")
                 messages.success(request, 'Item updated successfully')
                 redirect_url = reverse('signals')
                 response = {'valid': 'success', 'message': 'Item updated successfully', 'redirect_url': redirect_url}
@@ -577,7 +613,7 @@ class ClusterView(View):
             else:
                 print(form.errors)
         else:
-            form = SignalsForm(instance=signal)
+            form = SignalsForm(instance=signal, user=request.user)
         module_id = request.session.get('module')
         module = get_object_or_404(Module, pk=module_id)
         context = {
