@@ -7,65 +7,100 @@ from iol.models import IOList, Project
 from django.template.loader import render_to_string
 # Create your views here.
 
+
 class IOListView(ListView):
     model = IOList
     context_object_name = 'iolists'
-    template_name='sorting/sorting.html'
+    template_name = 'sorting/sorting.html'
 
-    def filter_queryset(self, queryset):
-        panel_number = self.request.GET.get('panel_number')
+    def get_queryset(self):
+        project_id = self.request.session.get('project')
+        queryset = self.model.objects.filter(project_id=project_id)
+        project= Project.objects.get(id=project_id)
+        panel_number = self.request.GET.get('panel-number')
+        print(panel_number)
         if panel_number:
             queryset = queryset.filter(panel_number=panel_number)
+
+        if project.is_Murr:
+            queryset = queryset.order_by('panel_number', 'order')
+        else:
+            queryset = queryset.order_by('panel_number', 'order', 'signal_type', 'location')
+
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['project'] = IOList.objects.first()
-        iolist = IOList.objects.filter(project_id=self.request.session.get('project')).order_by('order')
-        panels = [i.panel_number for i in iolist]
-        panels =[*set(panels)]
 
-        # Get the distinct panel numbers in the current project
-        panel_numbers = IOList.objects.filter(project_id=self.request.session.get('project')).values_list('panel_number', flat=True).distinct()
-        context['panel_numbers'] = panels
+        project_id = self.request.session.get('project')
+        context['project'] = Project.objects.get(pk=project_id)
+
+        iolist = self.get_queryset()
+        panel_numbers = iolist.order_by().values_list('panel_number', flat=True).distinct()
+        context['panel_numbers'] = panel_numbers
 
         return context
 
-    def get_queryset(self, *args, **kwargs):
-        project = self.request.session.get('project')
-        panel_number = self.request.GET.get('panel_number')
-        project_ins = get_object_or_404(Project, pk=project)
+
+# class IOListView(ListView):
+#     model = IOList
+#     context_object_name = 'iolists'
+#     template_name='sorting/sorting.html'
+
+#     def filter_queryset(self, queryset):
+#         panel_number = self.request.GET.get('panel_number')
+#         if panel_number:
+#             queryset = queryset.filter(panel_number=panel_number)
+#         return queryset
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['project'] = IOList.objects.first()
+#         iolist = IOList.objects.filter(project_id=self.request.session.get('project')).order_by('order')
+#         panels = [i.panel_number for i in iolist]
+#         panels =[*set(panels)]
+
+#         # Get the distinct panel numbers in the current project
+#         panel_numbers = IOList.objects.filter(project_id=self.request.session.get('project')).values_list('panel_number', flat=True).distinct()
+#         context['panel_numbers'] = panels
+
+#         return context
+
+#     def get_queryset(self, *args, **kwargs):
+#         project = self.request.session.get('project')
+#         panel_number = self.request.GET.get('panel_number')
+#         project_ins = get_object_or_404(Project, pk=project)
         
-        io_list_queryset = IOList.objects.filter(project_id=project) 
-        for idx, io in enumerate(io_list_queryset, start=1):
-            if project_ins.is_Murr:
-                io.module_position =1 + ( (idx-1)//14) 
-                io.save()
+#         io_list_queryset = IOList.objects.filter(project_id=project) 
+#         for idx, io in enumerate(io_list_queryset, start=1):
+#             if project_ins.is_Murr:
+#                 io.module_position =1 + ( (idx-1)//14) 
+#                 io.save()
 
-        queryset = IOList.objects.filter(project_id=project)
-        if panel_number:
-            queryset = queryset.filter(panel_number=panel_number)
+#         queryset = IOList.objects.filter(project_id=project)
+#         if panel_number:
+#             queryset = queryset.filter(panel_number=panel_number)
 
-        if project_ins.is_Murr:
-            queryset = queryset.order_by('panel_number', 'order')
-        else:
-            queryset = queryset.order_by('panel_number', 'order', 'signal_type', 'location')
-        return queryset
+#         if project_ins.is_Murr:
+#             queryset = queryset.order_by('panel_number', 'order')
+#         else:
+#             queryset = queryset.order_by('panel_number', 'order', 'signal_type', 'location')
+#         return queryset
     
-    def post(self, request, *args, **kwargs):
-        data = json.loads(request.body)
-        selected_panel_number = data['panel_number']
+#     def post(self, request, *args, **kwargs):
+#         data = json.loads(request.body)
+#         selected_panel_number = data['panel_number']
 
-        queryset = self.get_queryset()
-        queryset = self.filter_queryset(queryset)
+#         queryset = self.get_queryset()
+#         queryset = self.filter_queryset(queryset)
 
-        if selected_panel_number:
-            queryset = queryset.filter(panel_number=selected_panel_number)
+#         if selected_panel_number:
+#             queryset = queryset.filter(panel_number=selected_panel_number)
 
-        # html = render_to_string('sorting/partials/table.html', {'iolists': queryset})
-        # return JsonResponse({'html': html})
-        data = render_to_string('sorting/partials/table.html', {'iolists': queryset})
-        return JsonResponse(({'success': True, 'data': data}))  
+#         # html = render_to_string('sorting/partials/table.html', {'iolists': queryset})
+#         # return JsonResponse({'html': html})
+#         data = render_to_string('sorting/partials/table.html', {'iolists': queryset})
+#         return JsonResponse(({'success': True, 'data': data}))  
 
     
 def delete_tag(request, pk):

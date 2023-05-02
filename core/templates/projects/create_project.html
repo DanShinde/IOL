@@ -43,6 +43,18 @@
                       {% render_field form.is_Murr|add_class:"form-control" %}
                     </div>
                   </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="label" for="{{ form.PLC.id_for_label }}">{{ form.PLC.label_tag }}</label>
+                      {% render_field form.PLC|add_class:"form-control" %}
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="form-group">
+                      <label class="label" for="{{ form.panel_numbers.id_for_label }}">{{ form.panel_numbers.label_tag }}</label>
+                      {% render_field form.panel_numbers|add_class:"form-control"|attr:"placeholder:Enter panel numbers separated by ',' and no spaces. e.g. CP01,CP02" %}
+                    </div>
+                  </div>
                   <div class="col-md-12">
                     <div class="form-group">
                       <input type="submit" value="Create New Project" class="btn btn-primary">

@@ -9,7 +9,7 @@ from django.forms.models import inlineformset_factory, BaseInlineFormSet
 class ProjectForm(forms.ModelForm):
     class Meta:
         model = Project
-        fields = ['name', 'description', 'segment', 'is_Murr']
+        fields = ['name', 'description', 'segment', 'is_Murr', 'PLC', 'panel_numbers']
         exclude = ['created_by', 'created_at', 'updated_at']
 
 

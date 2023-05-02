@@ -19,7 +19,7 @@
           <form id="filter-form">
             <div class="form-group">
               <label for="panel-number">Panel Number:</label>
-              <select class="form-control" id="panel-number">
+              <select class="form-control" id="panel-number" name="panel-number">
                 <option value="">All</option>
                 {% for panel_number in panel_numbers %}
                   <option value="{{ panel_number }}">{{ panel_number }}</option>
@@ -95,7 +95,8 @@
       </div>
     </div>
   </div>
-  <script>
+{% comment %} 
+<script>
 // Get the select element for panel number filter
 const panelNumberSelect = document.querySelector('#panel-number');
 
@@ -130,7 +131,7 @@ panelNumberSelect.addEventListener('change', (event) => {
     });
 });
 
-  </script>
+  </script> {% endcomment %}
 
 
   <script type="text/javascript">

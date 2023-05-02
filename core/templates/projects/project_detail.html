@@ -3,6 +3,7 @@
 {% block title %}<title>{{ project.name }} IO List</title>{% endblock %}
 {% block content %}
  {% load static  %}
+ {% load custom_filter %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/project_details.css' %}">
 <div class = "container-fluid">
   <div class = "row row-height">
@@ -20,10 +21,14 @@
             <div class="row">
               <div class="col-md-6">
                 <div class="form-group">
-                  <label class="label" for="panel_number">Panel Number</label>
-                  <input type="text" name="panel_number" maxlength="50" class="form-control" required="" id="panel_number" value = 'CP01'>
+                    <label class="label" for="panel_number">Panel Number</label>
+                    <select class="form-control" id="panel_number" name="panel_number">
+                        {% for panel_number in project.panel_numbers|split_string:"," %}
+                          <option value="{{ panel_number }}">{{ panel_number }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
-              </div>
+            </div>            
               <div class="col-md-6">
                 <div class="form-group">
                   <label class="label" for="module_name">Module Name</label>
