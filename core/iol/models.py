@@ -64,7 +64,7 @@ class IOList(models.Model):
     terminal_number = models.IntegerField(blank=True, null=True)
     channel = models.IntegerField( blank=True, null=True)
     location = models.CharField(max_length=2, choices=(('FD', 'FD'), ('CP', 'CP')), default='CP')
-    io_address = models.CharField(max_length=10, blank=True, null=True)
+    io_address = models.CharField(max_length=20, blank=True, null=True)
     Cluster = models.CharField(max_length=50, default="Testing")
     created_by = models.CharField(max_length=30)
     created_at = models.DateTimeField(auto_now_add=True)
