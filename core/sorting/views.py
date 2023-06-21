@@ -151,7 +151,9 @@ def cluster_number_update(request, pk, action):
 def order_update(request, pk, action):
     iolist = get_object_or_404(IOList, pk=pk)
     if action == 'update':
+        print(request.body.decode('utf-8'))
         parts = request.body.decode('utf-8').split("=")
+        print(parts)
         value = parts[1]
         iolist.order = int(value)
         iolist.save()

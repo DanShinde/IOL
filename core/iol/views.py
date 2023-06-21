@@ -154,7 +154,8 @@ def add_signals(request):
     data = render_to_string('projects/iolist_in_add.html', {'io_list': io_list})
     return JsonResponse({'success': True, 'data': data})
 
-def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer, panel_n, signal_type):
+def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer, panel_n, signal_type, panel):
+    # print("Test in spares -",signal_type, IO.tag,  IO)
     channel = (row - 1) % 16 + 1
     worksheet.write(row, 0, row)
     worksheet.write(row, 1, "Spare")
@@ -196,8 +197,9 @@ def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer, panel_n, 
     worksheet.write(row, 6, x)
     worksheet.write(row, 7, "Spare Signal")
     worksheet.write(row, 8, channel)
-    worksheet.write(row, 9, IO.module_position)
-    worksheet.write(row, 10, IO.panel_number)
+    worksheet.write(row, 9, 0)  #IO.module_position
+    # print(IO, "Spare")
+    worksheet.write(row, 10, panel)
     worksheet.write(row, 11, "CP")
     if project.is_Murr:
                 worksheet.write(row, 12, "X4" if row%2 == 0 else "X2")
@@ -219,8 +221,12 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer, panel_n):
     # Now fill other rows with columns
     letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
     # Writing DIs to file
+    # print(iolist)
+    IOOut = iolist.first()
+    # print("Test 1 - ", IOOut)
     for IO in iolist:
-        IOOut = IO
+        IOOut = IO if IO != None else IOOut
+        # print("IO Out is  -", IOOut)
         if IO.signal_type == "DI" or project.is_Murr:
             while project.is_Murr and ((row-1) % 16 )+1 in [15,16]:
                 worksheet, I_Pointer = add_Murr_spares(worksheet,row,project,IO,I_Pointer, panel_n)
@@ -265,8 +271,11 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer, panel_n):
             worksheet.write(row, 6, IO.io_address)
             worksheet.write(row, 7, IO.actual_description)
             worksheet.write(row, 8, channel)
-            worksheet.write(row, 9, IO.module_position)
-            worksheet.write(row, 10, IO.panel_number)
+            worksheet.write(row, 9, 0)  #IO.module_position
+            # print("/n")
+            # print([x for x in IO.__dict__.items() if not x[0].startswith('_')])
+            worksheet.write(row, 10, panel)
+            # print(IO)
             worksheet.write(row, 11, IO.location)
             if project.is_Murr:
                 worksheet.write(row, 12, "X2" if row%2 == 0 else "X4")
@@ -274,22 +283,30 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer, panel_n):
                     worksheet.write(row, 13, f'X{((row-1 % 16)+1) }')
                 # worksheet.write(row, 12, f'X{((row-1 % 16)+1) }')
             row += 1
-            IOOut = IO
+            IOOut = IO if IO != None else IOOut
         # Channel_Dict= {0:[0,1], 1:[2,3], 2:[4,5], 3:[6,7], 4:[8,9]}
     # print(IOOut.signal_type)
     # print(F'Panel number {panel} of I_Pointer count {I_Pointer}.')
     #Adding Input spares
+    # print("Testing -",IOOut)
     for i in range(16- ( ((I_Pointer-1)%16))):
         count = i+1
-        worksheet, I_Pointer, Q_Pointer = add_spares(worksheet,row,project,IOOut, count, I_Pointer, Q_Pointer, panel_n, "DI")
+        worksheet, I_Pointer, Q_Pointer = add_spares(worksheet,row,project,IOOut, count, I_Pointer, Q_Pointer, panel_n, "DI", panel)
         row += 1
         # print(I_Pointer)
-
+    IOOut = iolist.first()
     #Writing DOs to file
     if not project.is_Murr:
         # sourcery skip: low-code-quality
         letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        # print(iolist)
         for IO in iolist:
+            if IO is None:
+                # print("Skipping")
+                continue
+            # print(IO)
+            IOOut = IO if IO != None else IOOut
+            # print("OUT is  - ", IOOut)
             if IO.signal_type == "DO"  :
                 channel = (row - 1) % 16 + 1
                 worksheet.write(row, 0, row)
@@ -320,20 +337,25 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer, panel_n):
                 worksheet.write(row, 10, IO.panel_number)
                 worksheet.write(row, 11, IO.location)
                 row += 1
+                # print("Final - ", IO)
                 IOOut = IO
+                # IOOut = IO if IO != None else IOOut
     # print(F'Panel number {panel} of I_Pointer count {Q_Pointer}.')
     #Adding Output spares
+    
+    # print(IOOut)
     if not project.is_Murr:
 
         if project.PLC == "Allen Bradley":
             for i in range(16- ( ((I_Pointer-1)%16))):
                 count = i+1
-                worksheet, I_Pointer, Q_Pointer = add_spares(worksheet,row,project,IOOut, count, I_Pointer, Q_Pointer, panel_n, "DO")
+                # print(IOOut)
+                worksheet, I_Pointer, Q_Pointer = add_spares(worksheet,row,project,IOOut, count, I_Pointer, Q_Pointer, panel_n, "DO", panel)
                 row += 1
         else:
             for i in range(16- ( ((Q_Pointer-1)%16))):
                 count = i+1
-                worksheet, I_Pointer, Q_Pointer = add_spares(worksheet,row,project,IOOut, count, I_Pointer, Q_Pointer, panel_n, "DO")
+                worksheet, I_Pointer, Q_Pointer = add_spares(worksheet,row,project,IOOut, count, I_Pointer, Q_Pointer, panel_n, "DO", panel)
                 row += 1
     dup_format = workbook.add_format({'bg_color': '#FFC7CE','font_color': '#9C0006'})
 
