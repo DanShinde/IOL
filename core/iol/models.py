@@ -9,7 +9,10 @@ from django.dispatch import receiver
 
 Segments=(('Carton/Tote Handling','Carton/Tote Handling'),
           ('Slit Roll','Slit Roll'),
-          ('CBS', 'CBS'))
+          ('CBS', 'CBS'),
+          ('Robotics','Robotics'),
+          ('ASRS','ASRS'),
+          ('Pallet Handling', 'Pallet Handling'))
 ChoicesPLC=(('Siemens','Siemens'),
             ('Allen Bradley', 'Allen Bradley'))
 
