@@ -12,8 +12,7 @@ Segments=(('Carton/Tote Handling','Carton/Tote Handling'),
           ('CBS', 'CBS'),
           ('Robotics','Robotics'),
           ('ASRS-MB','ASRS-MB'),
-          ('ASRS-Stacker','ASRS-Stacker'),
-          ('Pallet Handling', 'Pallet Handling'))
+          ('ASRS-Stacker','ASRS-Stacker'))
 ChoicesPLC=(('Siemens','Siemens'),
             ('Allen Bradley', 'Allen Bradley'))
 

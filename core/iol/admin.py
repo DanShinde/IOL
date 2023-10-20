@@ -61,22 +61,27 @@ class ProjectAdmin(admin.ModelAdmin):
 
 admin.site.register(Project, ProjectAdmin)
 
-class ModuleAdmin(admin.ModelAdmin):
+# class ModuleAdmin(admin.ModelAdmin):
+#     list_display = ['id', 'module', 'segment', 'created_by', 'created_at']
+
+# admin.site.register(Module, ModuleAdmin)
+class ModuleResource(resources.ModelResource):
+    class Meta:
+        model = Module
+        fields = '__all__'
+
+
+@admin.register(Module)
+class ModuleAdmin(ImportExportMixin, admin.ModelAdmin):
     list_display = ['id', 'module', 'segment', 'created_by', 'created_at']
 
-admin.site.register(Module, ModuleAdmin)
+    resource_class = ModuleResource
+    list_filter = ('segment', 'created_by')
+    search_fields = (
+        "created_by",
+        "segment"
+    )
 
-# class ReportAdmin(admin.ModelAdmin):
-#     list_display = ['id', 'project','segment', 'created_by', 'created_at', 'updated_by', 'updated_at']
-
-
-
-
-
-# class ReportAdmin(ImportExportModelAdmin):
-#     list_display = ['id', 'project__name', 'segment', 'created_by', 'created_at', 'updated_by', 'updated_at']
-#     # Define the export formats you want to enable
-#     list_export = ('xlsx',)
 
 
 

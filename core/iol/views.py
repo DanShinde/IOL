@@ -618,6 +618,7 @@ class ClusterView(View):
                 signal = form.save(commit=False)
                 signal.created_by = request.user.get_full_name()
                 signal.module = module
+                signal.segment = module.segment
                 signal.save()
                 module.updated_at = datetime.now()
                 module.save()
