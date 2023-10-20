@@ -29,6 +29,8 @@ class Project(models.Model):
     PLC = models.CharField(max_length=50, default='Siemens', choices = ChoicesPLC)
     panels = models.JSONField(blank=True, null=True)
     panel_numbers = models.CharField(max_length=1000, blank=True, null=True)
+    exported_at = models.DateTimeField( blank=True, null=True)
+    exported_by = models.CharField(max_length=30, blank=True, null=True)
 
     # segment = models.CharField(max_length=50, blank=True, default =Segments[0][0], choices = Segments)
 
@@ -109,6 +111,25 @@ class Signals(models.Model):
 # @receiver(post_save, sender=Project)
 # def create_profile(sender, instance, **kwargs):
 
+class ProjectReport(models.Model):
+    project = models.ForeignKey(Project, on_delete=models.CASCADE)
+    updated_at = models.DateTimeField(blank=True, null=True)
+    updated_by = models.CharField(max_length=50,blank=True, null=True)
+    created_at = models.DateTimeField()
+    created_by = models.CharField(max_length=50,blank=True, null=True)
+    segment = models.CharField(max_length=50, blank=True, default =Segments[0][0], choices = Segments)
+
+    def __str__(self):
+        return str(self.project)
 
 
-
+@receiver(post_save, sender=Project)
+def create_project_report(sender, instance, created, **kwargs):
+    if created:
+        ProjectReport.objects.create(
+            project=instance,
+            created_at=instance.created_at,
+            created_by=instance.created_by,
+            segment = instance.segment,
+            # You can set exported_at and exported_by based on your requirements
+        )

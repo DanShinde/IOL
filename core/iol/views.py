@@ -21,7 +21,7 @@ from django.template import loader
 from rest_framework.response import Response
 from .serializers import SignalSerializer, ModuleSerializer
 from .forms import ProjectForm, SignalsForm, IOListForm, ClusterForm
-from .models import Project, Module, Signals, IOList
+from .models import Project, Module, ProjectReport, Signals, IOList
 from django.core import serializers
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required,permission_required
@@ -155,6 +155,7 @@ def add_signals(request):
     return JsonResponse({'success': True, 'data': data})
 
 def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer, panel_n, signal_type, panel):
+    # sourcery skip: low-code-quality
     # print("Test in spares -",signal_type, IO.tag,  IO)
     channel = (row - 1) % 16 + 1
     worksheet.write(row, 0, row)
@@ -297,7 +298,7 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer, panel_n):
     IOOut = iolist.first()
     #Writing DOs to file
     if not project.is_Murr:
-        # sourcery skip: low-code-quality
+        # sourcery skip: assign-if-exp, hoist-similar-statement-from-if, low-code-quality, merge-duplicate-blocks, remove-redundant-if, split-or-ifs, swap-nested-ifs
         letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
         # print(iolist)
         for IO in iolist:
@@ -408,6 +409,12 @@ def export_to_excel(request):
     print(project.panels)
     project.save()
     response = HttpResponse(output.read(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    
+    project_id = request.session.get('project')
+    projectRep = get_object_or_404(ProjectReport ,project = project)
+    projectRep.updated_at = datetime.now()
+    projectRep.updated_by = request.user.get_full_name()
+    projectRep.save()
     return response
 
 #Get list of Clusters/ Modules

@@ -4,7 +4,7 @@ from .models import *
 from iol.models import Signals, Module, IOList, Project
 from import_export import resources
 from import_export.admin import ImportMixin, ExportMixin, ImportExportMixin
-
+from import_export.admin import ImportExportModelAdmin
 
 class SignalResource(resources.ModelResource):
     class Meta:
@@ -56,7 +56,41 @@ class IOListAdmin(ImportExportMixin, admin.ModelAdmin):
 
 
 
+class ProjectAdmin(admin.ModelAdmin):
+    list_display = ['id', 'name', 'description', 'segment','PLC', 'created_by','created_at', 'is_Murr']
 
-# admin.site.register(IOList)
-admin.site.register(Project)
-admin.site.register(Module)
+admin.site.register(Project, ProjectAdmin)
+
+class ModuleAdmin(admin.ModelAdmin):
+    list_display = ['id', 'module', 'segment', 'created_by', 'created_at']
+
+admin.site.register(Module, ModuleAdmin)
+
+# class ReportAdmin(admin.ModelAdmin):
+#     list_display = ['id', 'project','segment', 'created_by', 'created_at', 'updated_by', 'updated_at']
+
+
+
+
+
+# class ReportAdmin(ImportExportModelAdmin):
+#     list_display = ['id', 'project__name', 'segment', 'created_by', 'created_at', 'updated_by', 'updated_at']
+#     # Define the export formats you want to enable
+#     list_export = ('xlsx',)
+
+
+
+class Reportresource(resources.ModelResource):
+    class Meta:
+        model = ProjectReport
+        fields = ('id', 'project__name', 'segment', 'created_by', 'created_at', 'updated_by', 'updated_at')
+
+class ReportExport(ImportExportModelAdmin):
+    resource_class = Reportresource
+    list_display = ['id', 'project', 'segment', 'created_by', 'created_at', 'updated_by', 'updated_at']
+    ordering = ['-created_at']
+    verbose_name = "Project Report"
+    verbose_name_plural = "Project Reports"
+
+admin.site.register(ProjectReport, ReportExport)
+
