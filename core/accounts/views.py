@@ -6,7 +6,9 @@ from django.http import HttpResponse
 from django.views.generic import CreateView
 from django.urls import reverse_lazy
 import git
+import pandas as pd
 from django.contrib.auth import logout
+from iol.models import ProjectReport
 
 # Create your views here.
 
@@ -45,3 +47,5 @@ class SignUpView(CreateView):
 def logout_view(request):
     logout(request)
     return redirect('project_list')
+
+

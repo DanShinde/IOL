@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'sorting',
     'import_export',
     'widget_tweaks',
+    'dashboard',
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"

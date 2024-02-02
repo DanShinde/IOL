@@ -21,5 +21,7 @@ urlpatterns = [
     path('', include('iol.urls')),
     path('accounts/', include('accounts.urls')),
     path('sort/', include('sorting.urls')),
+    path('dash/', include('dashboard.urls')),
+
 
 ]
