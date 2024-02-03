@@ -2,14 +2,47 @@
 {% block title %}<title>DashBoard</title>{% endblock %}
 {% block content %}
 {% load widget_tweaks %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div>
+  <canvas id="myChart"></canvas>
+</div>
+<div class="piv">
+  {{pivot}}
+</div>
+<!-- dashboard/dash.html -->
 
 
-{{pivot}}
-
-
+  <!-- Your existing HTML content here -->
 
   <script>
+    const ctx = document.getElementById('myChart');
 
+    // Assuming 'pivot' is a dictionary with the structure {"Carton/Tote Handling": {"project": 1}}
+    const pivotData = {{ pivot|safe }};
+
+    const labels = Object.keys(pivotData);
+    const datasetData = Object.values(pivotData).map(item => item.project);
+
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: '# of Projects',
+          data: datasetData,
+          borderWidth: 1,
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
   </script>
-
 {% endblock %}
