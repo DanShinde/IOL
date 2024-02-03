@@ -7,42 +7,44 @@
 <div>
   <canvas id="myChart"></canvas>
 </div>
-<div class="piv">
-  {{pivot}}
-</div>
-<!-- dashboard/dash.html -->
 
+<script>
+  const ctx = document.getElementById('myChart');
 
-  <!-- Your existing HTML content here -->
+  // Assuming 'pivot' is a dictionary with the structure {"Carton/Tote Handling": {"project": 1}}
+  const pivotData = {{ pivot|safe }};
 
-  <script>
-    const ctx = document.getElementById('myChart');
+  const labels = Object.keys(pivotData);
+  const datasetData = Object.values(pivotData).map(item => item.project);
 
-    // Assuming 'pivot' is a dictionary with the structure {"Carton/Tote Handling": {"project": 1}}
-    const pivotData = {{ pivot|safe }};
+  // Function to generate a random color
+  const getRandomColor = () => `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.7)`;
 
-    const labels = Object.keys(pivotData);
-    const datasetData = Object.values(pivotData).map(item => item.project);
+  // Generate random colors for each data point
+  const backgroundColors = Array.from({ length: labels.length }, getRandomColor);
+  const borderColors = Array.from({ length: labels.length }, getRandomColor);
 
-    new Chart(ctx, {
-      type: 'bar',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: '# of Projects',
-          data: datasetData,
-          borderWidth: 1,
-          backgroundColor: 'rgba(75, 192, 192, 0.2)',
-          borderColor: 'rgba(75, 192, 192, 1)',
-        }]
-      },
-      options: {
-        scales: {
-          y: {
-            beginAtZero: true
-          }
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: '# of Projects',
+        data: datasetData,
+        backgroundColor: backgroundColors,
+        borderColor: borderColors,
+        borderWidth: 1,
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
         }
       }
-    });
-  </script>
+    }
+  });
+</script>
+
 {% endblock %}
+
