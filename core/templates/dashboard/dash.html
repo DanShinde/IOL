@@ -1,50 +1,70 @@
 {% extends 'base/base.html' %}
+{% load static %}
 {% block title %}<title>DashBoard</title>{% endblock %}
 {% block content %}
 {% load widget_tweaks %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="{% static 'css\dash.css' %}">
 
-<div>
+
+<div class="flex-container">
+  <div class="chart1 charts">
   <canvas id="myChart"></canvas>
 </div>
+<div class="chart2 charts">
+  <canvas id="myChart2"></canvas>
+</div>
+</div>
+
+
 
 <script>
-  const ctx = document.getElementById('myChart');
+  // Function to create a chart
+  function createChart(chartType, chartData, chartElement) {
+    const ctx = document.getElementById(chartElement);
 
-  // Assuming 'pivot' is a dictionary with the structure {"Carton/Tote Handling": {"project": 1}}
-  const pivotData = {{ pivot|safe }};
+    const labels = Object.keys(chartData);
+    const datasetData = Object.values(chartData).map(item => item.project);
 
-  const labels = Object.keys(pivotData);
-  const datasetData = Object.values(pivotData).map(item => item.project);
+    // Function to generate a random color
+    const getRandomColor = () => `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.7)`;
 
-  // Function to generate a random color
-  const getRandomColor = () => `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.7)`;
+    // Generate random colors for each data point
+    const backgroundColors = Array.from({ length: labels.length }, getRandomColor);
+    const borderColors = Array.from({ length: labels.length }, getRandomColor);
 
-  // Generate random colors for each data point
-  const backgroundColors = Array.from({ length: labels.length }, getRandomColor);
-  const borderColors = Array.from({ length: labels.length }, getRandomColor);
-
-  new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [{
-        label: '# of Projects',
-        data: datasetData,
-        backgroundColor: backgroundColors,
-        borderColor: borderColors,
-        borderWidth: 3,
-      }]
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true
-        }
+    new Chart(ctx, {
+      type: chartType,
+      data: {
+        labels: labels,
+        datasets: [{
+          label: '# of Projects segment wise',
+          data: datasetData,
+          backgroundColor: backgroundColors,
+          borderColor: borderColors,
+          borderWidth: 3,
+          
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        },
+        
       }
-    }
-  });
+    });
+  }
+
+  // Example usage
+  const pivotData1 = {{ pivot|safe }};
+  createChart('bar', pivotData1, 'myChart');
+
+  const pivotData2 = {{ pivot2|safe }};
+  createChart('line', pivotData2, 'myChart2');
 </script>
+
 
 {% endblock %}
 

@@ -1,0 +1,11 @@
+.flex-container {
+    display: flex;
+    justify-content: space-around;
+    align-items: stretch;
+    height: 100vh; /* Set the container height to 100% of the viewport height */
+  }
+
+  .charts {
+    flex: 1; /* Each chart takes equal width */
+    padding: 20px; /* Add some padding for better appearance */
+  }
