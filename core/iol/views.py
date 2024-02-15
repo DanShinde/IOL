@@ -55,7 +55,7 @@ def create_project(request):
 @login_required(login_url="/accounts/login")
 def project_list(request):
     user_groups = request.user.groups.values_list('name', flat=True)
-    projects = Project.objects.filter(segment__in=user_groups).distinct()
+    projects = Project.objects.filter(segment__in=user_groups).distinct().reverse()
     return render(request, 'projects/project_list.html', {'projects': projects})
 
     # projects = Project.objects.all()
