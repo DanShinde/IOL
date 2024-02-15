@@ -1,15 +1,70 @@
 {% extends 'base/base.html' %}
+{% load static %}
 {% block title %}<title>DashBoard</title>{% endblock %}
 {% block content %}
 {% load widget_tweaks %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="{% static 'css\dash.css' %}">
 
 
-{{pivot}}
+<div class="flex-container">
+  <div class="chart1 charts">
+  <canvas id="myChart"></canvas>
+</div>
+<div class="chart2 charts">
+  <canvas id="myChart2"></canvas>
+</div>
+</div>
 
 
 
-  <script>
+<script>
+  // Function to create a chart
+  function createChart(chartType, chartData, chartElement) {
+    const ctx = document.getElementById(chartElement);
 
-  </script>
+    const labels = Object.keys(chartData);
+    const datasetData = Object.values(chartData).map(item => item.project);
+
+    // Function to generate a random color
+    const getRandomColor = () => `rgba(${Math.random() * 255}, ${Math.random() * 255}, ${Math.random() * 255}, 0.7)`;
+
+    // Generate random colors for each data point
+    const backgroundColors = Array.from({ length: labels.length }, getRandomColor);
+    const borderColors = Array.from({ length: labels.length }, getRandomColor);
+
+    new Chart(ctx, {
+      type: chartType,
+      data: {
+        labels: labels,
+        datasets: [{
+          label: '# of Projects',
+          data: datasetData,
+          backgroundColor: backgroundColors,
+          borderColor: borderColors,
+          borderWidth: 3,
+          
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        },
+        
+      }
+    });
+  }
+
+  // Example usage
+  const pivotData1 = {{ pivot|safe }};
+  createChart('bar', pivotData1, 'myChart');
+
+  const pivotData2 = {{ pivot2|safe }};
+  createChart('line', pivotData2, 'myChart2');
+</script>
+
 
 {% endblock %}
+
