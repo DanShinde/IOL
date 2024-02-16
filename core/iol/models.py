@@ -14,7 +14,9 @@ Segments=(('Carton/Tote Handling','Carton/Tote Handling'),
           ('ASRS-MB','ASRS-MB'),
           ('ASRS-Stacker','ASRS-Stacker'))
 ChoicesPLC=(('Siemens','Siemens'),
-            ('Allen Bradley', 'Allen Bradley'))
+            ('Allen Bradley', 'Allen Bradley'),
+            ('Mitsubishi', 'Mitsubishi'))
+            
 
 class Project(models.Model):
     name = models.CharField(max_length=50)
