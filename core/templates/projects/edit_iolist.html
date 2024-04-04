@@ -65,6 +65,12 @@
       </div>
       <div class="col-md-6">
         <div class="form-group">
+          <label class="label" for="{{ form.tag.id_for_label }}">{{ form.tag.label_tag }}</label>
+          {% render_field form.tag|add_class:"form-control" %}
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
           <label class="label" for="{{ form.device_type.id_for_label }}">{{ form.device_type.label_tag }}</label>
           {% render_field form.device_type|add_class:"form-control" %}
   
