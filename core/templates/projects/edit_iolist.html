@@ -81,7 +81,7 @@
       <div class="col-md-6">
         <div class="form-group">
             <label class="label" for="{{ form.tag.id_for_label }}">{{ form.tag.label_tag }}</label>
-            <input type="text" class="form-control" value="{{ form.tag.value }}" readonly>
+            {% render_field form.tag|add_class:"form-control" %}
         </div>
       </div>
     
