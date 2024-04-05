@@ -80,10 +80,12 @@
       </div>
       <div class="col-md-6">
         <div class="form-group">
-          <label class="label" for="{{ form.tag.id_for_label }}">{{ form.tag.label_tag }}</label>
-          {% render_field form.tag|add_class:"form-control" readonly %}
+            <label class="label" for="{{ form.tag.id_for_label }}">{{ form.tag.label_tag }}</label>
+            {% render_field form.tag|add_class:"form-control" %}
+            <input type="text" class="form-control" value="{{ form.tag.value }}" readonly>
         </div>
       </div>
+    
       <div class="col-md-6">
         <div class="form-group">
           <label class="label" for="{{ form.panel_number.id_for_label }}">{{ form.panel_number.label_tag }}</label>
