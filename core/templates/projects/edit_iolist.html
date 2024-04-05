@@ -71,16 +71,17 @@
   
         </div>
       </div>
-      <div class="col-md-6">
-        <div class="form-group">
-          <label class="label" for="{{ form.tag.id_for_label }}">{{ form.tag.label_tag }}</label>
-          {% render_field form.tag|add_class:"form-control" %}
-        </div>
-      </div>
+
       <div class="col-md-6">
         <div class="form-group">
           <label class="label" for="{{ form.actual_description.id_for_label }}">{{ form.actual_description.label_tag }}</label>
           {% render_field form.actual_description|add_class:"form-control" %}
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="form-group">
+          <label class="label" for="{{ form.tag.id_for_label }}">{{ form.tag.label_tag }}</label>
+          {% render_field form.tag|add_class:"form-control" readonly %}
         </div>
       </div>
       <div class="col-md-6">
