@@ -17,14 +17,17 @@
         </button>
         <button class="btn btn-primary mt-3 mybtns mr-auto" onclick= "location.href='{% url 'project_detail' project.id %}'">
           <span class="glyphicon glyphicon-filter">Edit IO List </span>
-      </button>
-      <a class="btn btn-primary mt-3 mybtns" style="color:white; cursor: pointer;" onclick= "location.href='{% url 'sorting' project.id %}'">Re-Order IO List</a>
+        </button>
+        <button class="btn btn-primary mt-3 mybtns mr-auto" onclick= "location.href='{% url 'grouping' project.id 1 %}'">
+          <span class="glyphicon glyphicon-filter">Group IO List </span>
+        </button>
+        <a class="btn btn-primary mt-3 mybtns" style="color:white; cursor: pointer;" onclick= "location.href='{% url 'sorting' project.id %}'">Re-Order IO List</a>
         <div class="text-center mx-auto">
             <h5 class="card-title mt-3" id ="projectName">{{ project }}</h5>
             <p class="card-text">{{ project.description }}</p>
         </div>
         <button class="btn btn-primary mt-3 mybtns ml-auto" id="export-iolist-btn">Export IO List</button>
-    </div>
+      </div>
     
     
 
@@ -185,7 +188,7 @@
             a = document.createElement('a');
             a.href = window.URL.createObjectURL(xhttp.response);
             today = new Date();
-            a.download = projectName +"_IO_List_R0"+ ".xls";
+            a.download = projectName +"_IO_List_R0"+ ".xlsx";
             a.style.display = 'none';
             document.body.appendChild(a);
             return a.click();

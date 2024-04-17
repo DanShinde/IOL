@@ -41,6 +41,13 @@ class IOListView(ListView):
 
         return context
 
+"""
+
+
+Keyword arguments:
+argument -- description
+Return: return_description
+
 
 # class IOListView(ListView):
 #     model = IOList
@@ -101,7 +108,7 @@ class IOListView(ListView):
 #         # return JsonResponse({'html': html})
 #         data = render_to_string('sorting/partials/table.html', {'iolists': queryset})
 #         return JsonResponse(({'success': True, 'data': data}))  
-
+"""
     
 def delete_tag(request, pk):
     io = IOList.objects.get(pk= pk)
@@ -146,6 +153,8 @@ def cluster_number_update(request, pk, action):
     else:
         return JsonResponse({'error': 'Invalid request method'})
 
+
+
 # Order update by editing order number in table
 @csrf_exempt
 def order_update(request, pk, action):
@@ -176,3 +185,65 @@ def delete_in_Reorder(request,pk):
         # return render(request, 'projects/iolist_in_add.html', {'io_list': iolists})
     else:
         return HttpResponseNotFound()
+    
+#grouping IO List
+
+from django.core.paginator import Paginator
+from django.shortcuts import render
+
+
+def group_view(request,project_id, page_number):
+    request.session['page_number'] = page_number
+    request.session['project_id'] = project_id
+
+    project = get_object_or_404(Project, pk=project_id)
+    # Assuming 10 entries per page, calculate cluster_number based on page_number
+    cluster_number = page_number
+    
+    queryset = IOList.objects.filter(cluster_number=cluster_number,project = project)
+    return render(request, 'sorting/grouping.html', {'iolists': queryset})
+
+def ngroup_view(request):
+    page_number = 1 + request.session.get('page_number') 
+
+    project_id = request.session.get('project_id') 
+
+    project = get_object_or_404(Project, pk=project_id)
+    # Assuming 10 entries per page, calculate cluster_number based on page_number
+    cluster_number = page_number
+    request.session['page_number'] = page_number
+    request.session['project_id'] = project_id
+    
+    queryset = IOList.objects.filter(cluster_number=cluster_number,project = project)
+    return render(request, 'sorting/grouping.html', {'iolists': queryset})
+
+def pgroup_view(request):
+    page_number =  request.session.get('page_number') - 1
+    project_id = request.session.get('project_id') 
+
+    project = get_object_or_404(Project, pk=project_id)
+    # Assuming 10 entries per page, calculate cluster_number based on page_number
+    cluster_number = page_number
+    request.session['page_number'] = page_number
+    request.session['project_id'] = project_id
+    
+    queryset = IOList.objects.filter(cluster_number=cluster_number,project = project)
+    return render(request, 'sorting/grouping.html', {'iolists': queryset})
+
+@csrf_exempt
+def update_clustern(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        pk = data.get('pk')
+        new_value = data.get('newValue')
+
+        try:
+            # Update your model instance with the new value
+            instance = IOList.objects.get(pk=pk)
+            instance.cluster_number = new_value
+            instance.save()
+            return JsonResponse({'success': True})
+        except IOList.DoesNotExist:
+            return JsonResponse({'error': 'Object not found'}, status=404)
+    else:
+        return JsonResponse({'error': 'Invalid request method'}, status=405)
