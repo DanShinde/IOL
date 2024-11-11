@@ -23,6 +23,17 @@ class SignalsSerializer(serializers.ModelSerializer):
         model = Signals
         fields = '__all__'
 
+class SignalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Signals
+        fields = '__all__'
+
+
+class ModuleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Module
+        fields = '__all__'
+        
 class ProjectReportSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProjectReport
