@@ -1,26 +1,21 @@
 from rest_framework import serializers
-from .models import Project, Module, IOList, Signals, ProjectReport
+from .models import Signals, Module, Project, ProjectReport
 
-class ProjectSerializer(serializers.ModelSerializer):
+class SignalSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Project
+        model = Signals
         fields = '__all__'
+
 
 class ModuleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Module
         fields = '__all__'
 
-class IOListSerializer(serializers.ModelSerializer):
-    project_id = serializers.PrimaryKeyRelatedField(queryset=Project.objects.all(), source='project', write_only=True)
-    class Meta:
-        model = IOList
-        fields = '__all__'
 
-class SignalsSerializer(serializers.ModelSerializer):
-    module_id = serializers.PrimaryKeyRelatedField(queryset=Module.objects.all(), source='module', write_only=True)
+class ProjectSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Signals
+        model = Project
         fields = '__all__'
 
 class SignalSerializer(serializers.ModelSerializer):
