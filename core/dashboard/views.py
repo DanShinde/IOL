@@ -2,6 +2,9 @@ from django.shortcuts import render
 from iol.models import ProjectReport
 import pandas as pd
 from datetime import datetime
+from rest_framework import viewsets
+from iol.models import Project, Module, IOList, Signals, ProjectReport
+from .serializers import ProjectSerializer, ModuleSerializer, IOListSerializer, SignalsSerializer, ProjectReportSerializer
 
 
 def format_month_year(period):
@@ -40,3 +43,25 @@ def home(request):
 
     }
     return render(request, 'dashboard/dash.html', context)
+
+
+
+class ProjectViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
+
+class ModuleViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Module.objects.all()
+    serializer_class = ModuleSerializer
+
+class IOListViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = IOList.objects.all()
+    serializer_class = IOListSerializer
+
+class SignalsViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Signals.objects.all()
+    serializer_class = SignalsSerializer
+
+class ProjectReportViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = ProjectReport.objects.all()
+    serializer_class = ProjectReportSerializer
