@@ -1,12 +1,19 @@
 from django.contrib.auth.views import LoginView, LogoutView
-from django.urls import path
-
-from . import views
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from iol import views
+router = DefaultRouter()
+router.register(r'projects', views.ProjectViewSet)
+router.register(r'modules', views.ModuleViewSet)
+router.register(r'iolists', views.IOListViewSet)
+router.register(r'signals', views.SignalsViewSet)
+router.register(r'projectreports', views.ProjectReportViewSet)
 
 
 urlpatterns = [
 #dashboard 
     path('', views.home, name = 'dash-home'),
+    path('api/', include(router.urls)),
 ]
 
 
