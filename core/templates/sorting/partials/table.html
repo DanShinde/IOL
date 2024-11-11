@@ -36,7 +36,6 @@
           <table id="tablesort" class="table-striped table-success" cellspacing="0" cellpadding="2">
             <thead>
               <tr>
-                <th>Sr.No.</th>
                 <th>Order</th>
                 <th>Project</th>
                 <th>Name</th>
@@ -54,54 +53,8 @@
             </thead>
             <tbody>
               {% for iolist in iolists %}
-              
                 <tr class="item" id="{{ forloop.counter }}" data-pk="{{ iolist.pk }}" data-panel="{{ iolist.panel_number }}">
                   <input type="hidden" name="iolist_order" value="{{ iolist.id }}"/>
-                  <td>
-                    {% if forloop.counter|divisibleby:14 %}
-                      14
-                    {% endif %}
-                    {% if forloop.counter|add:1|divisibleby:14 %}
-                      13
-                    {% endif %}
-                    {% if forloop.counter|add:2|divisibleby:14 %}
-                      12
-                    {% endif %}
-                    {% if forloop.counter|add:3|divisibleby:14 %}
-                      11
-                    {% endif %}
-                    {% if forloop.counter|add:4|divisibleby:14 %}
-                      10
-                    {% endif %}
-                    {% if forloop.counter|add:5|divisibleby:14 %}
-                      9
-                    {% endif %}
-                    {% if forloop.counter|add:6|divisibleby:14 %}
-                      8
-                    {% endif %}
-                    {% if forloop.counter|add:7|divisibleby:14 %}
-                      7
-                    {% endif %}
-                    {% if forloop.counter|add:8|divisibleby:14 %}
-                      6
-                    {% endif %}
-                    {% if forloop.counter|add:9|divisibleby:14 %}
-                      5
-                    {% endif %}
-                    {% if forloop.counter|add:10|divisibleby:14 %}
-                      4
-                    {% endif %}
-                    {% if forloop.counter|add:11|divisibleby:14 %}
-                      3
-                    {% endif %}
-                    {% if forloop.counter|add:12|divisibleby:14 %}
-                      2
-                    {% endif %}
-                    {% if forloop.counter|add:13|divisibleby:14 %}
-                      1
-                    {% endif %}
-                    
-                  </td>
                   <td>
                     <a href="#" class="editable order" contenteditable="true" data-pk="{{ iolist.pk }}" data-name="order"
                       hx-get="{% url 'order_update' iolist.pk 'update' %}" hx-swap="outerHTML">{{ iolist.order }}</a>
