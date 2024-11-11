@@ -1,7 +1,8 @@
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from iol import views
+from . import views
+
 router = DefaultRouter()
 router.register(r'projects', views.ProjectViewSet)
 router.register(r'modules', views.ModuleViewSet)
