@@ -22,6 +22,8 @@ from rest_framework.response import Response
 from .serializers import SignalSerializer, ModuleSerializer
 from .forms import ProjectForm, SignalsForm, IOListForm, ClusterForm
 from .models import Project, Module, ProjectReport, Signals, IOList
+from .serializers import ProjectSerializer, ModuleSerializer, IOListSerializer, SignalsSerializer, ProjectReportSerializer
+from rest_framework import viewsets
 from django.core import serializers
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required,permission_required
@@ -666,5 +668,23 @@ class ClusterView(View):
         else:
             return super().dispatch(request, *args, **kwargs)
 
+class ProjectViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
 
+class ModuleViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Module.objects.all()
+    serializer_class = ModuleSerializer
+
+class IOListViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = IOList.objects.all()
+    serializer_class = IOListSerializer
+
+class SignalsViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Signals.objects.all()
+    serializer_class = SignalsSerializer
+
+class ProjectReportViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = ProjectReport.objects.all()
+    serializer_class = ProjectReportSerializer
 
