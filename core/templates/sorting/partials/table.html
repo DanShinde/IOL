@@ -181,6 +181,10 @@ panelNumberSelect.addEventListener('change', (event) => {
 .then(data => {
   if (data.success) {
     // Update the DOM with the new HTML returned by the backend
+    const nextInput = $('input.module_position').eq($('input.module_position').index(this) + 1);
+            if (nextInput.length > 0) {
+              nextInput.focus();
+            }
   } else {
     console.error(data.error);
   }

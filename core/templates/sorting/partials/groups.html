@@ -32,7 +32,7 @@
                   <th>Signal Type</th>
                   <th>Device Type</th>
                   <th>Panel Number</th>
-                  <th>Card Number</th>
+                  <th>Module Position</th>
                   <th>Location</th>
                   <th>Cluster Number</th>
                   <th>Delete</th>
@@ -52,7 +52,15 @@
                     <td>{{ iolist.signal_type }}</td>
                     <td>{{ iolist.device_type }}</td>
                     <td>{{ iolist.panel_number }}</td>
-                    <td>{{ iolist.module_position }}</td>
+                    <td style="text-align: center; vertical-align: middle;">
+                      <input type="text" 
+                             class="editable module_position" 
+                             value="{{ iolist.module_position }}" 
+                             data-pk="{{ iolist.pk }}" 
+                             data-name="module_position" 
+                             id="module_position_input_{{ iolist.pk }}"
+                             style="width: 100px; text-align: center; vertical-align: middle;" />
+                    </td>
                     <td>{{ iolist.location }}</td>
                     <td>
                       <!-- <a href="#" class="editable clusternumber" contenteditable="true" data-pk="{{ iolist.pk }}" data-name="cluster_number"
@@ -77,6 +85,53 @@
         {% endif %}
       </div>
     </div>
+    <script> $(document).ready(function() {
+
+
+      // Listen for the 'Enter' key on the input field
+      $('input.module_position').on('keypress', function(event) {
+         if (event.which === 13) {  // Check if 'Enter' key is pressed
+           const updatedPosition = $(this).val().trim();
+           const pk = $(this).data('pk');
+           
+           // Log the updated position value
+           console.log('Updated Position:', updatedPosition);
+   
+           // Create the payload for the PUT request
+           const requestBody = {
+             new_position: updatedPosition
+           };
+   
+           // Log the request body to the console
+           console.log('Request Body:', requestBody);
+           
+           // Send the PUT request without using hx
+           fetch(`/sort/module_position_update/${pk}/update`, {
+     method: 'PUT',
+     headers: {
+       'Content-Type': 'application/json',
+     },
+     body: JSON.stringify({
+       new_position: updatedPosition  // Make sure this is the correct data
+     }),
+   })
+   .then(response => response.json())
+   .then(data => {
+     if (data.success) {
+       // Update the DOM with the new HTML returned by the backend
+       const nextInput = $('input.module_position').eq($('input.module_position').index(this) + 1);
+            if (nextInput.length > 0) {
+              nextInput.focus();
+            }
+     } else {
+       console.error(data.error);
+     }
+   })
+   .catch(error => console.error('Error:', error));
+         }
+       });
+      });
+   </script>
     <script>
 document.addEventListener('DOMContentLoaded', function() {
   // Find all editable elements with the class 'editable clusternumber'

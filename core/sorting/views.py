@@ -224,16 +224,51 @@ from django.core.paginator import Paginator
 from django.shortcuts import render
 
 
-def group_view(request,project_id, page_number):
+# def group_view(request,project_id, page_number):
+#     request.session['page_number'] = page_number
+#     request.session['project_id'] = project_id
+
+#     project = get_object_or_404(Project, pk=project_id)
+#     # Assuming 10 entries per page, calculate cluster_number based on page_number
+#     module_position = page_number
+    
+#     queryset = IOList.objects.filter(module_position=module_position,project = project)
+#     return render(request, 'sorting/grouping.html', {'iolists': queryset})
+
+def group_view(request, project_id, page_number):
     request.session['page_number'] = page_number
     request.session['project_id'] = project_id
 
     project = get_object_or_404(Project, pk=project_id)
-    # Assuming 10 entries per page, calculate cluster_number based on page_number
-    module_position = page_number
     
-    queryset = IOList.objects.filter(module_position=module_position,project = project)
+    # Get distinct module_positions for the project
+    distinct_positions = IOList.objects.filter(project=project).values_list('module_position', flat=True).distinct()
+    
+    # Get the module_position based on the page_number (index in distinct list)
+    if page_number <= len(distinct_positions) and page_number > 0:
+        module_position = distinct_positions[page_number - 1]  # 1-based index to 0-based list index
+    else:
+        module_position = distinct_positions[0]  # Default to first position if invalid
+    
+    queryset = IOList.objects.filter(module_position=module_position, project=project)
+    
     return render(request, 'sorting/grouping.html', {'iolists': queryset})
+
+
+
+# def ngroup_view(request):
+#     page_number = 1 + request.session.get('page_number') 
+
+#     project_id = request.session.get('project_id') 
+
+#     project = get_object_or_404(Project, pk=project_id)
+#     # Assuming 10 entries per page, calculate cluster_number based on page_number
+#     module_position = page_number
+#     request.session['page_number'] = module_position
+#     request.session['project_id'] = project_id
+    
+#     queryset = IOList.objects.filter(module_position=module_position,project = project)
+#     return render(request, 'sorting/grouping.html', {'iolists': queryset})
 
 def ngroup_view(request):
     page_number = 1 + request.session.get('page_number') 
@@ -241,26 +276,59 @@ def ngroup_view(request):
     project_id = request.session.get('project_id') 
 
     project = get_object_or_404(Project, pk=project_id)
-    # Assuming 10 entries per page, calculate cluster_number based on page_number
-    module_position = page_number
-    request.session['page_number'] = module_position
-    request.session['project_id'] = project_id
     
-    queryset = IOList.objects.filter(module_position=module_position,project = project)
-    return render(request, 'sorting/grouping.html', {'iolists': queryset})
-
-def pgroup_view(request):
-    page_number =  request.session.get('page_number') - 1
-    project_id = request.session.get('project_id') 
-
-    project = get_object_or_404(Project, pk=project_id)
-    # Assuming 10 entries per page, calculate cluster_number based on page_number
-    module_position = page_number
+    # Get distinct module_positions for the project
+    distinct_positions = IOList.objects.filter(project=project).values_list('module_position', flat=True).distinct().order_by('module_position')
+    
+    # Get the module_position based on the page_number (index in distinct list)
+    if page_number <= len(distinct_positions) and page_number > 0:
+        module_position = distinct_positions[page_number - 1]  # 1-based index to 0-based list index
+    else:
+        module_position = distinct_positions[0]  # Default to first position if invalid
+    
     request.session['page_number'] = page_number
     request.session['project_id'] = project_id
     
-    queryset = IOList.objects.filter(cluster_number=module_position,project = project)
+    queryset = IOList.objects.filter(module_position=module_position, project=project)
+    
     return render(request, 'sorting/grouping.html', {'iolists': queryset})
+
+# def pgroup_view(request):
+#     page_number =  request.session.get('page_number') - 1
+#     project_id = request.session.get('project_id') 
+
+#     project = get_object_or_404(Project, pk=project_id)
+#     # Assuming 10 entries per page, calculate cluster_number based on page_number
+#     module_position = page_number
+#     request.session['page_number'] = page_number
+#     request.session['project_id'] = project_id
+    
+#     queryset = IOList.objects.filter(cluster_number=module_position,project = project)
+#     return render(request, 'sorting/grouping.html', {'iolists': queryset})
+
+def pgroup_view(request):
+    page_number = -1 + request.session.get('page_number') 
+
+    project_id = request.session.get('project_id') 
+
+    project = get_object_or_404(Project, pk=project_id)
+    
+    # Get distinct module_positions for the project
+    distinct_positions = IOList.objects.filter(project=project).values_list('module_position', flat=True).distinct().order_by('module_position')
+    
+    # Get the module_position based on the page_number (index in distinct list)
+    if page_number <= len(distinct_positions) and page_number > 0:
+        module_position = distinct_positions[page_number - 1]  # 1-based index to 0-based list index
+    else:
+        module_position = distinct_positions[0]  # Default to first position if invalid
+    
+    request.session['page_number'] = page_number
+    request.session['project_id'] = project_id
+    
+    queryset = IOList.objects.filter(module_position=module_position, project=project)
+    
+    return render(request, 'sorting/grouping.html', {'iolists': queryset})
+
 
 @csrf_exempt
 def update_clustern(request):
