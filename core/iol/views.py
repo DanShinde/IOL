@@ -137,9 +137,9 @@ def add_signals(request):
         )
         entry.save()
     if project.is_Murr:
-        io_list_to_order = IOList.objects.filter(project = project).order_by('cluster_number', 'order')
+        io_list_to_order = IOList.objects.filter(project = project).order_by('cluster_number', 'module_position','order')
     else:
-        io_list_to_order = IOList.objects.filter(project = project).order_by('signal_type', 'location')
+        io_list_to_order = IOList.objects.filter(project = project).order_by('signal_type',  'location', 'module_position','order')
     temp_Add = 0
     for index, signal in enumerate(io_list_to_order, start=1):
         signal.order = (((index-1)//14)*2) + index if project.is_Murr else index
@@ -198,7 +198,7 @@ def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer, panel_n, 
     worksheet.write(row, 6, x)
     worksheet.write(row, 7, "Spare Signal")
     worksheet.write(row, 8, channel)
-    worksheet.write(row, 9, 0)  #IO.module_position
+    worksheet.write(row, 9, IO.module_position if IO.module_position is not None else 0)
     # print(IO, "Spare")
     worksheet.write(row, 10, panel)
     worksheet.write(row, 11, "CP")
@@ -272,7 +272,7 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer, panel_n):
             worksheet.write(row, 6, IO.io_address)
             worksheet.write(row, 7, IO.actual_description)
             worksheet.write(row, 8, channel)
-            worksheet.write(row, 9, 0)  #IO.module_position
+            worksheet.write(row, 9, IO.module_position)
             # print("/n")
             # print([x for x in IO.__dict__.items() if not x[0].startswith('_')])
             worksheet.write(row, 10, panel)
@@ -371,10 +371,10 @@ def export_to_excel(request):
     project_id = request.session.get('project')
     project = get_object_or_404(Project, id=project_id)
     if project.is_Murr:
-        iolist = IOList.objects.filter(project_id=project_id).order_by('order')
+        iolist = IOList.objects.filter(project_id=project_id).order_by('module_position','order')
         # print('Its Murr')
     else:
-        iolist = IOList.objects.filter(project_id=project_id).order_by('signal_type', 'location','order')
+        iolist = IOList.objects.filter(project_id=project_id).order_by('signal_type', 'location','module_position','order')
     if len(project.panel_numbers) > 2:
         panels = project.panel_numbers.split(",")
         print(panels)

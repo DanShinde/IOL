@@ -14,6 +14,7 @@ htmx_views = [
     path('tag-delete/<int:pk>/', views.delete_tag, name='tag-delete'),
     path('sort_IO/', views.sort_IO, name= "sort_IO"),
     path('cluster_number_update/<int:pk>/<str:action>', views.cluster_number_update, name= "cluster_number_update"),
+    path('module_position_update/<int:pk>/<str:action>', views.module_position_update, name= "module_position_update"),
     path('order_update/<int:pk>/<str:action>', views.order_update, name= "order_update"),
     path('delete_signal/<int:pk>/', views.delete_in_Reorder, name='delete-signal-reorder'),
     path('grouping/<int:project_id>/<int:page_number>', views.group_view, name='grouping'),

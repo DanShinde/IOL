@@ -23,9 +23,9 @@ class IOListView(ListView):
             queryset = queryset.filter(panel_number=panel_number)
 
         if project.is_Murr:
-            queryset = queryset.order_by('panel_number', 'order')
+            queryset = queryset.order_by('panel_number', 'module_position','order')
         else:
-            queryset = queryset.order_by('panel_number', 'order', 'signal_type', 'location')
+            queryset = queryset.order_by('panel_number', 'module_position','order', 'signal_type', 'location')
 
         return queryset
 
@@ -154,6 +154,38 @@ def cluster_number_update(request, pk, action):
         return JsonResponse({'error': 'Invalid request method'})
 
 
+@csrf_exempt  # Exempt CSRF protection for this view
+def module_position_update(request, pk, action):
+    try:
+        if request.method == 'PUT':
+            # Get the module object
+            iolist = get_object_or_404(IOList, pk=pk)
+
+            # Get the new position value from the request data
+            data = json.loads(request.body)
+            new_position = data.get('new_position', '').strip()
+            
+            print(f"Request body: {json.dumps(request.body.decode('utf-8'))}")
+            
+            if not new_position:
+                print("New position is missing")
+                return JsonResponse({'success': False, 'error': 'New position is required.'}, status=400)
+
+            # Update the position and save
+            iolist.module_position = new_position
+            iolist.save()
+
+            # Return the updated module position as HTML
+            return JsonResponse({
+                'success': True,
+                'html': f'<a href="#" class="editable module_position" contenteditable="true" data-pk="{pk}" hx-get="{request.path}" hx-trigger="blur changed" hx-vals=\'{{"new_position": this.innerText.trim()}}\' hx-swap="outerHTML">{iolist.module_position}</a>'
+            })
+        
+        return JsonResponse({'success': False, 'error': 'Invalid HTTP method'}, status=405)
+
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
 
 # Order update by editing order number in table
 @csrf_exempt
@@ -198,9 +230,9 @@ def group_view(request,project_id, page_number):
 
     project = get_object_or_404(Project, pk=project_id)
     # Assuming 10 entries per page, calculate cluster_number based on page_number
-    cluster_number = page_number
+    module_position = page_number
     
-    queryset = IOList.objects.filter(cluster_number=cluster_number,project = project)
+    queryset = IOList.objects.filter(module_position=module_position,project = project)
     return render(request, 'sorting/grouping.html', {'iolists': queryset})
 
 def ngroup_view(request):
@@ -210,11 +242,11 @@ def ngroup_view(request):
 
     project = get_object_or_404(Project, pk=project_id)
     # Assuming 10 entries per page, calculate cluster_number based on page_number
-    cluster_number = page_number
-    request.session['page_number'] = page_number
+    module_position = page_number
+    request.session['page_number'] = module_position
     request.session['project_id'] = project_id
     
-    queryset = IOList.objects.filter(cluster_number=cluster_number,project = project)
+    queryset = IOList.objects.filter(module_position=module_position,project = project)
     return render(request, 'sorting/grouping.html', {'iolists': queryset})
 
 def pgroup_view(request):
@@ -223,11 +255,11 @@ def pgroup_view(request):
 
     project = get_object_or_404(Project, pk=project_id)
     # Assuming 10 entries per page, calculate cluster_number based on page_number
-    cluster_number = page_number
+    module_position = page_number
     request.session['page_number'] = page_number
     request.session['project_id'] = project_id
     
-    queryset = IOList.objects.filter(cluster_number=cluster_number,project = project)
+    queryset = IOList.objects.filter(cluster_number=module_position,project = project)
     return render(request, 'sorting/grouping.html', {'iolists': queryset})
 
 @csrf_exempt
