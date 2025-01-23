@@ -141,6 +141,7 @@ $('#panel-number').change(function() {
        const nextInput = $('input.module_position').eq($('input.module_position').index(this) + 1);
             if (nextInput.length > 0) {
               nextInput.focus();
+              nextInput.select(); // Select the content of the input
             }
      } else {
        console.error(data.error);
