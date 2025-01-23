@@ -7,17 +7,28 @@
 
         
         <div class="panel-heading d-flex align-items-center">
-            <button class="btn btn-primary mt-3 mybtns mr-auto" onclick= "location.href='{% url 'groupingprev' %}'">
-              <span class="glyphicon glyphicon-filter">Previous </span>
-            </button>
-            <button class="btn btn-primary mt-3 mybtns mr-auto disabled" >
-                <span class="glyphicon glyphicon-filter">{{ request.session.page_number }} </span>
-              </button>
-            <button class="btn btn-primary mt-3 mybtns mr-auto" onclick= "location.href='{% url 'groupingnext'  %}'">
-              <span class="glyphicon glyphicon-filter">Next </span>
-            </button>
-        </div>
-
+          <button class="btn btn-primary mt-3 mybtns mr-auto" 
+              onclick="location.href=`/sort/grouping/{{project_id}}/{{currentPageNumber|add:-1}}/?panel_number={{selected_panel_number}}`">
+              <span class="glyphicon glyphicon-filter">Previous</span>
+          </button>
+          <button class="btn btn-primary mt-3 mybtns mr-auto disabled">
+              <span class="glyphicon glyphicon-filter">{{ request.session.page_number }}</span>
+          </button>
+          <select class="form-control" id="panel-number" name="panel-number">
+              <option value="">All</option>
+              {% for panel_number in panel_numbers %}
+                  <option value="{{ panel_number }}" {% if panel_number == selected_panel_number %}selected{% endif %}>
+                      {{ panel_number }}
+                  </option>
+              {% endfor %}
+          </select>
+          <button class="btn btn-primary mt-3 mybtns mr-auto" 
+              onclick="location.href=`/sort/grouping/{{project_id}}/{{currentPageNumber|add:1}}/?panel_number={{selected_panel_number}}`
+              ">
+              <span class="glyphicon glyphicon-filter">Next</span>
+          </button>
+      </div>
+      
 
         {% if iolists %}
           <div id="tag-form" class="sortable">
@@ -86,6 +97,14 @@
       </div>
     </div>
     <script> $(document).ready(function() {
+
+$('#panel-number').change(function() {
+    const panelNumber = $(this).val();
+    const projectId = $('#projectrow').data('project-id');
+    const currentPageNumber = "{{ request.session.page_number }}";  // Get current page number
+    const url = `/sort/grouping/{{project_id}}/${currentPageNumber}/?panel_number=${panelNumber}`;
+    window.location.href = url;
+});
 
 
       // Listen for the 'Enter' key on the input field

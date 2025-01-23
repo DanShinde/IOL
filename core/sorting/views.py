@@ -240,21 +240,36 @@ def group_view(request, project_id, page_number):
     request.session['project_id'] = project_id
 
     project = get_object_or_404(Project, pk=project_id)
-    
-    # Get distinct module_positions for the project
-    distinct_positions = IOList.objects.filter(project=project).values_list('module_position', flat=True).distinct()
-    
+    panel_number = request.GET.get('panel_number')
+    if panel_number and panel_number != 'None':
+        panel_number = panel_number.strip()
+        # Get distinct module_positions for the project filtered by panel_number
+        distinct_positions = IOList.objects.filter(project=project, panel_number=panel_number).values_list('module_position', flat=True).distinct().order_by('module_position')
+    else:
+        distinct_positions = IOList.objects.filter(project=project).values_list('module_position', flat=True).distinct().order_by('module_position')
+
     # Get the module_position based on the page_number (index in distinct list)
     if page_number <= len(distinct_positions) and page_number > 0:
         module_position = distinct_positions[page_number - 1]  # 1-based index to 0-based list index
     else:
         module_position = distinct_positions[0]  # Default to first position if invalid
-    
-    queryset = IOList.objects.filter(module_position=module_position, project=project)
-    
-    return render(request, 'sorting/grouping.html', {'iolists': queryset})
+    if panel_number and panel_number != 'None':
+        queryset = IOList.objects.filter(module_position=module_position, project=project, panel_number=panel_number).order_by('panel_number', 'order')
+    else:
+        queryset = IOList.objects.filter(module_position=module_position, project=project).order_by('order')
 
+    panel_numbers = IOList.objects.filter(project=project).order_by().values_list('panel_number', flat=True).distinct()
 
+    # Prepare the context dictionary to pass values to the template
+    context = {
+        'iolists': queryset,
+        'panel_numbers': panel_numbers,
+        'selected_panel_number': panel_number,  # Include the selected panel number in the context
+        'project_id': project_id,
+        'currentPageNumber': page_number,
+    }
+
+    return render(request, 'sorting/grouping.html', context)
 
 # def ngroup_view(request):
 #     page_number = 1 + request.session.get('page_number') 
@@ -276,10 +291,12 @@ def ngroup_view(request):
     project_id = request.session.get('project_id') 
 
     project = get_object_or_404(Project, pk=project_id)
-    
+    panel_number = request.GET.get('panel-number')
+    if panel_number != None:
     # Get distinct module_positions for the project
-    distinct_positions = IOList.objects.filter(project=project).values_list('module_position', flat=True).distinct().order_by('module_position')
-    
+        distinct_positions = IOList.objects.filter(project=project, panel_number=panel_number).values_list('module_position', flat=True).distinct().order_by('module_position', 'order')
+    else:
+        distinct_positions = IOList.objects.filter(project=project).values_list('module_position', flat=True).distinct().order_by('module_position', 'order')
     # Get the module_position based on the page_number (index in distinct list)
     if page_number <= len(distinct_positions) and page_number > 0:
         module_position = distinct_positions[page_number - 1]  # 1-based index to 0-based list index
@@ -290,8 +307,13 @@ def ngroup_view(request):
     request.session['project_id'] = project_id
     
     queryset = IOList.objects.filter(module_position=module_position, project=project)
-    
-    return render(request, 'sorting/grouping.html', {'iolists': queryset})
+    panel_numbers = IOList.objects.filter(project=project).order_by().values_list('panel_number', flat=True).distinct()
+    # Prepare the context dictionary to pass values to the template
+    context = {
+        'iolists': queryset,
+        'panel_numbers': panel_numbers
+    }
+    return render(request, 'sorting/grouping.html', context)
 
 # def pgroup_view(request):
 #     page_number =  request.session.get('page_number') - 1
@@ -312,10 +334,13 @@ def pgroup_view(request):
     project_id = request.session.get('project_id') 
 
     project = get_object_or_404(Project, pk=project_id)
+    panel_number = request.GET.get('panel-number')
     
+    if panel_number != None:
     # Get distinct module_positions for the project
-    distinct_positions = IOList.objects.filter(project=project).values_list('module_position', flat=True).distinct().order_by('module_position')
-    
+        distinct_positions = IOList.objects.filter(project=project,panel_number=panel_number).values_list('module_position', flat=True).distinct().order_by('module_position', 'order')
+    else:
+        distinct_positions = IOList.objects.filter(project=project).values_list('module_position', flat=True).distinct().order_by('module_position', 'order')
     # Get the module_position based on the page_number (index in distinct list)
     if page_number <= len(distinct_positions) and page_number > 0:
         module_position = distinct_positions[page_number - 1]  # 1-based index to 0-based list index

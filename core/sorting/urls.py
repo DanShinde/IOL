@@ -18,6 +18,7 @@ htmx_views = [
     path('order_update/<int:pk>/<str:action>', views.order_update, name= "order_update"),
     path('delete_signal/<int:pk>/', views.delete_in_Reorder, name='delete-signal-reorder'),
     path('grouping/<int:project_id>/<int:page_number>', views.group_view, name='grouping'),
+    path('grouping/<int:project_id>/<int:page_number>/', views.group_view, name='grouping'),
     path('groupingnext/', views.ngroup_view, name='groupingnext'),
     path('groupingprev/', views.pgroup_view, name='groupingprev'),
     path('update-clustern/', views.update_clustern, name='update_data'),
