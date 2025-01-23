@@ -198,7 +198,7 @@ def add_spares(worksheet,row, project, IO, count,I_Pointer, Q_Pointer, panel_n, 
     worksheet.write(row, 6, x)
     worksheet.write(row, 7, "Spare Signal")
     worksheet.write(row, 8, channel)
-    worksheet.write(row, 9, IO.module_position if IO.module_position is not None else 0)
+    worksheet.write(row, 9, IO.module_position if IO is not None else 0)
     # print(IO, "Spare")
     worksheet.write(row, 10, panel)
     worksheet.write(row, 11, "CP")
