@@ -13,12 +13,12 @@ class SignalResource(resources.ModelResource):
 
 
 @admin.register(Signals)
-class SignalsAdmin(ImportExportMixin, admin.ModelAdmin):
+class SignalsAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ['id', 'equipment_code', 'code','component_description',
                     'function_purpose',	'device_type',	'signal_type',
                     'remarks', 'segment', 'initial_state', 'location', 'module_id']
 
-    resource_class = SignalResource
+    # resource_class = SignalResource
     list_filter = ('segment', 'module_id')
     search_fields = (
         "module_id",
@@ -38,7 +38,7 @@ class IOListResource(resources.ModelResource):
 
 
 @admin.register(IOList)
-class IOListAdmin(ImportExportMixin, admin.ModelAdmin):
+class IOListAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ['id','tag', 'order', 'cluster_number', 'project', 'name',
                     'code',  'device_type',	'signal_type',
                     'io_address', 'location']
@@ -52,11 +52,11 @@ class IOListAdmin(ImportExportMixin, admin.ModelAdmin):
         "panel_number"
     )
 
-    resource_class = IOListResource
+    # resource_class = IOListResource
 
 
 
-class ProjectAdmin(admin.ModelAdmin):
+class ProjectAdmin(ImportExportModelAdmin,admin.ModelAdmin):
     list_display = ['id', 'name', 'description', 'segment','PLC', 'created_by','created_at', 'is_Murr']
 
 admin.site.register(Project, ProjectAdmin)
@@ -72,10 +72,10 @@ class ModuleResource(resources.ModelResource):
 
 
 @admin.register(Module)
-class ModuleAdmin(ImportExportMixin, admin.ModelAdmin):
+class ModuleAdmin(ImportExportModelAdmin, admin.ModelAdmin):
     list_display = ['id', 'module', 'segment', 'created_by', 'created_at']
 
-    resource_class = ModuleResource
+    # resource_class = ModuleResource
     list_filter = ('segment', 'created_by')
     search_fields = (
         "created_by",
