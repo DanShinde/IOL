@@ -229,9 +229,10 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer, panel_n):
         IOOut = IO if IO != None else IOOut
         # print("IO Out is  -", IOOut)
         if IO.signal_type == "DI" or project.is_Murr:
-            while project.is_Murr and ((row-1) % 16 )+1 in [15,16]:
+            while project.is_Murr and ((row-1) % 16 )+1 in [15,16] and not project.isFreeze:
                 worksheet, I_Pointer = add_Murr_spares(worksheet,row,project,IO,I_Pointer, panel_n)
                 row += 1
+
 
             # print('Signal Added')
             channel = (row - 1) % 16 + 1
