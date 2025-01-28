@@ -150,6 +150,43 @@ $('#panel-number').change(function() {
    .catch(error => console.error('Error:', error));
          }
        });
+       
+       
+       
+       var tbody = $("#tablesort tbody");
+      $("#tablesort").tableDnD({
+          onDragClass: "table-warning",
+          onDrop: function(table, row) {
+              var rows = table.tBodies[0].rows;
+              var iolistsOrderList = [];
+              for (var i = 0; i < rows.length; i++) {
+                  var iolistPk = parseInt(rows[i].querySelector('input[name="iolist_order"]').value);
+                  iolistsOrderList.push(iolistPk);
+              }
+              var formData = new FormData();
+              formData.append('iolists', iolistsOrderList);
+              // formData.append('csrfmiddlewaretoken', csrf);
+              console.log(iolistsOrderList)
+              console.log(rows);
+              $.ajax({
+                  url: '{% url "sort_IO" %}',
+                  type: 'POST',
+                  data: formData,
+                  processData: false,
+                  contentType: false,
+                  headers: {"X-CSRFToken": getCookie("csrftoken")},
+                  success: function(response) {
+                    console.log('IOList order updated successfully');  
+                   // $('#tag-list').html(response.data);
+                    console.log("Updated")
+                  },
+                  error: function(xhr, status, error) {
+                      console.log('Error updating IOList order');
+                  }
+              });
+          }
+          
+      });
       });
    </script>
     <script>
