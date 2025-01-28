@@ -137,14 +137,14 @@ def add_signals(request):
         )
         entry.save()
     if project.is_Murr:
-        io_list_to_order = IOList.objects.filter(project = project).order_by('cluster_number', 'module_position','order')
+        io_list_to_order = IOList.objects.filter(project = project).order_by( 'module_position','order')
     else:
         io_list_to_order = IOList.objects.filter(project = project).order_by('signal_type',  'location', 'module_position','order')
     temp_Add = 0
-    for index, signal in enumerate(io_list_to_order, start=1):
-        signal.order = (((index-1)//14)*2) + index if project.is_Murr else index
+    # for index, signal in enumerate(io_list_to_order, start=1):
+    #     signal.order = (((index-1)//14)*2) + index if project.is_Murr else index
         # print(f'Order is {signal.order}')
-        signal.module_position =1+ (index-1)//14 if project.is_Murr else 1+ (index-1)//16
+        #signal.module_position =1+ (index-1)//14 if project.is_Murr else 1+ (index-1)//16
         # signal.save()
 
     
