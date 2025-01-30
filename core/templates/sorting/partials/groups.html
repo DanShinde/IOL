@@ -195,21 +195,21 @@ $('#panel-number').change(function() {
    </script>
     <script>
       function deleteSignal(pk) {
-          var url = "{% url 'delete-signal-reorder' 0 %}".replace('0', pk);
-          $.ajax({
-            url: url,
-            type: 'DELETE',
-            headers: {"X-CSRFToken": getCookie("csrftoken")},
-            success: function(response) {
-              $('#tag-list').html(response.data);
-              //console.log(response.data);
-              console.log(" Signal Deleted Successfully.")
-            },
-            error: function(xhr, status, error) {
-              // Handle error
-            }
-          });
+    var url = "{% url 'delete-signal-reorder' 0 %}".replace('0', pk);
+    $.ajax({
+        url: url,
+        type: 'DELETE',
+        headers: { "X-CSRFToken": getCookie("csrftoken") },
+        success: function(response) {
+            $("tr[data-pk='" + pk + "']").remove();  // Remove the row with matching data-pk
+            console.log("Signal Deleted Successfully.");
+        },
+        error: function(xhr, status, error) {
+            console.error("Error deleting signal:", error);
         }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   // Find all editable elements with the class 'editable clusternumber'
   const editableElements = document.querySelectorAll('.editable.clusternumber');
