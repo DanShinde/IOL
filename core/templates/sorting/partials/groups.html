@@ -194,6 +194,22 @@ $('#panel-number').change(function() {
       });
    </script>
     <script>
+      function deleteSignal(pk) {
+          var url = "{% url 'delete-signal-reorder' 0 %}".replace('0', pk);
+          $.ajax({
+            url: url,
+            type: 'DELETE',
+            headers: {"X-CSRFToken": getCookie("csrftoken")},
+            success: function(response) {
+              $('#tag-list').html(response.data);
+              //console.log(response.data);
+              console.log(" Signal Deleted Successfully.")
+            },
+            error: function(xhr, status, error) {
+              // Handle error
+            }
+          });
+        }
 document.addEventListener('DOMContentLoaded', function() {
   // Find all editable elements with the class 'editable clusternumber'
   const editableElements = document.querySelectorAll('.editable.clusternumber');
