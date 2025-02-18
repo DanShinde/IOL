@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.shortcuts import render
 from iol.models import ProjectReport
 import pandas as pd
@@ -5,6 +6,8 @@ from datetime import datetime
 from rest_framework import viewsets
 from iol.models import Project, Module, IOList, Signals, ProjectReport
 from .serializers import ProjectSerializer, ModuleSerializer, IOListSerializer, SignalsSerializer, ProjectReportSerializer
+from rest_framework.decorators import api_view
+from django.views.decorators.csrf import csrf_exempt
 
 
 def format_month_year(period):
@@ -31,8 +34,24 @@ def Trends():
 
     return pivot.to_json(), pivot2.to_json()
 
+@csrf_exempt
+@api_view(['GET'])
+def Dashdata(request):
+    pivot, pivot2 = Trends()
+    context = {
+        'pivot': pivot,
+        'pivot2': pivot2,
+    }
+    # print(context)
+    # Create response object
+    response = JsonResponse(context)
 
+    # Add CORS headers to allow all origins (for testing)
+    response["Access-Control-Allow-Origin"] = "*"
+    response["Access-Control-Allow-Methods"] = "GET, OPTIONS"
+    response["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
 
+    return response
 
 
 def home(request):

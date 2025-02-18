@@ -13,6 +13,7 @@ router.register(r'projectreports', views.ProjectReportViewSet)
 urlpatterns = [
 #dashboard 
     path('', views.home, name = 'dash-home'),
+    path('data/', views.Dashdata, name = 'dash-data'),
     path('api/', include(router.urls)),
 ]
 
