@@ -412,10 +412,14 @@ def export_to_excel(request):
     response = HttpResponse(output.read(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     
     project_id = request.session.get('project')
-    projectRep = get_object_or_404(ProjectReport ,project = project)
-    projectRep.updated_at = datetime.now()
-    projectRep.updated_by = request.user.get_full_name()
-    projectRep.save()
+    try:
+        projectRep = get_object_or_404(ProjectReport ,project = project)
+        projectRep.updated_at = datetime.now()
+        projectRep.updated_by = request.user.get_full_name()
+        projectRep.save()
+    except Exception as e:
+        print(e)
+
     return response
 
 #Get list of Clusters/ Modules
