@@ -30,6 +30,9 @@ urlpatterns = [
     path('iolist_project/<int:project_id>', views.iolist_project, name='iolist_project'),
     re_path(r'^iolist/(?:(?P<pk>\d+)/)?(?:(?P<action>\w+)/)?',  login_required(views.IolistView.as_view()), name='iolist'),
     re_path(r'^signals/(?:(?P<pk>\d+)/)?(?:(?P<action>\w+)/)?',  login_required(views.ClusterView.as_view()), name='signals'),
+
+    #Temporary connecting to other Version
+    path('apiio/<str:project_name>', views.GetProjectIOList, name='io-api'),
 ]
 
 

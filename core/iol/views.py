@@ -19,7 +19,7 @@ import xlsxwriter
 from django.template.loader import render_to_string
 from django.template import loader
 from rest_framework.response import Response
-from .serializers import SignalSerializer, ModuleSerializer
+from .serializers import SignalSerializer, ModuleSerializer, IOListSerializer
 from .forms import ProjectForm, SignalsForm, IOListForm, ClusterForm
 from .models import Project, Module, ProjectReport, Signals, IOList
 from django.core import serializers
@@ -366,6 +366,26 @@ def write_sheet(panel,workbook, project, iolist, I_Pointer, Q_Pointer, panel_n):
     return workbook, I_Pointer, Q_Pointer
 
 
+def GetProjectIOList(request, project_name):
+    # Fetch project using its name
+    project = get_object_or_404(Project, name=project_name)
+
+    if project.is_Murr:
+        iolist = IOList.objects.filter(project=project).order_by('module_position', 'order')
+    else:
+        iolist = IOList.objects.filter(project=project).order_by('signal_type', 'location', 'module_position', 'order')
+
+    # Serialize queryset
+    serialized_data = IOListSerializer(iolist, many=True).data
+
+    return JsonResponse({
+        "project_name": project.name,
+        "project_id": project.id,
+        "is_Murr": project.is_Murr,
+        "iolist": serialized_data
+    }, safe=False)
+
+
 #EXporting IO List to Excel file
 @login_required(login_url="/accounts/login")
 def export_to_excel(request):
@@ -378,7 +398,7 @@ def export_to_excel(request):
         iolist = IOList.objects.filter(project_id=project_id).order_by('signal_type', 'location','module_position','order')
     if len(project.panel_numbers) > 2:
         panels = project.panel_numbers.split(",")
-        print(panels)
+        # print(panels)
     else:
         panels = [i.panel_number for i in iolist]
         panels =[*set(panels)]
@@ -407,7 +427,7 @@ def export_to_excel(request):
                     .values_list('panel_number', 'count')
     
     project.panels = dict(panel_counts)
-    print(project.panels)
+    # print(project.panels)
     project.save()
     response = HttpResponse(output.read(), content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     
