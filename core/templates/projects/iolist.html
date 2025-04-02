@@ -16,17 +16,23 @@
             <span class="glyphicon glyphicon-filter"></span>Click To Apply Filter
         </button>
         <button class="btn btn-primary mt-3 mybtns mr-auto" onclick= "location.href='{% url 'project_detail' project.id %}'">
-          <span class="glyphicon glyphicon-filter">Edit IO List </span>
+          <span class="glyphicon glyphicon-filter">0. Edit IO List </span>
+        </button>
+        <button class="btn btn-primary mt-3 mybtns mr-auto" onclick= "location.href='{% url 'iolist_classifier' project.id %}'">
+          <span class="glyphicon glyphicon-filter">1. Classify IO List </span>
         </button>
         <button class="btn btn-primary mt-3 mybtns mr-auto" onclick= "location.href='{% url 'grouping' project.id 1 %}'">
-          <span class="glyphicon glyphicon-filter">Group IO List </span>
+          <span class="glyphicon glyphicon-filter">2. Group IO List </span>
         </button>
-        <a class="btn btn-primary mt-3 mybtns" style="color:white; cursor: pointer;" onclick= "location.href='{% url 'sorting' project.id %}'">Re-Order IO List</a>
+        <a class="btn btn-primary mt-3 mybtns" style="color:white; cursor: pointer;" onclick= "location.href='{% url 'sorting' project.id %}'">3. Re-Order IO List</a>
         <div class="text-center mx-auto">
             <h5 class="card-title mt-3" id ="projectName">{{ project }}</h5>
             <p class="card-text">{{ project.description }}</p>
         </div>
-        <button class="btn btn-primary mt-3 mybtns ml-auto" id="export-iolist-btn">Export IO List</button>
+        <button class="btn btn-primary mt-3 mybtns mr-auto" onclick= "location.href='{% url 'io-v2' project.name  %}'">
+          <span class="glyphicon glyphicon-filter">4.1 Export IO Latest </span>
+        </button>
+        <button class="btn btn-primary mt-3 mybtns ml-auto" id="export-iolist-btn">4. Export IO List</button>
       </div>
     
     

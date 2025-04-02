@@ -28,7 +28,9 @@ from django.contrib.auth.decorators import login_required,permission_required
 from django.contrib.auth import login, logout, authenticate
 from django.http import QueryDict
 from django.contrib.auth.mixins import LoginRequiredMixin
-
+import requests
+from rest_framework.views import APIView
+from rest_framework import status
 
 def home(request):
     return redirect('project_list') 
@@ -386,6 +388,64 @@ def GetProjectIOList(request, project_name):
     }, safe=False)
 
 
+V2_BASE_URL = "http://localhost:8001/IOLGen"  # Update with actual V1 base URL
+
+def GenerateFromV2(request, project_name):
+    project = get_object_or_404(Project, name=project_name)
+    if not project_name or project is None:
+        return HttpResponse("Missing 'project_name' parameter", status=400)
+
+    # Construct the full URL for ExportIOListfromV1 in V1 application
+    export_url = f"{V2_BASE_URL}/ExportIOListfromV1/{project_name}/"
+
+    try:
+        # Make a request to ExportIOListfromV1
+        response = requests.get(export_url, stream=True)
+
+        if response.status_code != 200:
+            return HttpResponse(f"Failed to generate file: {response.status_code}", status=response.status_code)
+
+        # Return the Excel file response from V1
+        response_content = response.content
+        result = HttpResponse(response_content, content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+        result["Content-Disposition"] = f'attachment; filename="{project_name}_IO_List.xlsx"'
+        return result
+    except requests.exceptions.RequestException as e:
+        return HttpResponse(f"Error connecting to V2: {str(e)}", status=500)
+
+
+
+
+class UpdateIOData(APIView):
+    def post(self, request):
+        try:
+            io_data = request.data.get("io_data", [])
+
+            if not io_data:
+                return Response({"error": "No IO data provided"}, status=status.HTTP_400_BAD_REQUEST)
+
+            updated_records = []
+
+            for entry in io_data:
+                io_id = entry.get("id")
+                iomodule_name = entry.get("iomodule_name")
+
+                if not all([io_id, iomodule_name]):
+                    continue  # Skip invalid entries
+
+                # Update or create the entry in the database
+                obj, created = IOList.objects.update(
+                    id=io_id,
+                    defaults={"iomodule_name": iomodule_name}
+                )
+                updated_records.append(obj.id)
+
+            return Response({"message": "Database updated successfully", "updated_ids": updated_records}, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 #EXporting IO List to Excel file
 @login_required(login_url="/accounts/login")
 def export_to_excel(request):
@@ -561,11 +621,13 @@ class IolistView(View):
         if kwargs.get('action') == 'get':
             return self.get(request, *args, **kwargs)
         try:
-            project_id = request.session.get('project')
+            project_id = request.session.get('project') or kwargs.get('pk')
+                
             project = get_object_or_404(Project, pk=project_id)
             print(project)
             segment = project.segment
-        except:
+        except Exception as e:
+            print(e)
             segment = "Test"
         print(segment)
         if not request.user.groups.filter(name= segment).exists():

@@ -1,6 +1,6 @@
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import path
-
+from .views import IOListClassifierView
 from . import views
 
 
@@ -22,6 +22,10 @@ htmx_views = [
     path('groupingnext/', views.ngroup_view, name='groupingnext'),
     path('groupingprev/', views.pgroup_view, name='groupingprev'),
     path('update-clustern/', views.update_clustern, name='update_data'),
+
+    path("iolist-classifier/<int:project_id>/", IOListClassifierView.as_view(), name="iolist_classifier"),
+    path("save-iolist/", views.save_iolist_Panels, name="save_iolist"),
+
 ]
 
 urlpatterns += htmx_views

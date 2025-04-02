@@ -1,9 +1,11 @@
 import json
 from django.http import HttpResponse, JsonResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, render
+from django.views import View
 from django.views.generic import ListView
 from django.core import serializers
 from iol.models import IOList, Project
+from rest_framework.response import Response
 from django.template.loader import render_to_string
 # Create your views here.
 
@@ -139,6 +141,7 @@ def sort_IO(request):
 
 
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view
 
 # cluster number update by editing cluster number in table
 @csrf_exempt
@@ -357,6 +360,7 @@ def pgroup_view(request):
 
 @csrf_exempt
 def update_clustern(request):
+
     if request.method == 'POST':
         data = json.loads(request.body)
         pk = data.get('pk')
@@ -372,3 +376,49 @@ def update_clustern(request):
             return JsonResponse({'error': 'Object not found'}, status=404)
     else:
         return JsonResponse({'error': 'Invalid request method'}, status=405)
+    
+
+class IOListClassifierView(View):
+    template_name = "sorting/iolist_classifier.html"
+
+    def get(self, request, project_id):
+        if not project_id:
+            return render(request, self.template_name, {"error": "No project selected."})
+
+        try:
+            project = Project.objects.get(id=project_id)
+        except Project.DoesNotExist:
+            return render(request, self.template_name, {"error": "Invalid project."})
+
+        iolist = IOList.objects.filter(project_id=project_id)
+
+
+        # Store project_id in session
+        request.session["project_id"] = project_id
+
+        return render(
+            request,
+            self.template_name,
+            {
+                "project": project,
+                "unclassified_ios": iolist,
+            },
+        )
+    
+@api_view(["POST"])
+def save_iolist_Panels(request):
+    project_id = request.session.get("project")
+    if not project_id:
+        return Response({"error": "No project selected."}, status=400)
+
+    data = request.data.get("fieldIOs", [])
+
+    for entry in data:
+        try:
+            io = IOList.objects.get(id=entry["id"], project_id=project_id)
+            io.location = "FD"
+            io.save()
+        except IOList.DoesNotExist:
+            continue
+
+    return Response({"message": "I/O List saved successfully!"})

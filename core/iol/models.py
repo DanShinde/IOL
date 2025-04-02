@@ -78,6 +78,7 @@ class IOList(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     order = models.PositiveIntegerField(null=True)
     cluster_number = models.PositiveIntegerField(null=True)
+    iomodule_name = models.CharField(max_length=10, blank=True, null=True)
     Demo_3d_Property = models.CharField(max_length=200, blank=True, null=True)
 
     def __str__(self):

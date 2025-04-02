@@ -1,6 +1,6 @@
 from django.urls import path, re_path
 from . import views
-from .views import ModuleListView, IolistView
+from .views import ModuleListView, IolistView, UpdateIOData
 from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
@@ -33,6 +33,9 @@ urlpatterns = [
 
     #Temporary connecting to other Version
     path('apiio/<str:project_name>', views.GetProjectIOList, name='io-api'),
+    path('apiio/v2/<str:project_name>', views.GenerateFromV2, name='io-v2'),
+    path("apiio/update/", UpdateIOData.as_view(), name="update_io_data"),
+
 ]
 
 
