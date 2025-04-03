@@ -32,6 +32,7 @@ import requests
 from rest_framework.views import APIView
 from rest_framework import status
 from rest_framework.permissions import AllowAny
+from sorting.views import ExportIOListfromV1
 
 
 def home(request):
@@ -401,7 +402,7 @@ def GenerateFromV2(request, project_name):
     export_url = f"{V2_BASE_URL}/ExportIOListfromV1/{project_name}/"
     # Dynamically generate the local URL instead of using a fixed base URL
     export_url = request.build_absolute_uri(reverse("ExportIOListfromV1", args=[project_name]))
-    
+
     try:
         # Make a request to ExportIOListfromV1
         response = requests.get(export_url, stream=True)
@@ -417,6 +418,21 @@ def GenerateFromV2(request, project_name):
     except requests.exceptions.RequestException as e:
         return HttpResponse(f"Error connecting to V2: {str(e)}", status=500)
 
+def GenerateLikeV2(request, project_name):
+    project = get_object_or_404(Project, name=project_name)
+    if not project_name or project is None:
+        return HttpResponse("Missing 'project_name' parameter", status=400)
+
+    # Construct the full URL for ExportIOListfromV1 in V1 application
+    try:
+        output = ExportIOListfromV1(project_name)
+        # Return the Excel file response from V1
+        response = HttpResponse(output.getvalue(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename={project_name}_IOList.xlsx'
+        return response
+    except requests.exceptions.RequestException as e:
+        return HttpResponse(f"Error connecting to V2: {str(e)}", status=500)
+    
 
 
 # @method_decorator(csrf_exempt, name="dispatch")  # Disable CSRF protection

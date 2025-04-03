@@ -36,7 +36,7 @@ urlpatterns = [
     path('apiio/<str:project_name>', views.GetProjectIOList, name='io-api'),
     path('apiio/v2/<str:project_name>', views.GenerateFromV2, name='io-v2'),
     path("apiio/update/", csrf_exempt(UpdateIOData.as_view()), name="update_io_data"),
-
+    path('ExportT4/<str:project_name>', views.GenerateLikeV2, name='ExportT4'),
 ]
 
 
