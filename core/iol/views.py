@@ -31,6 +31,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 import requests
 from rest_framework.views import APIView
 from rest_framework import status
+from rest_framework.permissions import AllowAny
+
 
 def home(request):
     return redirect('project_list') 
@@ -388,7 +390,7 @@ def GetProjectIOList(request, project_name):
     }, safe=False)
 
 
-V2_BASE_URL = "http://localhost:8001/IOLGen"  # Update with actual V1 base URL
+V2_BASE_URL = "http://iolgen.onrender.com/IOLGen"  # Update with actual V1 base URL
 
 def GenerateFromV2(request, project_name):
     project = get_object_or_404(Project, name=project_name)
@@ -415,8 +417,11 @@ def GenerateFromV2(request, project_name):
 
 
 
-
+# @method_decorator(csrf_exempt, name="dispatch")  # Disable CSRF protection
 class UpdateIOData(APIView):
+    authentication_classes = []  # Disable authentication
+    permission_classes = [AllowAny]  # Allow any request
+
     def post(self, request):
         try:
             io_data = request.data.get("io_data", [])
@@ -433,15 +438,16 @@ class UpdateIOData(APIView):
                 if not all([io_id, iomodule_name]):
                     continue  # Skip invalid entries
 
-                # Update or create the entry in the database
-                obj, created = IOList.objects.update(
-                    id=io_id,
-                    defaults={"iomodule_name": iomodule_name}
-                )
-                updated_records.append(obj.id)
+                # Update the entry in the database
+                updated = IOList.objects.filter(id=io_id).update(iomodule_name=iomodule_name)
 
-            return Response({"message": "Database updated successfully", "updated_ids": updated_records}, status=status.HTTP_200_OK)
+                if updated:  # If the update was successful
+                    updated_records.append(io_id)
 
+            return Response(
+                {"message": "Database updated successfully", "updated_ids": updated_records},
+                status=status.HTTP_200_OK
+            )
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 

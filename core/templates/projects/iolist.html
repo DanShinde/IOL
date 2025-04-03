@@ -24,6 +24,9 @@
         <button class="btn btn-primary mt-3 mybtns mr-auto" onclick= "location.href='{% url 'grouping' project.id 1 %}'">
           <span class="glyphicon glyphicon-filter">2. Group IO List </span>
         </button>
+        <button class="btn btn-primary mt-3 mybtns mr-auto" onclick= "location.href='{% url 'grouping2' project.id 1 %}'">
+          <span class="glyphicon glyphicon-filter">2.1 Group IO List </span>
+        </button>
         <a class="btn btn-primary mt-3 mybtns" style="color:white; cursor: pointer;" onclick= "location.href='{% url 'sorting' project.id %}'">3. Re-Order IO List</a>
         <div class="text-center mx-auto">
             <h5 class="card-title mt-3" id ="projectName">{{ project }}</h5>

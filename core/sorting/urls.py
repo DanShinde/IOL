@@ -19,12 +19,14 @@ htmx_views = [
     path('delete_signal/<int:pk>/', views.delete_in_Reorder, name='delete-signal-reorder'),
     path('grouping/<int:project_id>/<int:page_number>', views.group_view, name='grouping'),
     path('grouping/<int:project_id>/<int:page_number>/', views.group_view, name='grouping'),
+    path('grouping2/<int:project_id>/<int:page_number>/', views.group_view2, name='grouping2'),
     path('groupingnext/', views.ngroup_view, name='groupingnext'),
     path('groupingprev/', views.pgroup_view, name='groupingprev'),
     path('update-clustern/', views.update_clustern, name='update_data'),
 
     path("iolist-classifier/<int:project_id>/", IOListClassifierView.as_view(), name="iolist_classifier"),
     path("save-iolist/", views.save_iolist_Panels, name="save_iolist"),
+    path('grouping2AddSpares/<int:ref_io>/<str:signal_type>/', views.add_spare, name="add_spare_group"),
 
 ]
 

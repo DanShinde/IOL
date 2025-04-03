@@ -21,7 +21,11 @@
 
 <div>{% csrf_token %} 
     <div id="tag-list">
-        {% include 'sorting/partials/groups.html' %}
+        {% if group2 %}
+            {% include 'sorting/partials/groups2.html' %}
+        {% else %}
+            {% include 'sorting/partials/groups.html' %}
+        {% endif %}
     </div>
 
 </div>

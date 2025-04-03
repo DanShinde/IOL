@@ -1,12 +1,14 @@
+from datetime import datetime
 import json
 from django.http import HttpResponse, JsonResponse, HttpResponseNotFound
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.views import View
 from django.views.generic import ListView
 from django.core import serializers
 from iol.models import IOList, Project
 from rest_framework.response import Response
 from django.template.loader import render_to_string
+from django.contrib.auth.decorators import login_required
 # Create your views here.
 
 
@@ -244,12 +246,16 @@ def group_view(request, project_id, page_number):
 
     project = get_object_or_404(Project, pk=project_id)
     panel_number = request.GET.get('panel_number')
+    
     if panel_number and panel_number != 'None':
         panel_number = panel_number.strip()
         # Get distinct module_positions for the project filtered by panel_number
         distinct_positions = IOList.objects.filter(project=project, panel_number=panel_number).values_list('module_position', flat=True).distinct().order_by('module_position')
+        ioModules = IOList.objects.filter(project=project, panel_number=panel_number).values_list('iomodule_name', flat=True).distinct().order_by('iomodule_name')
     else:
         distinct_positions = IOList.objects.filter(project=project).values_list('module_position', flat=True).distinct().order_by('module_position')
+        ioModules = IOList.objects.filter(project=project).values_list('iomodule_name', flat=True).distinct().order_by('iomodule_name')
+
 
     # Get the module_position based on the page_number (index in distinct list)
     if page_number <= len(distinct_positions) and page_number > 0:
@@ -274,19 +280,6 @@ def group_view(request, project_id, page_number):
 
     return render(request, 'sorting/grouping.html', context)
 
-# def ngroup_view(request):
-#     page_number = 1 + request.session.get('page_number') 
-
-#     project_id = request.session.get('project_id') 
-
-#     project = get_object_or_404(Project, pk=project_id)
-#     # Assuming 10 entries per page, calculate cluster_number based on page_number
-#     module_position = page_number
-#     request.session['page_number'] = module_position
-#     request.session['project_id'] = project_id
-    
-#     queryset = IOList.objects.filter(module_position=module_position,project = project)
-#     return render(request, 'sorting/grouping.html', {'iolists': queryset})
 
 def ngroup_view(request):
     page_number = 1 + request.session.get('page_number') 
@@ -318,18 +311,7 @@ def ngroup_view(request):
     }
     return render(request, 'sorting/grouping.html', context)
 
-# def pgroup_view(request):
-#     page_number =  request.session.get('page_number') - 1
-#     project_id = request.session.get('project_id') 
 
-#     project = get_object_or_404(Project, pk=project_id)
-#     # Assuming 10 entries per page, calculate cluster_number based on page_number
-#     module_position = page_number
-#     request.session['page_number'] = page_number
-#     request.session['project_id'] = project_id
-    
-#     queryset = IOList.objects.filter(cluster_number=module_position,project = project)
-#     return render(request, 'sorting/grouping.html', {'iolists': queryset})
 
 def pgroup_view(request):
     page_number = -1 + request.session.get('page_number') 
@@ -401,24 +383,114 @@ class IOListClassifierView(View):
             self.template_name,
             {
                 "project": project,
-                "unclassified_ios": iolist,
+                "ios": iolist,
             },
         )
     
 @api_view(["POST"])
+@csrf_exempt
 def save_iolist_Panels(request):
-    project_id = request.session.get("project")
-    if not project_id:
-        return Response({"error": "No project selected."}, status=400)
 
     data = request.data.get("fieldIOs", [])
 
     for entry in data:
         try:
-            io = IOList.objects.get(id=entry["id"], project_id=project_id)
-            io.location = "FD"
+            io = IOList.objects.get(id=entry["id"])
             io.save()
         except IOList.DoesNotExist:
             continue
 
     return Response({"message": "I/O List saved successfully!"})
+
+
+def group_view2(request, project_id, page_number):
+    request.session['page_number'] = page_number
+    request.session['project_id'] = project_id
+
+    project = get_object_or_404(Project, pk=project_id)
+    panel_number = request.GET.get('panel_number')
+    
+    if panel_number and panel_number != 'None':
+        panel_number = panel_number.strip()
+        # Get distinct module_positions for the project filtered by panel_number
+        ioModules = IOList.objects.filter(project=project, panel_number=panel_number).values_list('iomodule_name', flat=True).distinct().order_by('iomodule_name')
+    else:
+        ioModules = IOList.objects.filter(project=project).values_list('iomodule_name', flat=True).distinct().order_by('iomodule_name')
+
+
+    # Get the module_position based on the page_number (index in distinct list)
+    if page_number <= len(ioModules) and page_number > 0:
+        selectedIOModule = ioModules[page_number - 1]  # 1-based index to 0-based list index
+    else:
+        selectedIOModule = ioModules[0]  # Default to first position if invalid
+    if panel_number and panel_number != 'None':
+        queryset = IOList.objects.filter(iomodule_name=selectedIOModule, project=project, panel_number=panel_number).order_by('panel_number', 'order')
+    else:
+        queryset = IOList.objects.filter(iomodule_name=selectedIOModule, project=project).order_by('order')
+
+    panel_numbers = IOList.objects.filter(project=project).order_by().values_list('panel_number', flat=True).distinct()
+
+    # Prepare the context dictionary to pass values to the template
+    context = {
+        'iolists': queryset,
+        'panel_numbers': panel_numbers,
+        'selected_panel_number': panel_number,  # Include the selected panel number in the context
+        'project_id': project_id,
+        'project_name': project.name,
+        'currentPageNumber': page_number,
+        'group2': True,
+    }
+
+    return render(request, 'sorting/grouping.html', context)
+
+
+
+@login_required(login_url="/accounts/login")
+def add_spare(request, ref_io, signal_type):
+    if request.method != 'GET':
+        return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+
+    # Fetch the reference IOList instance
+    ref_io_signal = get_object_or_404(IOList, id=ref_io)
+
+    # Fetch the related project and update timestamp
+    project = get_object_or_404(Project, pk=ref_io_signal.project_id)
+    project.updated_at = datetime.now()
+    project.save()
+
+    # Generate a new tag name (modify as per your naming convention)
+    new_tag_name = "Ix_SPARE"
+
+    # Create a copy of the IOList entry with modified tag name
+    new_io = IOList.objects.create(
+        project=ref_io_signal.project,
+        name=ref_io_signal.name,
+        equipment_code="SPARE",
+        code="SPARE",
+        tag=new_tag_name,  # Only this field changes
+        signal_type=signal_type,
+        device_type="Spare Signal",
+        actual_description=ref_io_signal.actual_description,
+        panel_number=ref_io_signal.panel_number,
+        node=ref_io_signal.node,
+        rack=ref_io_signal.rack,
+        module_position=ref_io_signal.module_position,
+        terminal_block=ref_io_signal.terminal_block,
+        terminal_number=ref_io_signal.terminal_number,
+        channel=ref_io_signal.channel,
+        location=ref_io_signal.location,
+        io_address=ref_io_signal.io_address,
+        Cluster=ref_io_signal.Cluster,
+        order=ref_io_signal.order + 1,
+        cluster_number=ref_io_signal.cluster_number,
+        iomodule_name=ref_io_signal.iomodule_name,
+        Demo_3d_Property= "",
+    )
+    # Retrieve page number from session, default to 1 if not found
+    page_number = request.session.get('current_page', 1)
+    panel_number = request.GET.get('panel_number')
+    if panel_number and panel_number != 'None':
+        return redirect('grouping2', project_id=project.id, page_number=page_number,panel_number=panel_number) 
+    else:
+        return redirect('grouping2', project_id=project.id, page_number=page_number) 
+    

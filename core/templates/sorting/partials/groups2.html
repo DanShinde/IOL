@@ -1,25 +1,43 @@
 {% load static %}
 
-{% with first_iolist=iolists.first %}
-<a href="{% url 'project_detail' first_iolist.project_id %}" class="btn float-md-none btn-info">Edit IO List</a>
-<span id = "projects" value = "{{ first_iolist.project_id }}" >
-<a href="{% url 'iolist_project' first_iolist.project_id %}" class="btn float-md-none btn-info">Review IO List</a>
-<h2 class="Dark">{{project.name}}</h2>
-{% endwith %}
+<div class="container">
+  {% with first_iolist=iolists.first %}
+  
+  <div class="row" style="background-color:rgb(119, 148, 121);">
+    <div class="col-sm-4">
+      <h2 class="Dark">{{ project_name }}</h2>
+    </div>
+    <div class="col-sm-4">
+      <a href="{% url 'project_detail' first_iolist.project_id %}" class="btn btn-info">Edit IO List</a>
+    </div>
+    <div class="col-sm-4">
+      <a href="{% url 'iolist_project' first_iolist.project_id %}" class="btn btn-info">Review IO List</a>
+    </div>
+  </div>
+
+  {% endwith %}
+</div>
+
+
+
+<!-- <span id = "projects" value = "{{ first_iolist.project_id }}" > -->
+
+
+
 <div id= "projectrow" class="row" data-project-id="{{ first_iolist.project_id }}">{{project.name}}  
-    <div class="col-sm-9 col-xl-10 order-2 order-sm-1 mt-3">
+    <div class="col-sm-9 col-xl-10 order-2 order-sm-1 mt-3 mx-auto">
       <div id="sortable" class="  d-flex justify-content-between align-items-center list-group mb-4 mt-3" data-id="1">
 
         
         <div class="panel-heading d-flex align-items-center">
-          <button class="btn btn-primary mt-3 mybtns mr-auto" 
-              onclick="location.href=`/sort/grouping/{{project_id}}/{{currentPageNumber|add:-1}}/?panel_number={{selected_panel_number}}`">
+          <button class="btn btn-primary mt-3 mybtns mr-auto" style="margin-left: 5px; margin-right: 5px; margin-bottom: 15px;" 
+              onclick="location.href=`/sort/grouping2/{{project_id}}/{{currentPageNumber|add:-1}}/?panel_number={{selected_panel_number}}`">
               <span class="glyphicon glyphicon-filter">Previous</span>
           </button>
-          <button class="btn btn-primary mt-3 mybtns mr-auto disabled">
+          <button class="btn btn-primary mt-3 mybtns mr-auto disabled" style="margin-left: 5px; margin-right: 5px; margin-bottom: 15px;">
               <span class="glyphicon glyphicon-filter">{{ request.session.page_number }}</span>
           </button>
-          <select class="form-control" id="panel-number" name="panel-number">
+          <select class="form-control" id="panel-number" name="panel-number" style="margin-left: 5px; margin-right: 5px; margin-bottom: 0px; ">
               <option value="">All</option>
               {% for panel_number in panel_numbers %}
                   <option value="{{ panel_number }}" {% if panel_number == selected_panel_number %}selected{% endif %}>
@@ -27,16 +45,29 @@
                   </option>
               {% endfor %}
           </select>
-          <button class="btn btn-primary mt-3 mybtns mr-auto" 
-              onclick="location.href=`/sort/grouping/{{project_id}}/{{currentPageNumber|add:1}}/?panel_number={{selected_panel_number}}`
+
+
+          <button class="btn btn-primary mt-3 mybtns mr-auto" style="margin-left: 5px; margin-right: 5px;margin-bottom: 15px;"
+              onclick="location.href=`/sort/grouping2/{{project_id}}/{{currentPageNumber|add:1}}/?panel_number={{selected_panel_number}}`
               ">
               <span class="glyphicon glyphicon-filter">Next</span>
           </button>
+          {% with last_io=iolists.last %}
+          <button class="btn btn-primary mt-3 mybtns mr-auto" style="background-color: #FF7F50; margin-left: 5px; margin-right: 5px; margin-bottom: 15px;" 
+          onclick="location.href=`/sort/grouping2AddSpares/{{ last_io.pk }}/DI`">
+              <span class="glyphicon glyphicon-filter">Add Spare - Input</span>
+          </button>
+          <button class="btn btn-primary mt-3 mybtns mr-auto"  style="background-color: #FF7F50;margin-left: 5px; margin-right: 5px;margin-bottom: 15px;"
+              onclick="location.href=`/sort/grouping2AddSpares/{{last_io.pk}}/DO`">
+              <span class="glyphicon glyphicon-filter">Add Spare - Output</span>
+          </button>
+          {% endwith %} 
+
       </div>
       
 
         {% if iolists %}
-          <div id="tag-form" class="sortable">
+          <div id="tag-form" class="sortable" style="margin-top: 0px;">
             {% csrf_token %}             
             <table id="tablesort" class="table-striped table-success" cellspacing="0" cellpadding="2">
               <thead>
@@ -109,7 +140,7 @@ $('#panel-number').change(function() {
     const panelNumber = $(this).val();
     const projectId = $('#projectrow').data('project-id');
     const currentPageNumber = "{{ request.session.page_number }}";  // Get current page number
-    const url = `/sort/grouping/{{project_id}}/${currentPageNumber}/?panel_number=${panelNumber}`;
+    const url = `/sort/grouping2/{{project_id}}/${currentPageNumber}/?panel_number=${panelNumber}`;
     window.location.href = url;
 });
 
