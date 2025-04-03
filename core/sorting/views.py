@@ -627,10 +627,8 @@ def ExportIOListfromV1(project_name):
             # Append to the main field_data DataFrame
             field_data = pd.concat([field_data, current_field_data], ignore_index=True)
 
-    import threading
 
-    thread = threading.Thread(target=UpdateIOModuleName, args=(Sheets, field_data))
-    thread.start()
+    UpdateIOModuleName(Sheets, field_data)
     
     for sheet in Sheets:
         Sheets[sheet].loc[:, "Sr.No"] = range(1, len(Sheets[sheet]) + 1)  # Update existing column
