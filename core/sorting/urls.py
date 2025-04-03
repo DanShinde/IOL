@@ -1,6 +1,6 @@
 from django.contrib.auth.views import LoginView, LogoutView
 from django.urls import path
-from .views import IOListClassifierView
+from .views import IOListClassifierView, ExportIOListfromV1
 from . import views
 
 
@@ -27,7 +27,7 @@ htmx_views = [
     path("iolist-classifier/<int:project_id>/", IOListClassifierView.as_view(), name="iolist_classifier"),
     path("save-iolist/", views.save_iolist_Panels, name="save_iolist"),
     path('grouping2AddSpares/<int:ref_io>/<str:signal_type>/', views.add_spare, name="add_spare_group"),
-
+    path('ExportIOListfromV1/<str:project_name>/', ExportIOListfromV1.as_view(), name='ExportIOListfromV1'),
 ]
 
 urlpatterns += htmx_views

@@ -399,7 +399,9 @@ def GenerateFromV2(request, project_name):
 
     # Construct the full URL for ExportIOListfromV1 in V1 application
     export_url = f"{V2_BASE_URL}/ExportIOListfromV1/{project_name}/"
-
+    # Dynamically generate the local URL instead of using a fixed base URL
+    export_url = request.build_absolute_uri(reverse("ExportIOListfromV1", args=[project_name]))
+    
     try:
         # Make a request to ExportIOListfromV1
         response = requests.get(export_url, stream=True)
