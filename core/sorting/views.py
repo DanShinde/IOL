@@ -626,8 +626,16 @@ def ExportIOListfromV1(project_name):
             current_field_data['Pin'] = ['Pin 4' if i % 2 == 0 else 'Pin 2' for i in range(len(current_field_data))]
             # Append to the main field_data DataFrame
             field_data = pd.concat([field_data, current_field_data], ignore_index=True)
+
+    import threading
+
+    thread = threading.Thread(target=UpdateIOModuleName, args=(Sheets, field_data))
+    thread.start()
+    
     for sheet in Sheets:
+        Sheets[sheet].loc[:, "Sr.No"] = range(1, len(Sheets[sheet]) + 1)  # Update existing column
         Sheets[sheet].to_excel(writer, sheet_name=sheet[:31], index=False)
+    field_data.loc[:, "Sr.No"] = range(1, len(field_data) + 1)  # Update existing column
     field_data.to_excel(writer, sheet_name="PLC01-Field IO", index=False)
 
     workbook = writer.book
@@ -643,7 +651,6 @@ def ExportIOListfromV1(project_name):
     writer.close()
     output.seek(0)
 
-    UpdateIOModuleName(Sheets, field_data)
     
     return output
 
