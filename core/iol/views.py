@@ -390,7 +390,7 @@ def GetProjectIOList(request, project_name):
     }, safe=False)
 
 
-V2_BASE_URL = "http://iolgen.onrender.com/IOLGen"  # Update with actual V1 base URL
+V2_BASE_URL = "https://iolgen.onrender.com/IOLGen"  # Update with actual V1 base URL
 
 def GenerateFromV2(request, project_name):
     project = get_object_or_404(Project, name=project_name)
