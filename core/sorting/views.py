@@ -446,6 +446,13 @@ def group_view2(request, project_id, page_number):
         'currentPageNumber': page_number,
         'group2': True,
         'io_modules' : json.dumps(list(ioModules)),
+        'selectedIOModule': selectedIOModule,
+        'AllIos': json.dumps(
+        list(IOList.objects.filter(project=project)
+             .values('id', 'tag', 'iomodule_name')  # Fetch both `id` and `tag`
+             .order_by('tag')),
+        ensure_ascii=False
+    ),
     }
 
     return render(request, 'sorting/grouping.html', context)
@@ -661,7 +668,7 @@ def ExportIOListfromV1(project_name):
 
 
 
-
+# Update IOModuleName while generating IO List
 def UpdateIOModuleName(panel_data_dict, field_data):
     try:
         # Prepare a unified list for both panel and field data
@@ -692,7 +699,7 @@ def UpdateIOModuleName(panel_data_dict, field_data):
         print(f"Error processing data: {str(e)}")
         return None
 
-
+#Re-Assign IOs
 def rearrange_ios(request, project_name, page_number):
     # Fetch data from the external API
     project = get_object_or_404(Project, name=project_name)
@@ -824,6 +831,7 @@ def rearrange_ios(request, project_name, page_number):
     return redirect('grouping2', project_id=project.id, page_number=page_number)
 
 
+#Update IO Module name from Gouping Screen
 def updateIOModuleSingle(request):
     if request.method != 'POST':
         return JsonResponse({'success': False, 'message': 'Invalid request method.'})
@@ -840,4 +848,5 @@ def updateIOModuleSingle(request):
     io.location = ios.location
     io.save()
     return JsonResponse({'success': True, 'message': f'{io.tag} shifted to {io.iomodule_name} successfully!'})
+
 

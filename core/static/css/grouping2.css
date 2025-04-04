@@ -1,0 +1,70 @@
+/* Centered Popup */
+.popup-container1 {
+    display: none; 
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 700px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    padding: 20px;
+}
+
+/* Popup Content */
+.popup-content1 {
+    text-align: center;
+    width: 90%;
+}
+
+/* Search Input Styling */
+#searchInput {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Scrollable Search Results */
+.search-results {
+    max-height: 200px;  /* Limits height */
+    overflow-y: auto;   /* Enables vertical scrolling */
+    border: 1px solid #ddd;
+    padding: 5px;
+    border-radius: 5px;
+    align-items: center;
+}
+
+/* Buttons inside Search Results */
+.search-results button {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    border: none;
+    background: #007BFF;
+    color: white;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.search-results button:hover {
+    background: #0056b3;
+}
+
+/* Close Button */
+.btn-close-popup {
+    margin-top: 10px;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-block;
+    bottom: 10px;
+    /* position: absolute;
+    bottom: 10px; /* Adjust as needed 
+    left: 50%; 
+    /* transform: translateX(-50%); */
+}

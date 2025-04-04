@@ -19,10 +19,22 @@
 </div>
 
 
+{% block heads %}
+  
+
+  
+<!-- Link CSS in the <head> -->
+  <link rel="stylesheet" type="text/css" href="{% static 'css/grouping2.css' %}">
+
+  <!-- Link JS before closing </body> -->
+  <script src="{% static 'js/grouping2.js' %}"></script>
 
 <!-- <span id = "projects" value = "{{ first_iolist.project_id }}" > -->
+  <script>
 
-
+    let selectedIOModule = "{{ selectedIOModule }}";  // String needs quotes
+</script>
+  {% endblock %}
 
 <div id= "projectrow" class="row" data-project-id="{{ first_iolist.project_id }}">{{project.name}}  
     <div class="col-sm-9 col-xl-10 order-2 order-sm-1 mt-3 mx-auto">
@@ -30,6 +42,9 @@
 
         
         <div class="panel-heading d-flex align-items-center">
+          <button id="btn-Shift-IO" onclick="openSearchPopup()" class="btn btn-primary mt-3 mybtns mr-auto" style="background-color: #29a931; margin-left: 5px; margin-right: 5px; margin-bottom: 15px;" >
+              <span class="glyphicon glyphicon-filter">Search Other IOs</span>
+          </button>
           <button class="btn btn-primary mt-3 mybtns mr-auto" style="margin-left: 5px; margin-right: 5px; margin-bottom: 15px;" 
               onclick="location.href=`/sort/grouping2/{{project_id}}/{{currentPageNumber|add:-1}}/?panel_number={{selected_panel_number}}`">
               <span class="glyphicon glyphicon-filter">Previous</span>
@@ -145,6 +160,22 @@
       </div>
     </div>
 
+
+<!-- Popup with Search Bar & Results -->
+<div id="searchPopup" class="popup-container1">
+  <div class="popup-content1">
+      <h3>Select IO</h3>
+      <input type="text" id="searchInput" placeholder="Search IO..." oninput="filterResults({{ AllIos }})">
+      
+      <!-- Scrollable results section -->
+      <div id="searchResults" class="search-results"></div>
+      
+      <div class="popup-btn">
+        <button onclick="closeSearchPopup()" class="btn btn-danger btn-close-popup">Close</button>
+      </div>
+  </div>
+
+</div>
 
  <!-- Modal -->
  <div id="popup" class="popup">
@@ -280,7 +311,7 @@ function showAutoAlert(message, duration = 2000) {
     alertBox.style.padding = "30px 40px";
     alertBox.style.borderRadius = "8px";
     alertBox.style.boxShadow = "0 2px 6px rgba(0,0,0,0.3)";
-    alertBox.style.zIndex = 9999;
+    alertBox.style.zIndex = 99991;
     alertBox.style.fontSize = "40px";
 
     document.body.appendChild(alertBox);
