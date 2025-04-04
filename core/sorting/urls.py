@@ -27,6 +27,8 @@ htmx_views = [
     path("iolist-classifier/<int:project_id>/", IOListClassifierView.as_view(), name="iolist_classifier"),
     path("save-iolist/", views.save_iolist_Panels, name="save_iolist"),
     path('grouping2AddSpares/<int:ref_io>/<str:signal_type>/', views.add_spare, name="add_spare_group"),
+    path('re-arrangeIos/<str:project_name>/<int:page_number>/', views.rearrange_ios, name='rearrange_ios'),
+    path('update_iomoduleName/', views.updateIOModuleSingle, name= "update_iomoduleName"),
 
 ]
 

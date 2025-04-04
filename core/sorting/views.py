@@ -445,6 +445,7 @@ def group_view2(request, project_id, page_number):
         'project_name': project.name,
         'currentPageNumber': page_number,
         'group2': True,
+        'io_modules' : json.dumps(list(ioModules)),
     }
 
     return render(request, 'sorting/grouping.html', context)
@@ -493,7 +494,7 @@ def add_spare(request, ref_io, signal_type):
         Demo_3d_Property= "",
     )
     # Retrieve page number from session, default to 1 if not found
-    page_number = request.session.get('current_page', 1)
+    page_number = request.session.get('page_number', 1)
     panel_number = request.GET.get('panel_number')
     if panel_number and panel_number != 'None':
         return redirect('grouping2', project_id=project.id, page_number=page_number,panel_number=panel_number) 
@@ -504,6 +505,195 @@ def add_spare(request, ref_io, signal_type):
 
 
 def ExportIOListfromV1(project_name):
+    # Fetch data from the external API
+    project = get_object_or_404(Project, name=project_name)
+
+    if project.is_Murr:
+        iolist = IOList.objects.filter(project=project).order_by('iomodule_name','module_position', 'order')
+    else:
+        iolist = IOList.objects.filter(project=project).order_by('signal_type', 'location', 'iomodule_name','module_position', 'order')
+
+    
+    if not iolist:
+        return HttpResponse("No IO list data available", status=204)
+    
+    # Prepare data for DataFrame
+    io_data = []
+    for item in iolist:
+        io_data.append([
+            item.id,
+            item.name,
+            item.code,
+            item.tag,
+            item.signal_type,
+            item.io_address,
+            item.device_type,
+            item.actual_description,
+            item.panel_number,
+            item.node,  # IO Module Name
+            item.module_position,
+            item.channel,
+            None,  # Pin (not available in data)
+            item.location,  # Remarks (not available in data)
+            None   # DataType (not available in data)
+        ])
+    
+    # Convert to DataFrame
+    columns = ["Sr.No", "Equipment Name", "Code", "Tag", "Signal Type", "I/O Address", 
+                "Device Type", "Function Description", "Panel Number", "IO Module Name", 
+                "Module Position", "Channel", "Pin",  "Remarks", "DataType"]
+    df = pd.DataFrame(io_data, columns=columns)
+    
+    # Extract unique panels
+    panels = df['Panel Number'].unique()
+
+    # Create an in-memory Excel file
+    output = BytesIO()
+    writer = pd.ExcelWriter(output, engine='xlsxwriter')
+
+    field_data = pd.DataFrame(columns=columns)
+    Sheets = {}
+    # Iterate over panels and write each panel's data to a separate sheet
+    for panel in panels:
+        if project.is_Murr:
+            panel_data = df[(df['Panel Number'] == panel) & (df['Remarks'] == "CP")].reset_index(drop=True)
+        else:
+            panel_data = df[(df['Panel Number'] == panel) ].reset_index(drop=True)
+        # Create a sequence for I/O Address (0.0, 0.1, ..., 0.7, 1.0, ..., etc.)
+        num_rows = len(panel_data)
+        sequence = np.floor(np.arange(num_rows) / 8) + (np.arange(num_rows) % 8) / 10.0
+        panel_data.loc[:, 'I/O Address'] = sequence
+        
+        # Add prefix based on Signal Type ('DI' -> 'I', 'DO' -> 'Q')
+        panel_data['I/O Address'] = panel_data.apply(
+            lambda row: f"I{row['I/O Address']}" if row['Signal Type'] == 'DI' else f"Q{row['I/O Address']}",
+            axis=1
+        )
+        Sheets[panel] = panel_data
+
+        # Extract numerical part of the 'Panel Number' (e.g., 'CC01' → '1')
+        panel_number_numeric = ''.join(filter(str.isdigit, panel)).lstrip('0')
+        io_module_name = f"IO{panel_number_numeric}"
+
+        # Assign the generated IO Module Name
+        panel_data['IO Module Name'] = io_module_name + '01'
+
+        # Assign Module Position: 1 for first 16, 2 for next 16, and so on
+        panel_data["Module Position"] = (panel_data.index // 16) + 1
+
+        # Assign Channel: 1 to 16, then repeat
+        panel_data["Channel"] = (panel_data.index % 16) + 1  
+        panel_data["Pin"] = "-"
+        panel_data["DataType"] = "Bool"
+        panel_data["Remarks"] = ""
+
+
+
+        # ---- Field Devices ----
+        # Filter data for 'FD' (Field Devices)
+        if project.is_Murr:
+            current_field_data = df[(df['Panel Number'] == panel) & (df['Remarks'] == "FD")].copy()  # Use .copy()
+        else:
+            current_field_data = pd.DataFrame(columns=columns)
+            
+
+        if not current_field_data.empty:
+
+
+            # Generate I/O Address sequence for field devices (1000.0, 1000.1, ..., 1001.7, ...)
+            num_rows_field = len(current_field_data)  # Get length after appending
+            field_sequence = 1000.0 + np.floor(np.arange(num_rows_field) / 8) + (np.arange(num_rows_field) % 8) / 10.0
+
+            # Assign the sequence
+            current_field_data.loc[:, 'I/O Address'] = field_sequence
+
+            # Add prefix ('DI' -> 'I', 'DO' -> 'Q')
+            current_field_data['I/O Address'] =current_field_data.apply(
+                lambda row: f"I{row['I/O Address']}" if row['Signal Type'] == 'DI' else f"Q{row['I/O Address']}",
+                axis=1
+            )
+
+            # Assign IO Module Name
+            # Generate IO Module Names: Start from "02", increment every 16 rows
+            module_numbers = (2 + np.arange(num_rows_field) // 16).astype(str).tolist()
+
+            # Assign the generated IO Module Names to 'IO Module Name'
+            current_field_data['IO Module Name'] = [f"IO{panel_number_numeric}{num.zfill(2)}" for num in module_numbers]
+
+            # Set Module Position to '-'
+            current_field_data['Module Position'] = '-'
+            current_field_data['DataType'] = 'Bool'
+            current_field_data['Remarks'] = ''
+            
+            # Assign Channel values (X0, X1, ..., X7, repeating every 2 rows)
+            current_field_data['Channel'] = [f"X{(i // 2) % 8}" for i in range(len(current_field_data))]
+
+            # Assign Pin values (alternating between Pin 4 and Pin 2)
+            current_field_data['Pin'] = ['Pin 4' if i % 2 == 0 else 'Pin 2' for i in range(len(current_field_data))]
+            # Append to the main field_data DataFrame
+            field_data = pd.concat([field_data, current_field_data], ignore_index=True)
+
+
+    UpdateIOModuleName(Sheets, field_data)
+    
+    for sheet in Sheets:
+        Sheets[sheet].loc[:, "Sr.No"] = range(1, len(Sheets[sheet]) + 1)  # Update existing column
+        Sheets[sheet].to_excel(writer, sheet_name=sheet[:31], index=False)
+    field_data.loc[:, "Sr.No"] = range(1, len(field_data) + 1)  # Update existing column
+    field_data.to_excel(writer, sheet_name="PLC01-Field IO", index=False)
+
+    workbook = writer.book
+    border_format = workbook.add_format({'bottom': 2})  # Thick bottom border
+
+    for sheet_name, worksheet in writer.sheets.items():
+        num_rows = worksheet.dim_rowmax + 1  # Get the actual number of rows in the sheet
+        for i in range(17, num_rows, 16):  # Start from row 17 (skipping header), then every 16 rows
+            worksheet.set_row(i - 1, None, border_format)  # Adjust for 0-based indexing
+
+
+    # Save the Excel file to memory
+    writer.close()
+    output.seek(0)
+
+    
+    return output
+
+
+
+
+
+def UpdateIOModuleName(panel_data_dict, field_data):
+    try:
+        # Prepare a unified list for both panel and field data
+        io_update_data = []
+
+        # Process panel data
+        for panel_number, panel_df in panel_data_dict.items():
+            panel_entries = panel_df[['Sr.No', 'IO Module Name']].copy()
+            panel_entries.rename(columns={'Sr.No': 'id', 'IO Module Name': 'iomodule_name'}, inplace=True)
+            io_update_data.extend(panel_entries.to_dict(orient="records"))
+
+        # Process field data
+        field_entries = field_data[['Sr.No', 'IO Module Name']].copy()
+        field_entries.rename(columns={'Sr.No': 'id', 'IO Module Name': 'iomodule_name'}, inplace=True)
+        io_update_data.extend(field_entries.to_dict(orient="records"))
+
+        for entry in io_update_data:
+            try:
+                io = IOList.objects.get(id=entry["id"])
+                io.iomodule_name = entry["iomodule_name"]
+                io.save()
+            except IOList.DoesNotExist:
+                continue
+
+        return Response({"message": "I/O List saved successfully!"})
+
+    except Exception as e:
+        print(f"Error processing data: {str(e)}")
+        return None
+
+
+def rearrange_ios(request, project_name, page_number):
     # Fetch data from the external API
     project = get_object_or_404(Project, name=project_name)
 
@@ -628,64 +818,26 @@ def ExportIOListfromV1(project_name):
             field_data = pd.concat([field_data, current_field_data], ignore_index=True)
 
 
+
     UpdateIOModuleName(Sheets, field_data)
-    
-    for sheet in Sheets:
-        Sheets[sheet].loc[:, "Sr.No"] = range(1, len(Sheets[sheet]) + 1)  # Update existing column
-        Sheets[sheet].to_excel(writer, sheet_name=sheet[:31], index=False)
-    field_data.loc[:, "Sr.No"] = range(1, len(field_data) + 1)  # Update existing column
-    field_data.to_excel(writer, sheet_name="PLC01-Field IO", index=False)
 
-    workbook = writer.book
-    border_format = workbook.add_format({'bottom': 2})  # Thick bottom border
-
-    for sheet_name, worksheet in writer.sheets.items():
-        num_rows = worksheet.dim_rowmax + 1  # Get the actual number of rows in the sheet
-        for i in range(17, num_rows, 16):  # Start from row 17 (skipping header), then every 16 rows
-            worksheet.set_row(i - 1, None, border_format)  # Adjust for 0-based indexing
+    return redirect('grouping2', project_id=project.id, page_number=page_number)
 
 
-    # Save the Excel file to memory
-    writer.close()
-    output.seek(0)
-
-    
-    return output
-
-
-
-
-
-def UpdateIOModuleName(panel_data_dict, field_data):
-    try:
-        # Prepare a unified list for both panel and field data
-        io_update_data = []
-
-        # Process panel data
-        for panel_number, panel_df in panel_data_dict.items():
-            panel_entries = panel_df[['Sr.No', 'IO Module Name']].copy()
-            panel_entries.rename(columns={'Sr.No': 'id', 'IO Module Name': 'iomodule_name'}, inplace=True)
-            io_update_data.extend(panel_entries.to_dict(orient="records"))
-
-        # Process field data
-        field_entries = field_data[['Sr.No', 'IO Module Name']].copy()
-        field_entries.rename(columns={'Sr.No': 'id', 'IO Module Name': 'iomodule_name'}, inplace=True)
-        io_update_data.extend(field_entries.to_dict(orient="records"))
-
-        for entry in io_update_data:
-            try:
-                io = IOList.objects.get(id=entry["id"])
-                io.save()
-            except IOList.DoesNotExist:
-                continue
-
-        return Response({"message": "I/O List saved successfully!"})
-
-    except Exception as e:
-        print(f"Error processing data: {str(e)}")
-        return None
-
-
-
-
+def updateIOModuleSingle(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+    # Extract data from the request
+    data = json.loads(request.body)
+    io_id = data.get('io_id')
+    new_iomodule = data.get('new_iomodule')
+    io = get_object_or_404(IOList, id=io_id)
+    io.iomodule_name = new_iomodule
+    ios = IOList.objects.filter(project=io.project, iomodule_name=new_iomodule).order_by('panel_number', 'order').last()
+    io.panel_number = ios.panel_number
+    io.module_position = ios.module_position
+    io.order = ios.order + 1
+    io.location = ios.location
+    io.save()
+    return JsonResponse({'success': True, 'message': f'{io.tag} shifted to {io.iomodule_name} successfully!'})
 

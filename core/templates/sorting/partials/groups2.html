@@ -63,6 +63,13 @@
           </button>
           {% endwith %} 
 
+          <button class="btn btn-primary mt-3 mybtns mr-auto" style="background-color: #FF7F50; margin-left: 5px; margin-right: 5px; margin-bottom: 15px;" 
+            data-page-number="{{ request.session.page_number }}"
+            onclick="redirectToReArrangeIOs(this, '{{ project_name }}')">
+              <span class="glyphicon glyphicon-filter">Re-Assign IOs</span>
+          </button>
+          
+
       </div>
       
 
@@ -95,7 +102,10 @@
                       <a href="#" class="editable order" contenteditable="true" data-pk="{{ iolist.pk }}" data-name="order"
                         hx-get="{% url 'order_update' iolist.pk 'update' %}" hx-swap="outerHTML">{{ iolist.order }}</a>
                     </td>
-                    <td>{{ iolist.project }}</td>
+                    <td onclick="openPopup({{ iolist.pk }}, {{ io_modules }})" style="cursor: pointer; color: blue; text-decoration: underline;">
+                      Change IO Module
+                  </td>
+                    
                     <td>{{ iolist.tag }}</td>
                     <td>{{ iolist.signal_type }}</td>
                     <td>{{ iolist.device_type }}</td>
@@ -134,7 +144,157 @@
         {% endif %}
       </div>
     </div>
+
+
+ <!-- Modal -->
+ <div id="popup" class="popup">
+    <!-- Modal content-->
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" onclick="closePopup()">&times;</button>
+        <h4 class="modal-title">Select Target IO Module</h4>
+      </div>
+      <div class="modal-body"
+       id="modal-body"
+       style="display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; align-items: center ;"
+       >
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal" onclick="closePopup()">Close</button>
+      </div>
+    </div>
+    
+  </div>
+
+
+<!-- Popup Container
+<div id="popup" class="popup">
+  <div class="popup-content">
+      <span class="close-btn" onclick="closePopup()">&times;</span>
+      <h3>Select Target IO Module</h3>
+      <div id="moduleList"></div>
+  </div>
+</div> -->
+
+    <!-- CSS for Popup -->
+<style>
+.popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000; /* Ensure it appears on top */
+}
+
+.popup-content {
+    background: white;
+    width: 50%;
+    margin: 10% auto;
+    padding: 20px;
+    border-radius: 5px;
+    position: relative;
+    z-index: 1001; /* Higher than background overlay */
+}
+
+
+  .close {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 20px;
+      cursor: pointer;
+  }
+
+  .dynamic-btn:hover {
+    background-color: #ffcc99;
+}
+</style>
+
+<!-- JavaScript for Popup -->
+<script>
+  function openPopup(pk, modules) {
+    let moduleListDiv = document.getElementById("modal-body");
+    moduleListDiv.innerHTML = ""; // Clear previous buttons
+
+    // Create buttons dynamically from Django context
+    modules.forEach(module => {
+        let button = document.createElement("button");
+        button.textContent = module;
+        button.className = "module-btn ws-green mt-3 mybtns mr-auto btn-lg dynamic-btn";
+        button.style.backgroundColor = "#ffd299"; // Set button color
+        button.onclick = function () {
+            sendData(pk, module,this);
+        };
+        moduleListDiv.appendChild(button);
+    });
+
+    document.getElementById("popup").style.display = "flex"; // Show popup
+}
+
+function closePopup() {
+    document.getElementById("popup").style.display = "none"; // Hide popup
+}
+
+function sendData(pk, moduleId, sender) {
+    let moduleName = sender.textContent.trim();
+    fetch('/sort/update_iomoduleName/', {  // Adjust the endpoint URL as needed
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken")  // Ensure CSRF token is sent
+        },
+        body: JSON.stringify({
+            io_id: pk,  // Matches `io_id` expected in Django view
+            new_iomodule: moduleName  // Matches `new_iomodule` in the view
+        }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      console.log(data);  // Now logs response data correctly
+        if (data.success) {
+            closePopup();  // Close the popup
+            showAutoAlert(data.message);  // Custom auto-close alert
+            $("tr[data-pk='" + pk + "']").remove();  // Remove the row with matching data-pk
+            console.log("Signal Shifted Successfully.");
+            
+        } else {
+            alert("Error: " + data.message);
+        }
+    })
+    .catch(error => console.error("Error:", error));
+}
+
+function showAutoAlert(message, duration = 2000) {
+    let alertBox = document.createElement("div");
+    alertBox.textContent = message;
+    alertBox.style.position = "fixed";
+    alertBox.style.top = "100px";
+    alertBox.style.left = "50%";
+    alertBox.style.transform = "translateX(-50%)";
+    alertBox.style.backgroundColor = "#4CAF50";  // Green success
+    alertBox.style.color = "white";
+    alertBox.style.padding = "30px 40px";
+    alertBox.style.borderRadius = "8px";
+    alertBox.style.boxShadow = "0 2px 6px rgba(0,0,0,0.3)";
+    alertBox.style.zIndex = 9999;
+    alertBox.style.fontSize = "40px";
+
+    document.body.appendChild(alertBox);
+
+    setTimeout(() => {
+        alertBox.remove();
+    }, duration);
+}
+
+</script>
+
     <script> $(document).ready(function() {
+
+
 
 $('#panel-number').change(function() {
     const panelNumber = $(this).val();
@@ -228,6 +388,15 @@ $('#panel-number').change(function() {
       });
    </script>
     <script>
+      function redirectToReArrangeIOs(button, last_io_pk) {
+        const pageNumber = button.getAttribute("data-page-number");
+        if (!pageNumber) {
+            alert("Page number not found in session.");
+            return;
+        }
+        window.location.href = `/sort/re-arrangeIos/${last_io_pk}/${pageNumber}`;
+    };
+
       function deleteSignal(pk) {
     var url = "{% url 'delete-signal-reorder' 0 %}".replace('0', pk);
     $.ajax({
