@@ -473,7 +473,11 @@ def add_spare(request, ref_io, signal_type):
     project.save()
 
     # Generate a new tag name (modify as per your naming convention)
-    new_tag_name = "Ix_SPARE"
+    if signal_type == "DI":
+        new_tag_name = "Ix_SPARE"
+    else :
+        new_tag_name = "Qx_SPARE"
+
 
     # Create a copy of the IOList entry with modified tag name
     new_io = IOList.objects.create(
@@ -754,6 +758,16 @@ def rearrange_ios(request, project_name, page_number):
 
         panel_data = df[(df['Panel Number'] == panel) & (df['Remarks'] == "CP")].reset_index(drop=True)
         
+        # Sort by 'Signal Type'
+        panel_data = panel_data.sort_values(by='Signal Type').reset_index(drop=True)
+        panelIOs = IOList.objects.filter(project=project, panel_number=panel).order_by('signal_type')
+        for idx, io in enumerate(panelIOs, start=1):
+            io.order = idx
+
+        # Optional optimization using bulk_update (Django 2.2+)
+        IOList.objects.bulk_update(panelIOs, ['order'])
+
+
         # Create a sequence for I/O Address (0.0, 0.1, ..., 0.7, 1.0, ..., etc.)
         num_rows = len(panel_data)
         sequence = np.floor(np.arange(num_rows) / 8) + (np.arange(num_rows) % 8) / 10.0
