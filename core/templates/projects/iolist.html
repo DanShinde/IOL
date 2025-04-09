@@ -32,7 +32,7 @@
             <h5 class="card-title mt-3" id ="projectName">{{ project }}</h5>
             <p class="card-text">{{ project.description }}</p>
         </div>
-        <button class="btn btn-primary mt-3 mybtns mr-auto" onclick= "location.href='{% url 'ExportT4' project.name  %}'">
+        <button class="btn btn-primary mt-3 mybtns mr-auto" onclick= "location.href='{% url 'ExportT4' project.id  %}'">
           <span class="glyphicon glyphicon-filter">4.1 Export IO Latest </span>
         </button>
 

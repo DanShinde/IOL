@@ -418,17 +418,17 @@ def GenerateFromV2(request, project_name):
     except requests.exceptions.RequestException as e:
         return HttpResponse(f"Error connecting to V2: {str(e)}", status=500)
 
-def GenerateLikeV2(request, project_name):
-    project = get_object_or_404(Project, name=project_name)
-    if not project_name or project is None:
+def GenerateLikeV2(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+    if not project_id or project is None:
         return HttpResponse("Missing 'project_name' parameter", status=400)
 
     # Construct the full URL for ExportIOListfromV1 in V1 application
     try:
-        output = ExportIOListfromV1(project_name)
+        output = ExportIOListfromV1(project.id)
         # Return the Excel file response from V1
         response = HttpResponse(output.getvalue(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = f'attachment; filename={project_name}_IOList.xlsx'
+        response['Content-Disposition'] = f'attachment; filename={project.name}_IOList.xlsx'
         return response
     except requests.exceptions.RequestException as e:
         return HttpResponse(f"Error connecting to V2: {str(e)}", status=500)

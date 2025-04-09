@@ -533,9 +533,9 @@ def add_spare(request, ref_io, signal_type):
 
 
 
-def ExportIOListfromV1(project_name):
+def ExportIOListfromV1(project_id):
     # Fetch data from the external API
-    project = get_object_or_404(Project, name=project_name)
+    project = get_object_or_404(Project, id=project_id)
 
     if project.is_Murr:
         iolist = IOList.objects.filter(project=project).order_by('iomodule_name','module_position', 'order')
