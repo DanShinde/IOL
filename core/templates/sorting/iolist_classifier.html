@@ -90,17 +90,24 @@
              id: item.dataset.id
          }));
      }
+    function getPanelIOData() {
+        return Array.from(panelIOs.children).map(item => ({
+            id: item.dataset.id
+        }));
+    }
  
      saveButton.addEventListener("click", function () {
          let fieldIOData = getFieldIOData();
+         let panelIOData = getPanelIOData();
  
-         fetch("/sort/save-iolist/", {
+ 
+         fetch("/sort/save-iolistClassify/", {
              method: "POST",
              headers: {
                  "Content-Type": "application/json",
                  "X-CSRFToken": getCSRFToken(), // Ensure CSRF token is included
              },
-             body: JSON.stringify({ fieldIOs: fieldIOData }),
+             body: JSON.stringify({ fieldIOs: fieldIOData, panelIOs: panelIOData }),
          })
          .then(response => response.json())
          .then(data => {

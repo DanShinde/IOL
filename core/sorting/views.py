@@ -393,19 +393,37 @@ class IOListClassifierView(View):
             },
         )
     
+
 @api_view(["POST"])
 @csrf_exempt
-def save_iolist_Panels(request):
+def save_iolist_Classify(request):
 
-    data = request.data.get("fieldIOs", [])
+    field_data = request.data.get("fieldIOs", [])
+    panel_data = request.data.get("panelIOs", [])
 
-    for entry in data:
-        try:
-            io = IOList.objects.get(id=entry["id"])
-            io.save()
-        except IOList.DoesNotExist:
-            continue
+    # 1. Collect all IDs
+    field_ids = [entry["id"] for entry in field_data]
+    panel_ids = [entry["id"] for entry in panel_data]
 
+    # 2. Fetch all relevant IOList entries in one query
+    io_fields = IOList.objects.filter(id__in=field_ids)
+    io_panels = IOList.objects.filter(id__in=panel_ids)
+
+    # 3. Create ID to object map
+    io_mapf = {io.id: io for io in io_fields}
+    io_mapp = {io.id: io for io in io_panels}
+
+    # 4. Update locations accordingly (CP takes priority if in both)
+
+    for io in io_mapf:
+        io_mapf[io].location = 'FD'
+
+    for io in io_mapp:
+        io_mapp[io].location = 'CP'  # Overwrites FD if also in field_ids
+
+    # 5. Save updated objects (in bulk)
+    IOList.objects.bulk_update(io_mapf.values(), ['location'])
+    IOList.objects.bulk_update(io_mapp.values(), ['location'])
     return Response({"message": "I/O List saved successfully!"})
 
 
