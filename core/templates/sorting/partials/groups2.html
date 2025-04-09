@@ -4,13 +4,13 @@
   {% with first_iolist=iolists.first %}
   
   <div class="row" style="background-color:rgb(119, 148, 121);">
-    <div class="col-sm-4">
+    <div class="col">
       <h2 class="Dark">{{ project_name }}</h2>
     </div>
-    <div class="col-sm-4">
+    <div class="col">
       <a href="{% url 'project_detail' first_iolist.project_id %}" class="btn btn-info">Edit IO List</a>
     </div>
-    <div class="col-sm-4">
+    <div class="col">
       <a href="{% url 'iolist_project' first_iolist.project_id %}" class="btn btn-info">Review IO List</a>
     </div>
   </div>

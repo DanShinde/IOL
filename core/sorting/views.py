@@ -765,9 +765,9 @@ def rearrange_ios(request, project_name, page_number):
     # Extract unique panels
     panels = df['Panel Number'].unique()
 
-    # Create an in-memory Excel file
-    output = BytesIO()
-    writer = pd.ExcelWriter(output, engine='xlsxwriter')
+    # # Create an in-memory Excel file
+    # output = BytesIO()
+    # writer = pd.ExcelWriter(output, engine='xlsxwriter')
 
     field_data = pd.DataFrame(columns=columns)
     Sheets = {}
