@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'import_export',
     'widget_tweaks',
     'dashboard',
+    'migrator',
 ]
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"

@@ -22,6 +22,7 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('sort/', include('sorting.urls')),
     path('dash/', include('dashboard.urls')),
+    path('migrator/', include('migrator.urls')),
 
 
 ]
