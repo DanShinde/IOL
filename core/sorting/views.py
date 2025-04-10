@@ -564,13 +564,14 @@ def ExportIOListfromV1(project_id):
             item.channel,
             None,  # Pin (not available in data)
             item.location,  # Remarks (not available in data)
-            None   # DataType (not available in data)
+            None,   # DataType (not available in data)
+            item.order
         ])
     
     # Convert to DataFrame
     columns = ["Sr.No", "Equipment Name", "Code", "Tag", "Signal Type", "I/O Address", 
                 "Device Type", "Function Description", "Panel Number", "IO Module Name", 
-                "Module Position", "Channel", "Pin",  "Remarks", "DataType"]
+                "Module Position", "Channel", "Pin",  "Remarks", "DataType", "Order"]
     df = pd.DataFrame(io_data, columns=columns)
     
     # Extract unique panels
@@ -616,6 +617,7 @@ def ExportIOListfromV1(project_id):
         panel_data["DataType"] = "Bool"
         panel_data["Remarks"] = ""
 
+        panel_data = panel_data.drop(columns=['Order'])
 
 
         # ---- Field Devices ----
@@ -632,6 +634,7 @@ def ExportIOListfromV1(project_id):
             # Generate I/O Address sequence for field devices (1000.0, 1000.1, ..., 1001.7, ...)
             num_rows_field = len(current_field_data)  # Get length after appending
             field_sequence = 1000.0 + np.floor(np.arange(num_rows_field) / 8) + (np.arange(num_rows_field) % 8) / 10.0
+            current_field_data = current_field_data.sort_values(by=['IO Module Name', 'Order']).reset_index(drop=True)
 
             # Assign the sequence
             current_field_data.loc[:, 'I/O Address'] = field_sequence
@@ -661,11 +664,14 @@ def ExportIOListfromV1(project_id):
             current_field_data['Pin'] = ['Pin 4' if i % 2 == 0 else 'Pin 2' for i in range(len(current_field_data))]
             # Append to the main field_data DataFrame
             field_data = pd.concat([field_data, current_field_data], ignore_index=True)
+            field_data = field_data.drop(columns=['Order'])
+
 
 
     UpdateIOModuleName(Sheets, field_data)
     
     for sheet in Sheets:
+        IOList.objects.bulk_update(Sheets[sheet], ['IO Module Name', 'Module Position', 'Channel', 'Pin', 'DataType', 'Remarks'])
         Sheets[sheet].loc[:, "Sr.No"] = range(1, len(Sheets[sheet]) + 1)  # Update existing column
         Sheets[sheet].to_excel(writer, sheet_name=sheet[:31], index=False)
     field_data.loc[:, "Sr.No"] = range(1, len(field_data) + 1)  # Update existing column
@@ -727,7 +733,7 @@ def rearrange_ios(request, project_name, page_number):
     project = get_object_or_404(Project, name=project_name)
 
     if project.is_Murr:
-        iolist = IOList.objects.filter(project=project).order_by('module_position', 'order')
+        iolist = IOList.objects.filter(project=project).order_by('iomodule_name', 'order')
     else:
         iolist = IOList.objects.filter(project=project).order_by('signal_type', 'location', 'module_position', 'order')
 
@@ -753,13 +759,14 @@ def rearrange_ios(request, project_name, page_number):
             item.channel,
             None,  # Pin (not available in data)
             item.location,  # Remarks (not available in data)
-            None   # DataType (not available in data)
+            None,   # DataType (not available in data)
+            item.order
         ])
     
     # Convert to DataFrame
     columns = ["Sr.No", "Equipment Name", "Code", "Tag", "Signal Type", "I/O Address", 
                 "Device Type", "Function Description", "Panel Number", "IO Module Name", 
-                "Module Position", "Channel", "Pin",  "Remarks", "DataType"]
+                "Module Position", "Channel", "Pin",  "Remarks", "DataType", "Order"]
     df = pd.DataFrame(io_data, columns=columns)
     
     # Extract unique panels
@@ -778,7 +785,7 @@ def rearrange_ios(request, project_name, page_number):
         
         # Sort by 'Signal Type'
         panel_data = panel_data.sort_values(by='Signal Type').reset_index(drop=True)
-        panelIOs = IOList.objects.filter(project=project, panel_number=panel).order_by('signal_type')
+        panelIOs = IOList.objects.filter(project=project, panel_number=panel, location='CP').order_by('signal_type', 'order')
         for idx, io in enumerate(panelIOs, start=1):
             io.order = idx
 
@@ -813,7 +820,7 @@ def rearrange_ios(request, project_name, page_number):
         panel_data["Pin"] = "-"
         panel_data["DataType"] = "Bool"
         panel_data["Remarks"] = ""
-
+        panel_data = panel_data.drop(columns=['Order'])
 
 
         # ---- Field Devices ----
@@ -821,13 +828,15 @@ def rearrange_ios(request, project_name, page_number):
         current_field_data = df[(df['Panel Number'] == panel) & (df['Remarks'] == "FD")].copy()  # Use .copy()
 
         if not current_field_data.empty:
+            fieldIOs = IOList.objects.filter(project=project, panel_number=panel, location='FD').order_by( 'order')
 
 
             # Generate I/O Address sequence for field devices (1000.0, 1000.1, ..., 1001.7, ...)
             num_rows_field = len(current_field_data)  # Get length after appending
             field_sequence = 1000.0 + np.floor(np.arange(num_rows_field) / 8) + (np.arange(num_rows_field) % 8) / 10.0
-
+            current_field_data = current_field_data.sort_values(by=['IO Module Name', 'Order']).reset_index(drop=True)
             # Assign the sequence
+            print(current_field_data.head)
             current_field_data.loc[:, 'I/O Address'] = field_sequence
 
             # Add prefix ('DI' -> 'I', 'DO' -> 'Q')
@@ -855,6 +864,8 @@ def rearrange_ios(request, project_name, page_number):
             current_field_data['Pin'] = ['Pin 4' if i % 2 == 0 else 'Pin 2' for i in range(len(current_field_data))]
             # Append to the main field_data DataFrame
             field_data = pd.concat([field_data, current_field_data], ignore_index=True)
+            current_field_data.drop(columns=['Order'])
+            
 
 
 

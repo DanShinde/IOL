@@ -39,12 +39,12 @@ class IOListResource(resources.ModelResource):
 
 @admin.register(IOList)
 class IOListAdmin(ImportExportModelAdmin, admin.ModelAdmin):
-    list_display = ['id','tag', 'order', 'cluster_number', 'project', 'name',
+    list_display = ['id','tag', 'order', 'iomodule_name', 'project', 'name',
                     'code',  'device_type',	'signal_type',
                     'io_address', 'location']
 
     # list_filter = [IOListFilter]
-    list_filter = ('project', 'cluster_number', 'equipment_code', 'panel_number', 'Cluster')
+    list_filter = ('project', 'cluster_number', 'equipment_code', 'panel_number', 'Cluster', 'iomodule_name')
     search_fields = (
         "name",
         "tag",
