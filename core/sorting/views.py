@@ -671,7 +671,6 @@ def ExportIOListfromV1(project_id):
     UpdateIOModuleName(Sheets, field_data)
     
     for sheet in Sheets:
-        IOList.objects.bulk_update(Sheets[sheet], ['IO Module Name', 'Module Position', 'Channel', 'Pin', 'DataType', 'Remarks'])
         Sheets[sheet].loc[:, "Sr.No"] = range(1, len(Sheets[sheet]) + 1)  # Update existing column
         Sheets[sheet].to_excel(writer, sheet_name=sheet[:31], index=False)
     field_data.loc[:, "Sr.No"] = range(1, len(field_data) + 1)  # Update existing column
