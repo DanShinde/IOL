@@ -538,7 +538,7 @@ def ExportIOListfromV1(project_id):
     project = get_object_or_404(Project, id=project_id)
 
     if project.is_Murr:
-        iolist = IOList.objects.filter(project=project).order_by('iomodule_name','module_position', 'order')
+        iolist = IOList.objects.filter(project=project).order_by('iomodule_name', 'order')
     else:
         iolist = IOList.objects.filter(project=project).order_by('signal_type', 'location', 'iomodule_name','module_position', 'order')
 
@@ -590,6 +590,14 @@ def ExportIOListfromV1(project_id):
         else:
             panel_data = df[(df['Panel Number'] == panel) ].reset_index(drop=True)
         # Create a sequence for I/O Address (0.0, 0.1, ..., 0.7, 1.0, ..., etc.)
+
+        panelIOs = IOList.objects.filter(project=project, panel_number=panel, location='CP').order_by('signal_type', 'order')
+        for idx, io in enumerate(panelIOs, start=1):
+            io.order = idx
+
+        # Optional optimization using bulk_update (Django 2.2+)
+        IOList.objects.bulk_update(panelIOs, ['order'])
+
         num_rows = len(panel_data)
         sequence = np.floor(np.arange(num_rows) / 8) + (np.arange(num_rows) % 8) / 10.0
         panel_data.loc[:, 'I/O Address'] = sequence
@@ -727,9 +735,9 @@ def UpdateIOModuleName(panel_data_dict, field_data):
         return None
 
 #Re-Assign IOs
-def rearrange_ios(request, project_name, page_number):
+def rearrange_ios(request, project_id, page_number):
     # Fetch data from the external API
-    project = get_object_or_404(Project, name=project_name)
+    project = get_object_or_404(Project, id=project_id)
 
     if project.is_Murr:
         iolist = IOList.objects.filter(project=project).order_by('iomodule_name', 'order')
@@ -827,7 +835,7 @@ def rearrange_ios(request, project_name, page_number):
         current_field_data = df[(df['Panel Number'] == panel) & (df['Remarks'] == "FD")].copy()  # Use .copy()
 
         if not current_field_data.empty:
-            fieldIOs = IOList.objects.filter(project=project, panel_number=panel, location='FD').order_by( 'order')
+            # fieldIOs = IOList.objects.filter(project=project, panel_number=panel, location='FD').order_by( 'order')
 
 
             # Generate I/O Address sequence for field devices (1000.0, 1000.1, ..., 1001.7, ...)
