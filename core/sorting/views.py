@@ -580,6 +580,7 @@ def ExportIOListfromV1(project_id):
 
     field_data = pd.DataFrame(columns=columns)
     Sheets = {}
+    byte_address = 0
     # Iterate over panels and write each panel's data to a separate sheet
     for panel in panels:
         if project.is_Murr:
@@ -596,9 +597,16 @@ def ExportIOListfromV1(project_id):
         IOList.objects.bulk_update(panelIOs, ['order'])
 
         num_rows = len(panel_data)
-        sequence = np.floor(np.arange(num_rows) / 8) + (np.arange(num_rows) % 8) / 10.0
-        panel_data.loc[:, 'I/O Address'] = sequence
-        
+
+        if num_rows > 0:
+            sequence = byte_address + np.floor(np.arange(num_rows) / 8) + (np.arange(num_rows) % 8) / 10.0
+            panel_data.loc[:, 'I/O Address'] = sequence
+            byte_address = int(sequence[-1]) + 1
+        else:
+            panel_data.loc[:, 'I/O Address'] = []  # or np.array([])
+
+
+
         # Add prefix based on Signal Type ('DI' -> 'I', 'DO' -> 'Q')
         panel_data['I/O Address'] = panel_data.apply(
             lambda row: f"I{row['I/O Address']}" if row['Signal Type'] == 'DI' else f"Q{row['I/O Address']}",
@@ -676,6 +684,22 @@ def ExportIOListfromV1(project_id):
     UpdateIOModuleName(Sheets, field_data)
     
     for sheet in Sheets:
+        #Update the IO Addresses before exporting
+        # Map Sr.No to ID if Sr.No is actually ID (as you said)
+        ids = Sheets[sheet]["Sr.No"].tolist()
+        io_addresses = Sheets[sheet]["I/O Address"].tolist()
+        # Fetch only relevant IOList objects by ID
+        io_objects = IOList.objects.filter(id__in=ids)
+        io_objects_dict = {io.id: io for io in io_objects}
+
+        for io_id, io_addr in zip(ids, io_addresses):
+            io_obj = io_objects_dict.get(io_id)
+            if io_obj:
+                io_obj.io_address = io_addr  # adjust field name if it's different
+
+        # Bulk update the io_address field
+        IOList.objects.bulk_update(io_objects, ['io_address'])
+        #Erase the id and write a sequence
         Sheets[sheet].loc[:, "Sr.No"] = range(1, len(Sheets[sheet]) + 1)  # Update existing column
         Sheets[sheet].to_excel(writer, sheet_name=sheet[:31], index=False)
     field_data.loc[:, "Sr.No"] = range(1, len(field_data) + 1)  # Update existing column
@@ -739,7 +763,7 @@ def rearrange_ios(request, project_id, page_number):
     if project.is_Murr:
         iolist = IOList.objects.filter(project=project).order_by('iomodule_name', 'order')
     else:
-        iolist = IOList.objects.filter(project=project).order_by('signal_type', 'location', 'module_position', 'order')
+        iolist = IOList.objects.filter(project=project).order_by('panel_number','signal_type', 'location', 'module_position', 'order')
 
     
     if not iolist:
@@ -783,6 +807,8 @@ def rearrange_ios(request, project_id, page_number):
 
     field_data = pd.DataFrame(columns=columns)
     Sheets = {}
+    byte_address = 0
+
     # Iterate over panels and write each panel's data to a separate sheet
     for panel in panels:
 
@@ -800,9 +826,15 @@ def rearrange_ios(request, project_id, page_number):
 
         # Create a sequence for I/O Address (0.0, 0.1, ..., 0.7, 1.0, ..., etc.)
         num_rows = len(panel_data)
-        sequence = np.floor(np.arange(num_rows) / 8) + (np.arange(num_rows) % 8) / 10.0
-        panel_data.loc[:, 'I/O Address'] = sequence
-        
+
+        if num_rows > 0:
+            sequence = byte_address + np.floor(np.arange(num_rows) / 8) + (np.arange(num_rows) % 8) / 10.0
+            panel_data.loc[:, 'I/O Address'] = sequence
+            byte_address = int(sequence[-1]) + 1
+        else:
+            panel_data.loc[:, 'I/O Address'] = []  # or np.array([])
+
+
         # Add prefix based on Signal Type ('DI' -> 'I', 'DO' -> 'Q')
         panel_data['I/O Address'] = panel_data.apply(
             lambda row: f"I{row['I/O Address']}" if row['Signal Type'] == 'DI' else f"Q{row['I/O Address']}",
@@ -871,8 +903,23 @@ def rearrange_ios(request, project_id, page_number):
             field_data = pd.concat([field_data, current_field_data], ignore_index=True)
             current_field_data.drop(columns=['Order'])
             
+    for sheet in Sheets:
+        #Update the IO Addresses before exporting
+        # Map Sr.No to ID if Sr.No is actually ID (as you said)
+        ids = Sheets[sheet]["Sr.No"].tolist()
+        io_addresses = Sheets[sheet]["I/O Address"].tolist()
+        # Fetch only relevant IOList objects by ID
+        io_objects = IOList.objects.filter(id__in=ids)
+        io_objects_dict = {io.id: io for io in io_objects}
 
+        for io_id, io_addr in zip(ids, io_addresses):
+            io_obj = io_objects_dict.get(io_id)
+            if io_obj:
+                io_obj.io_address = io_addr  # adjust field name if it's different
 
+        # Bulk update the io_address field
+        IOList.objects.bulk_update(io_objects, ['io_address'])
+    
 
     UpdateIOModuleName(Sheets, field_data)
 
