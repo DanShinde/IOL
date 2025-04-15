@@ -3,13 +3,10 @@ from io import BytesIO
 import json
 from django.http import HttpResponse, JsonResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse
 from django.views import View
 from django.views.generic import ListView
-from django.core import serializers
 import numpy as np
 import pandas as pd
-import requests
 from iol.models import IOList, Project
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -576,7 +573,7 @@ def ExportIOListfromV1(project_id):
     
     # Extract unique panels
     panels = df['Panel Number'].unique()
-
+    panels = project.panel_numbers.split(",")
     # Create an in-memory Excel file
     output = BytesIO()
     writer = pd.ExcelWriter(output, engine='xlsxwriter')
@@ -778,6 +775,7 @@ def rearrange_ios(request, project_id, page_number):
     
     # Extract unique panels
     panels = df['Panel Number'].unique()
+    panels = project.panel_numbers.split(",")
 
     # # Create an in-memory Excel file
     # output = BytesIO()
