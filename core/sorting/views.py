@@ -748,8 +748,10 @@ def reassign_ios(request, project_id, page_number=1):
         request.session['error_message'] = f"Validation error: {str(e)}"
     except Exception as e:
         request.session['error_message'] = f"Error reassigning IOs: {str(e)}"
-    
-    print(request.session['error_message'])
+    try:
+        print(request.session['error_message'])
+    except:
+        pass
     return redirect('grouping2', project_id=project.id, page_number=page_number)
 
 def assign_io_ordering(project):
