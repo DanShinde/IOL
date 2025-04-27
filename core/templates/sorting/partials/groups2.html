@@ -128,15 +128,7 @@
                     <td>{{ iolist.panel_number }}</td>
                     <td>{{ iolist.io_address }}</td>
                     <td>{{ iolist.iomodule_name }}</td>
-                    <td style="text-align: center; vertical-align: middle;">
-                      <input type="text" 
-                             class="editable module_position" 
-                             value="{{ iolist.module_position }}" 
-                             data-pk="{{ iolist.pk }}" 
-                             data-name="module_position" 
-                             id="module_position_input_{{ iolist.pk }}"
-                             style="width: 100px; text-align: center; vertical-align: middle;" />
-                    </td>
+                    <td>{{ iolist.module_position }}</td>
                     <td>{{ iolist.location }}</td>
                     <td>
                       <!-- <a href="#" class="editable clusternumber" contenteditable="true" data-pk="{{ iolist.pk }}" data-name="cluster_number"
@@ -208,6 +200,15 @@
       <h3>Select Target IO Module</h3>
       <div id="moduleList"></div>
   </div>
+                      <td style="text-align: center; vertical-align: middle;">
+                      <input type="text" 
+                             class="editable module_position" 
+                             value="{{ iolist.module_position }}" 
+                             data-pk="{{ iolist.pk }}" 
+                             data-name="module_position" 
+                             id="module_position_input_{{ iolist.pk }}"
+                             style="width: 100px; text-align: center; vertical-align: middle;" />
+                    </td>
 </div> -->
 
     <!-- CSS for Popup -->
