@@ -899,6 +899,8 @@ def add_dccard(request):
     module_name = data.get('module_name')
     panel_number = data.get('panel_number')
     cardType = data.get('card') 
+    if module_name == "":
+            return JsonResponse({'success': False, 'message': 'Module name is required.'})
     # assume `project`, `panel_number`, `module_name`, `pre`, `cluster_number`,
     # `request` and `order` are already defined in your view
     if cardType == "Add RAT":
@@ -940,6 +942,7 @@ def add_dccard(request):
             )
             entry.save()
     elif cardType == "Add DRC":
+        
         rows = [
             # sr, equipment_name,    code,               tag,               signal_type, io_address,    device_type,   function_desc,             panel_number,         io_module_name,   module_position, channel,      pin, terminal_no, remarks, data_type
             (1,  "MC08",             "LeftPin4",     "Ix_MC08_ROLLER_PROXY", "DI",        "",   "DRC Input",          "Spare Signal",                   "CC05",        "MC08_FRAT_CRD",   "-",             "LeftPin4",   "-", "-",          "",      "Bool"),

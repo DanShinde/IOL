@@ -198,35 +198,31 @@
     });
   }); 
 
+  function addCardHandler(event) {
+  event.preventDefault();
+  const cardType    = this.value;            // assuming your buttons have a `value`
+  const module_name = $("#module_name").val();
+  const panel_number= $("#panel_number").val();
 
-  document.getElementById('add-drc-btn').addEventListener('click', function(event) {
-    event.preventDefault(); // prevent form from submitting normally
-    var module_name = $("#module_name").val();
-    var selectedSignals = $("input[name^='signals-']:checked").map(function(){
-      return $(this).val();
-    }).get();    
+  const payload = JSON.stringify({ card: cardType, module_name, panel_number });
+  $.ajax({
+    type: "POST",
+    url: "/sort/add_dccard/",
+    data: payload,
+    dataType: "json",
+    contentType: "application/json; charset=utf-8",
+    headers: { "X-CSRFToken": getCookie("csrftoken") },
+    success: response => {
+      console.log("Selected signals sent to server.");
+      $('#IOList').html(response.data);
+    },
+    error: (xhr, status, error) => console.error(error)
+  });
+}
 
-    sendData = JSON.stringify({'card': this.value, 'module_name': $("#module_name").val(),'md': module_name, 'panel_number': $("#panel_number").val() });
-    console.log(sendData);
-    $.ajax({
-      type: "POST",
-      url: "/sort/add_dccard/",
-      data: sendData,
-      dataType: "json",
-      contentType: "application/json; charset=utf-8",
-      headers: {"X-CSRFToken": getCookie("csrftoken")},
-      success: function(response) {
-        console.log("Selected signals sent to server.");
-        $('#IOList').html(response.data);
+document.getElementById('add-drc-btn').addEventListener('click', addCardHandler);
+document.getElementById('add-rat-btn').addEventListener('click', addCardHandler);
 
-    
-  },
-      error: function(xhr, status, error) {
-        // handle error response
-        console.log('error')
-      }
-    });
-  }); 
 }
 
 
