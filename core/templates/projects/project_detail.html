@@ -52,6 +52,8 @@
           <input type ="button"  id="add-signals-btn" class="btn btn-primary mt-3 mybtns" style="cursor: pointer;" value= "Add Signals" >
           <a class="btn btn-primary mt-3 mybtns" style="color:white; cursor: pointer;" onclick= "location.href='{% url 'iolist_project' project.id %}'">Review IO List</a>
           <a class="btn btn-primary mt-3 mybtns" style="color:white; cursor: pointer;" onclick= "location.href='{% url 'sorting' project.id %}'">Re-Order IO List</a>
+          <input type ="button"  id="add-drc-btn" class="btn btn-primary mt-3 mybtns" style="cursor: pointer;" value= "Add DRC" >
+          <input type ="button"  id="add-rat-btn" class="btn btn-primary mt-3 mybtns" style="cursor: pointer;" value= "Add RAT" >
           
           <span></span>
           </div>
@@ -196,6 +198,35 @@
     });
   }); 
 
+
+  document.getElementById('add-drc-btn').addEventListener('click', function(event) {
+    event.preventDefault(); // prevent form from submitting normally
+    var module_name = $("#module_name").val();
+    var selectedSignals = $("input[name^='signals-']:checked").map(function(){
+      return $(this).val();
+    }).get();    
+
+    sendData = JSON.stringify({'card': this.value, 'module_name': $("#module_name").val(),'md': module_name, 'panel_number': $("#panel_number").val() });
+    console.log(sendData);
+    $.ajax({
+      type: "POST",
+      url: "/sort/add_dccard/",
+      data: sendData,
+      dataType: "json",
+      contentType: "application/json; charset=utf-8",
+      headers: {"X-CSRFToken": getCookie("csrftoken")},
+      success: function(response) {
+        console.log("Selected signals sent to server.");
+        $('#IOList').html(response.data);
+
+    
+  },
+      error: function(xhr, status, error) {
+        // handle error response
+        console.log('error')
+      }
+    });
+  }); 
 }
 
 

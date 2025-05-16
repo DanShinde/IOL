@@ -29,6 +29,7 @@ htmx_views = [
     path('grouping2AddSpares/<int:ref_io>/<str:signal_type>/', views.add_spare, name="add_spare_group"),
     path('re-arrangeIos/<int:project_id>/<int:page_number>/', views.reassign_ios, name='rearrange_ios'),
     path('update_iomoduleName/', views.updateIOModuleSingle, name= "update_iomoduleName"),
+    path('add_dccard/', views.add_dccard, name= "add_dccard"),
 
 ]
 

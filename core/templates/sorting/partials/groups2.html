@@ -104,8 +104,9 @@
                   <th>I/O Address</th>
                   <th>IO Module Name</th>
                   <th>Module Position</th>
+                  <th>Channel</th>
+                  <th>Pin</th>
                   <th>Location</th>
-                  <th>Cluster Number</th>
                   <th>Delete</th>
                 </tr>
               </thead>
@@ -129,14 +130,9 @@
                     <td>{{ iolist.io_address }}</td>
                     <td>{{ iolist.iomodule_name }}</td>
                     <td>{{ iolist.module_position }}</td>
+                    <td>{{ iolist.channel }}</td>
+                    <td>{{ iolist.pin }}</td>
                     <td>{{ iolist.location }}</td>
-                    <td>
-                      <!-- <a href="#" class="editable clusternumber" contenteditable="true" data-pk="{{ iolist.pk }}" data-name="cluster_number"
-                        hx-get="{% url 'cluster_number_update' iolist.pk 'update' %}" hx-swap="outerHTML">{{ iolist.cluster_number }}</a> -->
-                        <a href="#" class="editable clusternumber" contenteditable="true" data-pk="{{ iolist.pk }}"  data-name="cluster_number" 
-                        >{{ iolist.cluster_number }}</a>
-
-                    </td>
                     <td>
                       <span class="badge badge-danger badge-pill"
                         style="cursor: pointer;"

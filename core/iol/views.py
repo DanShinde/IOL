@@ -100,6 +100,13 @@ def get_filtered_signals(request):
     signals = Signals.objects.filter(module=selected_module).values()
     return JsonResponse({'signals': list(signals)})
 
+@login_required(login_url="/accounts/login")
+def add_dccard(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+    data = json.loads(request.body)
+    print(data)
+
 
 #Add Signals to IO List
 @login_required(login_url="/accounts/login")

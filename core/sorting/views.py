@@ -541,6 +541,22 @@ FIELD_IO_MODULE_PREFIX = "IO"
 PANEL_IO_START_ADDRESS = 0.0
 FIELD_IO_START_ADDRESS = 1000.0
 MODULE_SIZE = 16  # Number of IOs per module
+pin_drc_offset_map = {
+            "Sen1": 1.0,
+            "Sen2": 1.1,
+            "In1": 4.0,
+            "In2": 4.1,
+            "In3": 4.2,
+            "In4": 4.3,
+            "Out1": 3.0,
+            "Out2": 3.1,
+            "Out3": 3.2,
+            "Out4": 3.3,
+            "LeftPin4": 3.4,
+            "LeftPin2": 3.0,
+            "RightPin4": 3.6,
+            "RightPin2": 3.2,
+        }
 
 def assign_io_addresses(project_id):
     """
@@ -550,11 +566,16 @@ def assign_io_addresses(project_id):
     project = get_object_or_404(Project, id=project_id)
     
     with transaction.atomic():
+        # List to collect all IOs that need updating
+        ios_to_update = []
+        
         # Process panel IOs (location = 'CP')
         panel_ios = IOList.objects.filter(
             project=project, 
             location='CP'
         ).order_by('panel_number', 'signal_type', 'order')
+        
+        tempIOAddress = PANEL_IO_START_ADDRESS
         
         for panel_number in project.panel_numbers.split(","):
             panel_num = re.sub(r'\D', '', panel_number).lstrip('0') or '0'
@@ -566,20 +587,26 @@ def assign_io_addresses(project_id):
             # Assign addresses and module info
             for idx, io in enumerate(panel_io_group):
                 # Calculate address (0.0, 0.1, ..., 0.7, 1.0, etc.)
-                io_address = PANEL_IO_START_ADDRESS + (idx // 8) + (idx % 8) / 10.0
+                io_address = tempIOAddress + ((idx % 8)/10.0) 
                 io.io_address = f"I{io_address}" if io.signal_type == 'DI' else f"Q{io_address}"
                 
                 # Assign module position (1 for first 16 IOs, 2 for next 16, etc.)
                 io.module_position = (idx // MODULE_SIZE) + 1
                 io.iomodule_name = base_module_name
                 io.channel = (idx % MODULE_SIZE) + 1
+                io.pin = '-'
+                
+                # Add to update list
+                ios_to_update.append(io)
+                
+                # If the address exceeds .7, move to the next decade
+                if (idx % 8) == 7:
+                    tempIOAddress = tempIOAddress + 1
             
-            # Bulk update panel IOs
-            IOList.objects.bulk_update(
-                panel_io_group,
-                ['io_address', 'module_position', 'iomodule_name', 'channel']
-            )
-        
+            # After each panel, move to the next decade for the next panel
+            tempIOAddress = (int(tempIOAddress) // 10 + 1) * 10
+
+        tempFIOAddress = FIELD_IO_START_ADDRESS        
         # Process field IOs (location = 'FD')
         field_ios = IOList.objects.filter(
             project=project,
@@ -594,22 +621,62 @@ def assign_io_addresses(project_id):
             
             # Assign addresses and module info
             for idx, io in enumerate(field_io_group):
-                # Calculate address (1000.0, 1000.1, ..., 1000.7, 1001.0, etc.)
-                io_address = FIELD_IO_START_ADDRESS + (idx // 8) + (idx % 8) / 10.0
+                io_address = tempFIOAddress + ((idx % 8)/10.0) 
                 io.io_address = f"I{io_address}" if io.signal_type == 'DI' else f"Q{io_address}"
                 
-                # Assign module name (IO0102, IO0103, etc.)
                 module_num = 2 + (idx // MODULE_SIZE)
                 io.iomodule_name = f"{FIELD_IO_MODULE_PREFIX}{panel_num}{str(module_num).zfill(2)}"
                 io.module_position = '0'
                 io.channel = f"X{(idx // 2) % 8}"
+                io.pin = 'Pin 4' if idx % 2 == 0 else 'Pin 2'
                 io.terminal_number = 'Pin 4' if idx % 2 == 0 else 'Pin 2'
+                
+                # Add to update list
+                ios_to_update.append(io)
+                
+                if (idx % 8) == 7:
+                    tempFIOAddress = tempFIOAddress + 1
             
-            # Bulk update field IOs
-            IOList.objects.bulk_update(
-                field_io_group,
-                ['io_address', 'iomodule_name', 'module_position', 'channel', 'terminal_number']
-            )
+            tempFIOAddress = (int(tempFIOAddress) // 100 + 1) * 100
+
+        # Process DRC IOs
+        tempDIOAddress = (int(tempFIOAddress) // 1000 + 1) * 1000
+        drcIOs = IOList.objects.filter(
+            project=project,
+            location='DRC',
+        ).order_by('panel_number','iomodule_name', 'order')
+        
+        for panel_number in project.panel_numbers.split(","):
+            # Get all field IOs for this panel
+            drcIOs_group = drcIOs.filter(panel_number=panel_number)
+            drcIOs_DeviceList = list(drcIOs_group.values_list('iomodule_name', flat=True).distinct())
+            base = tempDIOAddress
+            step = 64
+            drcIOs_DeviceList = set(drcIOs_DeviceList)
+
+            module_address_map = {
+                module: base + step * idx
+                for idx, module in enumerate(drcIOs_DeviceList)
+            }
+
+            # Assign addresses and module info
+            for idx, io in enumerate(drcIOs_group):
+                letter = "I" if io.signal_type == "DI" else "Q"
+                addr = module_address_map[io.iomodule_name] 
+                addr += pin_drc_offset_map[io.pin]
+                io.io_address = f"%{letter}{addr:.1f}"
+                
+                # Add to update list
+                ios_to_update.append(io)
+
+        # Perform a single bulk update for all IOs
+        IOList.objects.bulk_update(
+            ios_to_update,
+            ['io_address', 'module_position', 'iomodule_name', 'channel', 'pin', 'terminal_number']
+        )
+                
+
+
 
 
 
@@ -662,6 +729,7 @@ def ExportIOListfromV1(project_id):
             if not panel_data.empty:
                 panel_data = panel_data.copy()
                 panel_data['Sr.No'] = range(1, len(panel_data) + 1)
+                print(panel_data.to_string(index=False))
                 panel_data.to_excel(
                     writer,
                     sheet_name=panel[:31],  # Excel sheet name limit
@@ -676,13 +744,27 @@ def ExportIOListfromV1(project_id):
             field_data['Sr.No'] = range(1, len(field_data) + 1)
             # Create an alternating list: Pin4, Pin2, Pin4, Pin2, ...
             pins = ['Pin4', 'Pin2'] * (len(field_data) // 2 + 1)
-            field_data['Pin'] = pins[:len(field_data)]
+            # field_data['Pin'] = pins[:len(field_data)]
             field_data.sort_values(by=['IO Module Name', 'Channel'], inplace=True)
             field_data.to_excel(
                 writer,
                 sheet_name="PLC01-Field IO",
                 index=False
             )
+        # Create DRC sheet
+        drc_data = df[df['Remarks'] == 'DRC']
+        print(drc_data)
+        if not drc_data.empty:
+            drc_data = drc_data.copy()
+            drc_data['Sr.No'] = range(1, len(drc_data) + 1)
+            drc_data.sort_values(by=['IO Module Name', 'Channel'], inplace=True)
+            drc_data.to_excel(
+                writer,
+                sheet_name="PLC01-DRC",
+                index=False
+            )
+            # print(drc_data)
+
     
     output.seek(0)
     return output
@@ -736,25 +818,31 @@ def reassign_ios(request, project_id, page_number=1):
     project = get_object_or_404(Project, id=project_id)
     
     try:
-        with transaction.atomic():
-            # First assign proper ordering
-            assign_io_ordering(project)
-            
-            # Then generate addresses based on the new ordering
-            assign_io_addresses(project.id)
-            
-            request.session['success_message'] = "IO addresses successfully reassigned"
+    # with transaction.atomic():
+        # First assign proper ordering
+        assign_io_ordering(project)
+        
+        # Then generate addresses based on the new ordering
+        assign_io_addresses(project.id)
+        
+        request.session['success_message'] = "IO addresses successfully reassigned"
+        print(request.session['success_message'])
     except ValidationError as e:
         request.session['error_message'] = f"Validation error: {str(e)}"
+        print(request.session['error_message'])
+
     except Exception as e:
         request.session['error_message'] = f"Error reassigning IOs: {str(e)}"
-    try:
         print(request.session['error_message'])
-    except:
-        pass
+
+    # try:
+    #     print(request.session['error_message'])
+    # except:
+    #     pass
     return redirect('grouping2', project_id=project.id, page_number=page_number)
 
 def assign_io_ordering(project):
+
     return
     """
     Assign proper ordering to all IOs in the project based on their current grouping
@@ -796,3 +884,93 @@ def assign_io_ordering(project):
         for idx, io in enumerate(field_ios, start=1):
             io.order = idx
             io.save()
+
+
+@login_required(login_url="/accounts/login")
+def add_dccard(request):
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'message': 'Invalid request method.'})
+    data = json.loads(request.body)
+    print(data)
+    project_id = request.session.get('project')
+    project = get_object_or_404(Project, pk=project_id)
+    project.updated_at = datetime.now()
+    project.save()
+    module_name = data.get('module_name')
+    panel_number = data.get('panel_number')
+    cardType = data.get('card') 
+    # assume `project`, `panel_number`, `module_name`, `pre`, `cluster_number`,
+    # `request` and `order` are already defined in your view
+    if cardType == "Add RAT":
+        rows = [
+            # sr, equipment_name,    code,               tag,                     signal_type, io_address,    device_type,                          function_desc,                        panel_number, io_module_name,   module_position, channel, pin, terminal_no, remarks, data_type
+            (1,  "MC08",             "ROLLER_PROXY",     "Ix_MC08_ROLLER_PROXY", "DI",        "%I30001.0",   "Proximity Sensor",                   "Proximity Sensor",                   "CC05",        "MC08_FRAT_CRD",   "-",             "Sen1",   "-", "-",          "",      "Bool"),
+            (2,  "MC08",             "WHEEL_PROXY",      "Ix_MC08_WHEEL_PROXY",  "DI",        "%I30001.1",   "Proximity Sensor",                   "Proximity Sensor",                   "CC05",        "MC08_FRAT_CRD",   "-",             "Sen2",   "-", "-",          "",      "Bool"),
+            (3,  "MC08",             "PPS",              "Ix_MC08_PPS",          "DI",        "%I30004.0",   "Retro Reflective Photo Sensor",      "Retro Reflective Photo Sensor",      "CC05",        "MC08_FRAT_CRD",   "-",             "In1",    "-", "-",          "",      "Bool"),
+            (4,  "MC08",             "PORT2_DTS",        "Ix_MC08_PORT2_DTS",    "DI",        "%I30004.1",   "Retro Reflective Photo Sensor",      "Retro Reflective Photo Sensor",      "CC05",        "MC08_FRAT_CRD",   "-",             "In2",    "-", "-",          "",      "Bool"),
+            (5,  "MC08",             "PORT3_DTS",        "Ix_MC08_PORT3_DTS",    "DI",        "%I30004.2",   "Retro Reflective Photo Sensor",      "Retro Reflective Photo Sensor",      "CC05",        "MC08_FRAT_CRD",   "-",             "In3",    "-", "-",          "",      "Bool"),
+            (6,  "MC08",             "Spare1",           "Ix_MC08_Spare1",       "DI",        "%I30004.3",   "Retro Reflective Photo Sensor",      "Retro Reflective Photo Sensor",      "CC05",        "MC08_FRAT_CRD",   "-",             "In4",    "-", "-",          "",      "Bool"),
+            (7,  "MC08",             "LIFTING_MDR_FWD",  "Qx_MC08_LIFTING_MDR_FWD","DO",      "%Q30003.0",   "Lift Mdr Fwd Command",               "Lift Mdr Fwd Command",               "CC05",        "MC08_FRAT_CRD",   "-",             "Out1",   "-", "-",          "",      "Bool"),
+            (8,  "MC08",             "LIFTING_MDR_REV",  "Qx_MC08_LIFTING_MDR_REV","DO",      "%Q30003.1",   "Lift Mdr Rev Command",               "Lift Mdr Rev Command",               "CC05",        "MC08_FRAT_CRD",   "-",             "Out2",   "-", "-",          "",      "Bool"),
+            (9,  "MC08",             "Spare2",           "Qx_MC08_Spare2",       "DO",        "%Q30003.2",   "Spare",                              "Spare",                              "CC05",        "MC08_FRAT_CRD",   "-",             "Out3",   "-", "-",          "",      "Bool"),
+            (10, "MC08",             "Spare3",           "Qx_MC08_Spare3",       "DO",        "%Q30003.3",   "Spare",                              "Spare",                              "CC05",        "MC08_FRAT_CRD",   "-",             "Out4",   "-", "-",          "",      "Bool"),
+        ]
+
+        for (sr, equipment_name, code, tag, sig_type, io_addr, dev_type,
+            func_desc, pnl_num, io_mod_name, mod_pos, pin,channel
+            , term_no, remarks, dt) in rows:
+
+            entry = IOList(
+                project=project,
+                name=module_name,
+                equipment_code=code,
+                code=code,
+                tag=("Ix_" if sig_type == "DI" else "Qx_")+module_name+"_"+code,
+                signal_type=sig_type,
+                io_address=io_addr,
+                device_type=dev_type,
+                actual_description=func_desc,
+                panel_number=panel_number,
+                iomodule_name="RAT_"+module_name,
+                location="DRC",
+                channel=channel,
+                pin=pin,
+                created_by=request.user.get_full_name(),
+                order=sr,
+            )
+            entry.save()
+    elif cardType == "Add DRC":
+        rows = [
+            # sr, equipment_name,    code,               tag,               signal_type, io_address,    device_type,   function_desc,             panel_number,         io_module_name,   module_position, channel,      pin, terminal_no, remarks, data_type
+            (1,  "MC08",             "LeftPin4",     "Ix_MC08_ROLLER_PROXY", "DI",        "",   "DRC Input",          "Spare Signal",                   "CC05",        "MC08_FRAT_CRD",   "-",             "LeftPin4",   "-", "-",          "",      "Bool"),
+            (2,  "MC08",             "LeftPin2",     "Ix_MC08_WHEEL_PROXY",  "DI",        "",   "DRC Input",          "Spare Signal",                   "CC05",        "MC08_FRAT_CRD",   "-",             "LeftPin2",   "-", "-",          "",      "Bool"),
+            (3,  "MC08",             "RightPin4",    "Ix_MC08_PPS",          "DI",        "",   "DRC Input",          "Spare Signal",                   "CC05",        "MC08_FRAT_CRD",   "-",             "RightPin4",  "-", "-",          "",      "Bool"),
+            (4,  "MC08",             "RightPin2",    "Ix_MC08_PORT2_DTS",    "DI",        "",   "DRC Input",          "Spare Signal",                   "CC05",        "MC08_FRAT_CRD",   "-",             "RightPin2",  "-", "-",          "",      "Bool"),
+        ]
+
+        for (sr, equipment_name, code, tag, sig_type, io_addr, dev_type,
+            func_desc, pnl_num, io_mod_name, mod_pos, pin,channel
+            , term_no, remarks, dt) in rows:
+
+            entry = IOList(
+                project=project,
+                name=module_name,
+                equipment_code=code,
+                code=code,
+                tag=("Ix_" if sig_type == "DI" else "Qx_")+module_name+"_"+code,
+                signal_type=sig_type,
+                io_address=io_addr,
+                device_type=dev_type,
+                actual_description=func_desc,
+                panel_number=panel_number,
+                iomodule_name="DRC"+module_name,
+                location="DRC",
+                channel=channel,
+                pin=pin,
+                created_by=request.user.get_full_name(),
+                order=sr,
+            )
+            entry.save()
+    io_list = IOList.objects.filter(project = project).order_by('-id')
+    data = render_to_string('projects/iolist_in_add.html', {'io_list': io_list})
+    return JsonResponse({'success': True, 'data': data})
