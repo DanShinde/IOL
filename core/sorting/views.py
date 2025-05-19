@@ -669,18 +669,21 @@ def assign_io_addresses(project_id):
                 
                 # Add to update list
                 ios_to_update.append(io)
-        # Sort them by io_address (ignoring first 2 chars)
-        ios_to_update_sorted = sorted(
-            ios_to_update,
-            key=lambda x: x.io_address[2:] if x.io_address else ''
-        )
+        # # Sort them by io_address (ignoring first 2 chars)
+        # ios_to_update_sorted = sorted(
+        #     ios_to_update,
+        #     key=lambda x: (
+        #         x.iomodule_name if x.iomodule_name is not None else '',
+        #         x.io_address[2:] if x.io_address else ''
+        #     )
+        # )
 
         # Assign order values
-        for idx, io in enumerate(ios_to_update_sorted, start=1):
+        for idx, io in enumerate(ios_to_update, start=1):
             io.order = idx
         # Perform a single bulk update for all IOs
         IOList.objects.bulk_update(
-            ios_to_update_sorted,
+            ios_to_update,
             ['io_address', 'module_position', 'iomodule_name', 'channel', 'pin', 'terminal_number']
         )
                 
