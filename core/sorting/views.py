@@ -679,8 +679,8 @@ def assign_io_addresses(project_id):
         # )
 
         # Assign order values
-        for idx, io in enumerate(ios_to_update, start=1):
-            io.order = idx
+        # for idx, io in enumerate(ios_to_update, start=1):
+        #     io.order = idx
         # Perform a single bulk update for all IOs
         IOList.objects.bulk_update(
             ios_to_update,
