@@ -5,6 +5,7 @@
  {% load static  %}
  {% load custom_filter %}
 <link rel="stylesheet" type="text/css" href="{% static 'css/project_details.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'css/addRat.css' %}">
 <div class = "container-fluid">
   <div class = "row row-height">
     <div class="col-md-6 left">
@@ -79,6 +80,8 @@
     </div>
   </div>
 </div>
+<!-- Include Configuration Popup -->
+{% include "projects/addRatConfigPopup.html" %}
 <script>
   {% comment %} window.onload = function() {
     document.getElementById('toHide').addEventListener('click', function(event) {
@@ -221,11 +224,11 @@
 }
 
 document.getElementById('add-drc-btn').addEventListener('click', addCardHandler);
-document.getElementById('add-rat-btn').addEventListener('click', addCardHandler);
+// document.getElementById('add-rat-btn').addEventListener('click', addCardHandler);
 
 }
 
 
 </script>
-
+<script src="{% static 'js/addRat.js' %}"></script>
 {% endblock %}

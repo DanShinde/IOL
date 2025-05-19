@@ -522,6 +522,7 @@ def add_spare(request, ref_io, signal_type):
         cluster_number=ref_io_signal.cluster_number,
         iomodule_name=ref_io_signal.iomodule_name,
         Demo_3d_Property= "",
+        created_by = request.user.get_full_name()
     )
     # Retrieve page number from session, default to 1 if not found
     page_number = request.session.get('page_number', 1)
@@ -668,10 +669,18 @@ def assign_io_addresses(project_id):
                 
                 # Add to update list
                 ios_to_update.append(io)
+        # Sort them by io_address (ignoring first 2 chars)
+        ios_to_update_sorted = sorted(
+            ios_to_update,
+            key=lambda x: x.io_address[2:] if x.io_address else ''
+        )
 
+        # Assign order values
+        for idx, io in enumerate(ios_to_update_sorted, start=1):
+            io.order = idx
         # Perform a single bulk update for all IOs
         IOList.objects.bulk_update(
-            ios_to_update,
+            ios_to_update_sorted,
             ['io_address', 'module_position', 'iomodule_name', 'channel', 'pin', 'terminal_number']
         )
                 
@@ -899,11 +908,39 @@ def add_dccard(request):
     module_name = data.get('module_name')
     panel_number = data.get('panel_number')
     cardType = data.get('card') 
+    # this is a list of dicts:
+    assignments_list = data.get('assignments', [])
+
+    # convert it to a dict keyed by pin:
+    assignments_dict = {
+        item['pin']: {k: v for k, v in item.items() if k != 'pin'}  # Using pin as key instead of code
+        for item in assignments_list
+    }
+    print(assignments_dict)
     if module_name == "":
             return JsonResponse({'success': False, 'message': 'Module name is required.'})
     # assume `project`, `panel_number`, `module_name`, `pre`, `cluster_number`,
     # `request` and `order` are already defined in your view
     if cardType == "Add RAT":
+        for pin, assignment in assignments_dict.items():
+            print(assignment[pin])
+            entry = IOList(
+                project=project,
+                name=module_name,
+                equipment_code=assignment['pin']['code'],
+                code=assignment['code'],
+                tag=("Ix_" if assignment['signal_type'] == "DI" else "Qx_")+module_name+"_"+assignment['code'],
+                signal_type=assignment['signal_type'],
+                device_type=assignment['device_type'],
+                # actual_description=assignment['function_desc'],
+                panel_number=panel_number,
+                iomodule_name="RAT_"+module_name,
+                location="DRC",
+                channel=pin,
+                pin=pin,
+                created_by=request.user.get_full_name(),
+                # order=assignment['order'],
+            )
         rows = [
             # sr, equipment_name,    code,               tag,                     signal_type, io_address,    device_type,                          function_desc,                        panel_number, io_module_name,   module_position, channel, pin, terminal_no, remarks, data_type
             (1,  "MC08",             "ROLLER_PROXY",     "Ix_MC08_ROLLER_PROXY", "DI",        "%I30001.0",   "Proximity Sensor",                   "Proximity Sensor",                   "CC05",        "MC08_FRAT_CRD",   "-",             "Sen1",   "-", "-",          "",      "Bool"),
@@ -966,7 +1003,7 @@ def add_dccard(request):
                 device_type=dev_type,
                 actual_description=func_desc,
                 panel_number=panel_number,
-                iomodule_name="DRC"+module_name,
+                iomodule_name=module_name,
                 location="DRC",
                 channel=channel,
                 pin=pin,

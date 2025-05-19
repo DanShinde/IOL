@@ -1,0 +1,36 @@
+<!-- templates/rat_configuration_popup.html -->
+<div id="configPopup" class="popup">
+    <div class="popup-content">
+        <span class="close">&times;</span>
+        <h2>Configure RAT Signals</h2><p style="margin-bottom: 0.1rem;">Select which signals should go to which pins:</p>
+        
+
+        <div class="config-container">
+            <div class="signals-section" style="border: 1px;">
+                <h3>Available Signals</h3>
+                <div id="availableSignals" class="signal-list">
+                    <!-- Filled by JavaScript -->
+                </div>
+            </div>
+
+            <div class="mapping-section">
+                <h3>Pin Mapping</h3>
+                <table class="pin-table">
+                    <thead>
+                        <tr>
+                            <th>Pin</th>
+                            <th>Assigned Signal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pinMapping">
+                        <!-- Filled by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="popup-actions">
+            <button id="saveConfig">Add Signals</button>
+        </div>
+    </div>
+</div>
