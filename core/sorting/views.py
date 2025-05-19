@@ -578,7 +578,7 @@ def assign_io_addresses(project_id):
         else:
             panel_ios = IOList.objects.filter(
                 project=project, 
-            ).order_by('signal_type', 'order')
+            ).order_by('panel_number','signal_type', 'order')
         
         tempIOAddress = PANEL_IO_START_ADDRESS
         
@@ -619,7 +619,7 @@ def assign_io_addresses(project_id):
         ).order_by('panel_number', 'order')
         
         for panel_number in project.panel_numbers.split(","):
-            if project.is_Murr:
+            if not project.is_Murr:
                 break
             panel_num = re.sub(r'\D', '', panel_number).lstrip('0') or '0'
             
