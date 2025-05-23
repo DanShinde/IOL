@@ -740,10 +740,16 @@ def ExportIOListfromV1(project_id):
     # Create Excel file
     output = BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        workbook = writer.book
         # Create sheets for each panel
         for panel in project.panel_numbers.split(","):
-            panel_data = df[(df['Panel Number'] == panel) & (df['Remarks'] == 'CP')]
-            panel_data.sort_values(by=['IO Module Name','I/O Address', 'Module Position', 'Channel'], inplace=True)
+            if project.is_Murr:
+                panel_data = df[(df['Panel Number'] == panel) & (df['Remarks'] == 'CP')]
+            else:
+                panel_data = df[(df['Panel Number'] == panel)]
+            # Convert Channel to numeric and then sort
+            panel_data['Channel'] = pd.to_numeric(panel_data['Channel'])
+            panel_data.sort_values(by=['IO Module Name', 'Module Position', 'Channel'], inplace=True) # 'I/O Address',
             if not panel_data.empty:
                 panel_data = panel_data.copy()
                 panel_data['Sr.No'] = range(1, len(panel_data) + 1)
@@ -753,11 +759,32 @@ def ExportIOListfromV1(project_id):
                     sheet_name=panel[:31],  # Excel sheet name limit
                     index=False
                 )
+                worksheet = writer.sheets[panel[:31]]
+                # Define border format (bottom border)
+                border_format = workbook.add_format({'bottom': 1})  # 1 = thin border
+
+                # Determine rows needing bottom border (last occurrence of Module Position)
+                last_occurrences = panel_data.index[
+                    panel_data['Module Position'] != panel_data['Module Position'].shift(-1)
+                ].tolist()
+                # Identify last occurrence of IO Module Name
+                last_io_modules = panel_data.index[
+                    panel_data['IO Module Name'] != panel_data['IO Module Name'].shift(-1)
+                ].tolist()
+
+                # Combine both lists and remove duplicates
+                border_rows = sorted(set(last_occurrences + last_io_modules))
+                # Apply bottom border formatting correctly (Excel indexing adjustment)
+                for row in border_rows:
+                    excel_row = panel_data.index.get_loc(row) + 1  # DataFrame to Excel row adjustment (header = row 0)
+                    worksheet.set_row(excel_row, None, border_format)
+
+
             
         
         # Create field devices sheet
         field_data = df[df['Remarks'] == 'FD']
-        if not field_data.empty:
+        if not field_data.empty and project.is_Murr:
             field_data = field_data.copy()
             field_data['Sr.No'] = range(1, len(field_data) + 1)
             # Create an alternating list: Pin4, Pin2, Pin4, Pin2, ...
@@ -769,6 +796,16 @@ def ExportIOListfromV1(project_id):
                 sheet_name="PLC01-Field IO",
                 index=False
             )
+            # Identify last occurrence of IO Module Name
+            last_occurrences = field_data.index[
+                    field_data['IO Module Name'] != field_data['IO Module Name'].shift(-1)
+                ].tolist()
+            worksheet = writer.sheets["PLC01-Field IO"]
+            # Apply bottom border formatting correctly (Excel indexing adjustment)
+            for row in last_occurrences:
+                excel_row = field_data.index.get_loc(row) + 1  # DataFrame to Excel row adjustment (header = row 0)
+                worksheet.set_row(excel_row, None, border_format)
+
         # Create DRC sheet
         drc_data = df[df['Remarks'] == 'DRC']
         print(drc_data)
@@ -781,7 +818,15 @@ def ExportIOListfromV1(project_id):
                 sheet_name="PLC01-DRC",
                 index=False
             )
-            # print(drc_data)
+                        # Identify last occurrence of IO Module Name
+            last_io_modules = field_data.index[
+                panel_data['IO Module Name'] != panel_data['IO Module Name'].shift(-1)
+            ].tolist()
+            worksheet = writer.sheets["PLC01-DRC"]
+            # Apply bottom border formatting correctly (Excel indexing adjustment)
+            for row in last_io_modules:
+                excel_row = panel_data.index.get_loc(row) + 1  # DataFrame to Excel row adjustment (header = row 0)
+                worksheet.set_row(excel_row, None, border_format)
 
     
     output.seek(0)
