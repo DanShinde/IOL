@@ -736,7 +736,7 @@ def ExportIOListfromV1(project_id):
     
     # Create DataFrame
     df = pd.DataFrame(export_data)
-    
+    sheetDict = {}
     # Create Excel file
     output = BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
@@ -759,6 +759,8 @@ def ExportIOListfromV1(project_id):
                     sheet_name=panel[:31],  # Excel sheet name limit
                     index=False
                 )
+                sheetDict[panel[:31]] = panel_data
+                
                 worksheet = writer.sheets[panel[:31]]
                 # Define border format (bottom border)
                 border_format = workbook.add_format({'bottom': 1})  # 1 = thin border
@@ -796,6 +798,8 @@ def ExportIOListfromV1(project_id):
                 sheet_name="PLC01-Field IO",
                 index=False
             )
+            sheetDict["PLC01-Field IO"] = field_data
+
             # Identify last occurrence of IO Module Name
             last_occurrences = field_data.index[
                     field_data['IO Module Name'] != field_data['IO Module Name'].shift(-1)
@@ -818,17 +822,36 @@ def ExportIOListfromV1(project_id):
                 sheet_name="PLC01-DRC",
                 index=False
             )
+            # Save DataFrame in dictionary for later use
+            sheetDict["PLC01-DRC"] = drc_data
                         # Identify last occurrence of IO Module Name
-            last_io_modules = field_data.index[
-                panel_data['IO Module Name'] != panel_data['IO Module Name'].shift(-1)
+            last_io_modules = drc_data.index[
+                drc_data['IO Module Name'] != drc_data['IO Module Name'].shift(-1)
             ].tolist()
             worksheet = writer.sheets["PLC01-DRC"]
             # Apply bottom border formatting correctly (Excel indexing adjustment)
             for row in last_io_modules:
-                excel_row = panel_data.index.get_loc(row) + 1  # DataFrame to Excel row adjustment (header = row 0)
+                excel_row = drc_data.index.get_loc(row) + 1  # DataFrame to Excel row adjustment (header = row 0)
                 worksheet.set_row(excel_row, None, border_format)
 
-    
+        # Apply duplicate value conditional formatting to the 4th column (column D) in all sheets
+        for sheet_name, worksheet in writer.sheets.items():
+            # Try to get the corresponding DataFrame from your data structure if available
+            panel_data = sheetDict[sheet_name]  # Replace with actual way to fetch DataFrame per sheet
+            num_rows = len(panel_data)
+
+            # Define the Excel column letter for the 4th column
+            col_letter = 'D'
+
+            # Define the conditional format for duplicates
+            duplicate_format = workbook.add_format({'bg_color': '#FFC7CE', 'font_color': '#9C0006'})
+
+            # Apply conditional formatting, skipping the header row
+            worksheet.conditional_format(f'{col_letter}2:{col_letter}{num_rows + 1}', {
+                'type': 'duplicate',
+                'format': duplicate_format
+            })
+
     output.seek(0)
     return output
 
