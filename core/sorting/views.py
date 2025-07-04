@@ -616,7 +616,7 @@ def assign_io_addresses(project_id):
         field_ios = IOList.objects.filter(
             project=project,
             location='FD'
-        ).order_by('panel_number', 'order')
+        ).order_by( 'iomodule_name','panel_number', 'order')
         
         for panel_number in project.panel_numbers.split(","):
             if not project.is_Murr:
@@ -906,7 +906,7 @@ def reassign_ios(request, project_id, page_number=1):
     try:
     # with transaction.atomic():
         # First assign proper ordering
-        assign_io_ordering(project)
+        # assign_io_ordering(project)
         
         # Then generate addresses based on the new ordering
         assign_io_addresses(project.id)
