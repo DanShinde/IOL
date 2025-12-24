@@ -4,7 +4,7 @@ import json
 import math
 import subprocess
 from django.forms import inlineformset_factory
-from django.http import HttpRequest, HttpResponse, HttpResponseForbidden, HttpResponseNotFound, JsonResponse
+from django.http import HttpRequest, HttpResponse, HttpResponseForbidden, HttpResponseNotFound, JsonResponse, FileResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.views import View
@@ -433,9 +433,13 @@ def GenerateLikeV2(request, project_id):
     # Construct the full URL for ExportIOListfromV1 in V1 application
     try:
         output = ExportIOListfromV1(project.id)
-        # Return the Excel file response from V1
-        response = HttpResponse(output.getvalue(), content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-        response['Content-Disposition'] = f'attachment; filename={project.name}_IOList.xlsx'
+        # Return the Excel file response using FileResponse
+        response = FileResponse(
+            output,
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            filename=f'{project.name}_IOList.xlsx'
+        )
         return response
     except requests.exceptions.RequestException as e:
         return HttpResponse(f"Error connecting to V2: {str(e)}", status=500)

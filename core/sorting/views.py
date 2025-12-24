@@ -744,14 +744,13 @@ def ExportIOListfromV1(project_id):
         # Create sheets for each panel
         for panel in project.panel_numbers.split(","):
             if project.is_Murr:
-                panel_data = df[(df['Panel Number'] == panel) & (df['Remarks'] == 'CP')]
+                panel_data = df[(df['Panel Number'] == panel) & (df['Remarks'] == 'CP')].copy()
             else:
-                panel_data = df[(df['Panel Number'] == panel)]
+                panel_data = df[(df['Panel Number'] == panel)].copy()
             # Convert Channel to numeric and then sort
             panel_data['Channel'] = pd.to_numeric(panel_data['Channel'])
             panel_data.sort_values(by=['IO Module Name', 'Module Position', 'Channel'], inplace=True) # 'I/O Address',
             if not panel_data.empty:
-                panel_data = panel_data.copy()
                 panel_data['Sr.No'] = range(1, len(panel_data) + 1)
                 print(panel_data.to_string(index=False))
                 panel_data.to_excel(
@@ -852,6 +851,7 @@ def ExportIOListfromV1(project_id):
                 'format': duplicate_format
             })
 
+    # Move outside the 'with' block so the workbook is saved before returning
     output.seek(0)
     return output
 
