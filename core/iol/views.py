@@ -628,8 +628,8 @@ class IolistView(View):
         iolist = get_object_or_404(IOList, id=kwargs.get('pk'))
         project_id = request.session.get('project')
         project = get_object_or_404(Project, pk=project_id)
-        if not request.user.groups.filter(name=project.segment).exists():
-            return HttpResponseForbidden()
+        # if not request.user.groups.filter(name=project.segment).exists():
+        #     return HttpResponseForbidden()
         if request.method == 'POST':
             form = IOListForm(request.POST, instance=iolist)
             # print("It's Post")
@@ -665,11 +665,12 @@ class IolistView(View):
             print(e)
             segment = "Test"
         print(segment)
-        if not request.user.groups.filter(name= segment).exists():
-            print("Not in group")
-            return HttpResponseForbidden()
+        # if not request.user.groups.filter(name= segment).exists():
+        #     print("Not in group")
+        #     return HttpResponseForbidden()
 
-        elif kwargs.get('action') == 'delete':
+        # el
+        if kwargs.get('action') == 'delete':
             return self.delete(request, *args, **kwargs)
         elif kwargs.get('action') == 'edit':
             return self.edit(request, *args, **kwargs)
@@ -789,4 +790,54 @@ class ClusterView(View):
             return super().dispatch(request, *args, **kwargs)
 
 
+class IOListReviewView(LoginRequiredMixin, View):
+    """View to review IOList items grouped by module name for a project"""
+
+    def get(self, request, project_id):
+        project = get_object_or_404(Project, pk=project_id)
+        selected_module = request.GET.get('module', None)
+        sort_by = request.GET.get('sort', 'alpha')  # 'alpha' or 'order'
+
+        # Get all unique module names for this project
+        if sort_by == 'order':
+            # Sort by first occurrence (by minimum order value)
+            from django.db.models import Min
+            modules_qs = IOList.objects.filter(project=project).values('name').annotate(
+                first_order=Min('order')
+            ).order_by('first_order')
+            modules = [item['name'] for item in modules_qs]
+        else:
+            # Alphabetical sort
+            modules = list(IOList.objects.filter(project=project).values_list('name', flat=True).distinct().order_by('name'))
+
+        # Get IOList items - filtered by module name if selected
+        if selected_module:
+            iolist_items = IOList.objects.filter(project=project, name=selected_module).order_by('order')
+        else:
+            if sort_by == 'order':
+                iolist_items = IOList.objects.filter(project=project).order_by('order')
+            else:
+                iolist_items = IOList.objects.filter(project=project).order_by('name', 'order')
+
+        # Get count per module name for display
+        module_counts = IOList.objects.filter(project=project).values('name').annotate(count=Count('id'))
+
+        context = {
+            'project': project,
+            'modules': modules,
+            'module_counts': {item['name']: item['count'] for item in module_counts},
+            'iolist_items': iolist_items,
+            'selected_module': selected_module,
+            'sort_by': sort_by,
+        }
+        return render(request, 'projects/iolist_review.html', context)
+
+    def delete(self, request, project_id, pk=None):
+        if not request.user.groups.filter(name='Managers').exists():
+            return HttpResponse("User does not have permissions to delete", status=403)
+
+        iolist_item = get_object_or_404(IOList, id=pk, project_id=project_id)
+        iolist_item.delete()
+
+        return JsonResponse({'success': True, 'message': 'Item deleted successfully'})
 

@@ -1,6 +1,6 @@
 from django.urls import path, re_path
 from . import views
-from .views import ModuleListView, IolistView, UpdateIOData
+from .views import ModuleListView, IolistView, UpdateIOData, IOListReviewView
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 
@@ -29,6 +29,8 @@ urlpatterns = [
     path('delete_signal/<int:pk>/', views.delete_IO, name='delete-signal'),
 
     path('iolist_project/<int:project_id>', views.iolist_project, name='iolist_project'),
+    path('iolist_review/<int:project_id>/', login_required(IOListReviewView.as_view()), name='iolist_review'),
+    path('iolist_review/<int:project_id>/<int:pk>/delete/', login_required(IOListReviewView.as_view()), name='iolist_review_delete'),
     re_path(r'^iolist/(?:(?P<pk>\d+)/)?(?:(?P<action>\w+)/)?',  login_required(views.IolistView.as_view()), name='iolist'),
     re_path(r'^signals/(?:(?P<pk>\d+)/)?(?:(?P<action>\w+)/)?',  login_required(views.ClusterView.as_view()), name='signals'),
 

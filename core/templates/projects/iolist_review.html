@@ -1,0 +1,207 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}<title>Review IO List - {{ project.name }}</title>{% endblock %}
+{% block script %}
+<script src="{% static 'js/tables.js' %}"></script>
+{% endblock %}
+{% block styles %}
+<style>
+  #example thead th {
+    position: sticky;
+    top: 70px;
+    background-color: #fff;
+    z-index: 10;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+  }
+  #example thead th input {
+    background-color: #fff;
+  }
+</style>
+{% endblock %}
+{% block content %}
+
+<div class="container-fluid mt-3">
+  <div class="row">
+    <!-- Sidebar with Module Name List -->
+    <div class="col-md-2">
+      <div class="card">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+          <h6 class="mb-0">Module Names</h6>
+        </div>
+        <div class="btn-group btn-group-sm w-100" role="group">
+          <a href="{% url 'iolist_review' project.id %}?sort=alpha{% if selected_module %}&module={{ selected_module }}{% endif %}"
+             class="btn {% if sort_by == 'alpha' %}btn-primary{% else %}btn-outline-primary{% endif %}">A-Z</a>
+          <a href="{% url 'iolist_review' project.id %}?sort=order{% if selected_module %}&module={{ selected_module }}{% endif %}"
+             class="btn {% if sort_by == 'order' %}btn-primary{% else %}btn-outline-primary{% endif %}">By Order</a>
+        </div>
+        <div class="list-group list-group-flush" style="max-height: 640px; overflow-y: auto;">
+          <a href="{% url 'iolist_review' project.id %}?sort={{ sort_by }}"
+             class="list-group-item list-group-item-action {% if not selected_module %}active{% endif %}">
+            All <span class="badge badge-secondary float-right">{{ iolist_items.count }}</span>
+          </a>
+          {% for module in modules %}
+          <a href="{% url 'iolist_review' project.id %}?module={{ module }}&sort={{ sort_by }}"
+             class="list-group-item list-group-item-action {% if selected_module == module %}active{% endif %}">
+            {{ module }}
+          </a>
+          {% empty %}
+          <span class="list-group-item text-muted">No module names found</span>
+          {% endfor %}
+        </div>
+      </div>
+      <a href="{% url 'project_detail' project.id %}" class="btn btn-secondary btn-block mt-2">Back to Project</a>
+    </div>
+
+    <!-- Main Content - IOList Table -->
+    <div class="col-md-10">
+      <div class="panel panel-primary filterable">
+        <div class="panel-heading d-flex align-items-center mb-3">
+          <button class="btn btn-primary mybtns mr-auto" id="FilterON">
+            <span class="glyphicon glyphicon-filter"></span>Click To Apply Filter
+          </button>
+          <div class="text-center mx-auto">
+            <h5 class="card-title" id="Module_Name">{{ project.name }}</h5>
+            <p class="card-text">
+              {% if selected_module %}
+                Viewing: <strong>{{ selected_module }}</strong>
+              {% else %}
+                Viewing: <strong>All Modules</strong>
+              {% endif %}
+            </p>
+          </div>
+          <span class="ml-auto"></span>
+        </div>
+
+        <table class="table-striped iotable table" id="example">
+            <thead>
+              <tr class="filters">
+                <th><input type="text" class="form-control" placeholder="#" disabled></th>
+                <th><input type="text" class="form-control" placeholder="Module Name" disabled></th>
+                <th><input type="text" class="form-control" placeholder="Code" disabled></th>
+                <th><input type="text" class="form-control" placeholder="Tag" disabled></th>
+                <th><input type="text" class="form-control" placeholder="Signal Type" disabled></th>
+                <th><input type="text" class="form-control" placeholder="Description" disabled></th>
+                <th><input type="text" class="form-control" placeholder="Cluster" disabled></th>
+                <th><input type="text" class="form-control" placeholder="Location" disabled></th>
+                <th><input type="text" class="form-control" placeholder="Panel" disabled></th>
+                <th>Edit</th>
+                <th>Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for item in iolist_items %}
+              <tr id="row-{{ item.id }}">
+                <td>{{ forloop.counter }}</td>
+                <td>{{ item.name }}</td>
+                <td>{{ item.code }}</td>
+                <td>{{ item.tag }}</td>
+                <td>{{ item.signal_type }}</td>
+                <td>{{ item.actual_description }}</td>
+                <td>{{ item.Cluster }}</td>
+                <td>{{ item.location }}</td>
+                <td>{{ item.panel_number }}</td>
+                <td>
+                  <a href="{% url 'iolist' item.id 'edit' %}" class="btn btn-sm btn-warning">Edit</a>
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-danger" onclick="deleteItem({{ item.id }})">Delete</button>
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="11" class="text-center">No IO List items found for this selection.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+        </table>
+        <p>No. of Rows: <span id="rowcount">{{ iolist_items.count }}</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function deleteItem(pk) {
+  if (!confirm('Are you sure you want to delete this item?')) {
+    return;
+  }
+
+  $.ajax({
+    url: "/iolist_review/{{ project.id }}/" + pk + "/delete/",
+    type: 'DELETE',
+    headers: {"X-CSRFToken": getCookie("csrftoken")},
+    success: function(response) {
+      if (response.success) {
+        $('#row-' + pk).fadeOut(300, function() { $(this).remove(); });
+        // Update row count
+        var currentCount = parseInt($('#rowcount').text()) - 1;
+        $('#rowcount').text(currentCount);
+      }
+    },
+    error: function(xhr, status, error) {
+      alert('Error deleting item: ' + error);
+    }
+  });
+}
+
+function getCookie(name) {
+  var cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    var cookies = document.cookie.split(';');
+    for (var i = 0; i < cookies.length; i++) {
+      var cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
+$(document).ready(function() {
+  $("#rowcount").html($(".filterable tbody tr").length);
+
+  $("#FilterON").click(function() {
+    var table = $(this).parents(".filterable");
+    var filters = table.find(".filters input");
+    var tbody = table.find(".table tbody");
+
+    if (filters.prop("disabled")) {
+      filters.prop("disabled", false);
+      filters.first().focus();
+    } else {
+      filters.val("").prop("disabled", true);
+      tbody.find(".no-result").remove();
+      tbody.find("tr").show();
+    }
+    $("#rowcount").html(tbody.find("tr:visible").length);
+  });
+
+  $(".filterable .filters input").keyup(function(event) {
+    if (event.keyCode === 9) return;
+
+    var input = $(this);
+    var value = input.val().toLowerCase();
+    var table = input.parents(".filterable");
+    var column = table.find(".filters th").index(input.parents("th"));
+    var tbody = table.find(".table tbody");
+    var rows = tbody.find("tr");
+    var matches = rows.filter(function() {
+      return $(this).find("td").eq(column).text().toLowerCase().indexOf(value) !== -1;
+    });
+
+    rows.hide();
+    matches.show();
+
+    if (matches.length === 0) {
+      tbody.prepend('<tr class="no-result text-center"><td colspan="' + table.find(".filters th").length + '">No result found</td></tr>');
+    } else {
+      tbody.find(".no-result").remove();
+    }
+    $("#rowcount").html(rows.filter(":visible").length);
+  });
+});
+</script>
+
+{% endblock %}
