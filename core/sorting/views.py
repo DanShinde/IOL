@@ -752,7 +752,7 @@ def ExportIOListfromV1(project_id):
             panel_data.sort_values(by=['IO Module Name', 'Module Position', 'Channel'], inplace=True) # 'I/O Address',
             if not panel_data.empty:
                 panel_data['Sr.No'] = range(1, len(panel_data) + 1)
-                print(panel_data.to_string(index=False))
+                # print(panel_data.to_string(index=False))
                 panel_data.to_excel(
                     writer,
                     sheet_name=panel[:31],  # Excel sheet name limit
